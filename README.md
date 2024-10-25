@@ -1,6 +1,9 @@
 # GIS-2425
 
-
+```shell
+cd setup-exercise
+dockercompose up --build
+```
 
 ## Getting started
 
