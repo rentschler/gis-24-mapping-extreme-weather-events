@@ -1,8 +1,14 @@
 # GIS-2425
 
+startup
 ```shell
-cd setup-exercise
-dockercompose up --build
+$ cd setup-exercise
+$ dockercompose up --build
+```
+
+inserting data into our db
+```shell
+$ ogr2ogr -f "PostgreSQL" PG:'host=localhost port=6543 dbname=gisDatabase user=joni password=Bl4ck0ut' './Carsharing.geojson' -nln car_sharing -overwrite
 ```
 
 ## Getting started
