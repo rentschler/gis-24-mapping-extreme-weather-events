@@ -9,7 +9,22 @@ $ dockercompose up --build
 inserting data into our db
 ```shell
 $ ogr2ogr -f "PostgreSQL" PG:'host=localhost port=6543 dbname=gisDatabase user=joni password=Bl4ck0ut' './Carsharing.geojson' -nln car_sharing -overwrite
+
+$ psql -d gisDatabase --host localhost --port 6543 -U joni
 ```
+
+## Ex 01 Task 4
+a) there are two car sharing providers in Konstanz
+`select distinct provider from car_sharing`
+Stadtmobil Südbaden und cars-hip
+
+b)
+How many car sharing points are there in Konstanz? 
+
+``
+Which of them is closest to the University of Konstanz,
+and what is the distance to this sharing point (in meters)? We assume the University of Konstanz to be located at
+47.689521° N, 9.188241° E.
 
 ## Getting started
 
