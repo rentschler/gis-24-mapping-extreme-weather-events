@@ -8,8 +8,8 @@ $ dockercompose up --build
 
 inserting data into our db
 ```shell
+$ sudo apt install gdal-bin
 $ ogr2ogr -f "PostgreSQL" PG:'host=localhost port=6543 dbname=gisDatabase user=joni password=Bl4ck0ut' './Carsharing.geojson' -nln car_sharing -overwrite
-
 $ psql -d gisDatabase --host localhost --port 6543 -U joni
 ```
 
