@@ -34,10 +34,44 @@ Stadtmobil Südbaden und cars-hip
 b)
 How many car sharing points are there in Konstanz? 
 
-``
+`SELECT COUNT(*) 
+FROM car_sharing;`
+35
+
+c)
 Which of them is closest to the University of Konstanz,
 and what is the distance to this sharing point (in meters)? We assume the University of Konstanz to be located at
 47.689521° N, 9.188241° E.
+```sql
+SELECT name,
+       street,
+       streetnr,
+       ST_Distance(
+           car_sharing.wkb_geometry, -- This is already in SRID 4326
+           ST_SetSRID(ST_MakePoint(9.188241, 47.689521), 4326)::geography --`ST_MakePoint` yields SRID 0, hence conversion is necessary
+       )
+AS "Distance (in meters)"
+FROM car_sharing
+ORDER BY "Distance (in meters)";
+
+
+SELECT ST_MakePoint(9.188241, 47.689521);
+
+
+SELECT ST_Distance(
+           (SELECT wkb_geometry FROM car_sharing LIMIT 1), -- This is already in SRID 4326
+           ST_SetSRID(ST_MakePoint(9.188241, 47.689521), 4326)::geography --`ST_MakePoint` yields SRID 0, hence conversion is necessary
+       )     ;
+
+--  What is the maximum capacity, in terms of the number of cars, 
+--  that  Stadtmobil Südbaden provides south of the Rhein?
+
+SELECT * from car_sharing
+-- lets only consider entries from the districtna = Altstadt | Paradies
+WHERE districtna = 'Altstadt' OR districtna = 'Paradies'
+-- only consider entries from the provider Stadtmobil Südbaden
+AND provider = 'Stadtmobil Südbaden'
+```
 
 ## Getting started
 
