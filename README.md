@@ -5,6 +5,19 @@ startup
 $ cd setup-exercise
 $ dockercompose up --build
 ```
+                      
+creating and activating a virtual environment
+```shell
+$ cd backend
+$ python3 -m venv venv
+$ source venv/bin/activate
+``` 
+update the requirements
+```shell
+$ pip install fastapi sqlalchemy pydantic-settings GeoAlchemy2 psycopg2-binary
+$ pip freeze > requirements.txt
+$ pip install -r requirements.txt
+``` 
 
 inserting data into our db
 ```shell
