@@ -72,6 +72,21 @@ WHERE districtna = 'Altstadt' OR districtna = 'Paradies'
 -- only consider entries from the provider Stadtmobil Südbaden
 AND provider = 'Stadtmobil Südbaden'
 ```
+                 
+## Ex 02 Task 2
+
+```sql
+SELECT
+    capacity,
+    districtna AS district,
+    ST_Y(wkb_geometry) AS latitude,
+    ST_X(wkb_geometry) AS longitude ,
+    name,
+    provider,
+    json_build_object('street', street, 'number', streetnr) AS address
+FROM car_sharing;
+```
+
 
 ## Getting started
 
