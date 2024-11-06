@@ -1,0 +1,32 @@
+/* Popup container styling */
+.leaflet-popup-content-wrapper {
+    background-color: #ffffff;
+    padding: 5;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 250px;
+  }
+  
+  /* Header styling */
+  .leaflet-popup-content h2 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333333;
+  }
+  
+  /* Paragraph styling */
+  .leaflet-popup-content p {
+    margin: 4px 0;
+    font-size: 0.9em;
+    color: #666666;
+  }
+  
+  /* Image styling */
+  .leaflet-popup-content img {
+    width: 100%;
+    height: auto;
+    margin-top: 8px;
+    border-radius: 4px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
