@@ -5,6 +5,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 from settings import settings
 from typing import List, Optional
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -22,8 +23,11 @@ Base.prepare(engine, reflect=True)
 CarSharing = Base.classes.car_sharing
 
 @app.get("/health")
+@app.get("/api")
+@app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
 
 
 @app.get("/api/car_sharing")
