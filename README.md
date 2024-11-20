@@ -1,3 +1,9 @@
+# Geographic Information Systems
+
+Welcome to your project template! This template includes several fixes based on your suggestions, compared to the setup provided for the exercises in the tutorial. As before, you can start the project by running `docker compose up` in the project's root directory in your terminal.
+
+You may experience a delay in the backend startup until the database initialization is complete, as data import is now included in this process. To minimize this delay, adjust the value of the key `services.database.healthcheck.timeout` in `docker-compose.yaml`. A manual data import is no longer necessary unless desired.
+
 # GIS-2425
 
 startup
@@ -26,66 +32,23 @@ $ ogr2ogr -f "PostgreSQL" PG:'host=localhost port=6543 dbname=gisDatabase user=j
 $ psql -d gisDatabase --host localhost --port 6543 -U joni
 ```
 
-## Ex 01 Task 4
-a) there are two car sharing providers in Konstanz
-`select distinct provider from car_sharing`
-Stadtmobil Südbaden und cars-hip
-
-b)
-How many car sharing points are there in Konstanz? 
-
-`SELECT COUNT(*) 
-FROM car_sharing;`
-35
-
-c)
-Which of them is closest to the University of Konstanz,
-and what is the distance to this sharing point (in meters)? We assume the University of Konstanz to be located at
-47.689521° N, 9.188241° E.
-```sql
-SELECT name,
-       street,
-       streetnr,
-       ST_Distance(
-           car_sharing.wkb_geometry, -- This is already in SRID 4326
-           ST_SetSRID(ST_MakePoint(9.188241, 47.689521), 4326)::geography --`ST_MakePoint` yields SRID 0, hence conversion is necessary
-       )
-AS "Distance (in meters)"
-FROM car_sharing
-ORDER BY "Distance (in meters)";
 
 
-SELECT ST_MakePoint(9.188241, 47.689521);
+# Hubert Setup
 
-
-SELECT ST_Distance(
-           (SELECT wkb_geometry FROM car_sharing LIMIT 1), -- This is already in SRID 4326
-           ST_SetSRID(ST_MakePoint(9.188241, 47.689521), 4326)::geography --`ST_MakePoint` yields SRID 0, hence conversion is necessary
-       )     ;
-
---  What is the maximum capacity, in terms of the number of cars, 
---  that  Stadtmobil Südbaden provides south of the Rhein?
-
-SELECT * from car_sharing
--- lets only consider entries from the districtna = Altstadt | Paradies
-WHERE districtna = 'Altstadt' OR districtna = 'Paradies'
--- only consider entries from the provider Stadtmobil Südbaden
-AND provider = 'Stadtmobil Südbaden'
 ```
-                 
-## Ex 02 Task 2
+database_url = "postgresql://admin:password@localhost:5432/rain"
 
-```sql
-SELECT
-    capacity,
-    districtna AS district,
-    ST_Y(wkb_geometry) AS latitude,
-    ST_X(wkb_geometry) AS longitude ,
-    name,
-    provider,
-    json_build_object('street', street, 'number', streetnr) AS address
-FROM car_sharing;
+engine = create_engine(database_url)
+
+df.to_sql("heavy_rain", engine, if_exists="replace", index=False)
+print("CSV file successfully loaded into the database!")
+
+
 ```
+
+and then `ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");`
+
 
 
 ## Getting started
@@ -177,21 +140,4 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
-
-
-
-### Hubert Setup
-
-```
-database_url = "postgresql://admin:password@localhost:5432/rain"
-
-engine = create_engine(database_url)
-
-df.to_sql("heavy_rain", engine, if_exists="replace", index=False)
-print("CSV file successfully loaded into the database!")
-
-
-```
-
-and then `ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");`
 
