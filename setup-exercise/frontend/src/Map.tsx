@@ -1,109 +1,57 @@
-import { Circle, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, CircleMarker  } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
-import "./map.css";
-type CarSharingPoint = {
-  capacity: number;
-  district: string;
-  latitude: number;
-  longitude: number;
-  name: string;
-  provider: string;
-  address: Address;
-  picture: string;
-};
-
-type Address = {
-  street: string;
-  number: string;
-};
 
 const Map = () => {
-  const [data, setData] = useState<CarSharingPoint[]>([]);
+  const [points, setPoints] = useState([]);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchData = (endpoint: string) => {
-        fetch(endpoint)
-            .then(res => res.json())
-            .then(data => {
-                if (isMounted) {
-                    setData(data);
-                    console.log("data", data);
-                }
-            })
-            .catch(err => console.log(err));
+    const fetchPoints = async () => {
+      try {
+        const response = await fetch("/api/data");
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setPoints(data);  // Save fetched data to state
+        } else {
+          console.error("Failed fetching api data:", response);
+        }
+      } catch (error) {
+        console.error("Error fetching api data:", error);
+      }
     };
 
-    fetchData("/api/car_sharing/points");
-    return () => {
-        isMounted = false;
-    };
-}, []);
-
-  const renderPoints = (data: CarSharingPoint[]) => {
-    return data.map((point) => {
-      return (
-        <Marker
-          key={point.name}
-          position={[point.latitude, point.longitude]}
-        >
-          <Popup>
-            <CustomPopup data={point} />
-          </Popup>
-        </Marker>
-      );
-    });
-  }
+    fetchPoints();
+  }, []);
 
   return (
+    <div style={{ height: "500px" }}>
     <MapContainer
       center={[47.69162, 9.187]}
       className="w-screen h-screen"
-      zoom={13}
+      zoom={8}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-         { data.length > 0 && renderPoints(data) }
-         {/* red circle at the coordinates of the university */}
-          <Circle
-              center={[47.69162, 9.187]}
-              pathOptions={{ color: 'red' }}
-              radius={10}
-          />
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {points.map((point) => {
+          const latitude = point["LATITUDE"];
+          const longitude = point["LONGITUDE"];
+          return (
+              <CircleMarker
+                center={[latitude, longitude]}
+                radius={2} // Radius of the dot, adjust as needed
+                color="red" // Border color
+                fillColor="red" // Fill color for the dot
+                fillOpacity={1} // Opacity of the fill color
+              ></CircleMarker>
+          );
+        })}
       </MapContainer>
-
+    </div>
   );
 };
 
 export default Map;
-
-interface CustomPopupProps {
-  data : CarSharingPoint;
-}
-/**
- * In the popup, you should include the following details about the sharing point:
-• the name of the sharing point,
-• its coordinates,
-• the capacity of cars,
-• the address, and
-• the provider.
-If available, you should also display an image of the sharing point
- * @param param0 
- */
-const CustomPopup = ({ data }: CustomPopupProps) => {
-  return (
-    <div>
-      <h2>{data.name}</h2>
-      <p>Coordinates: {data.latitude.toFixed(5)}, {data.longitude.toFixed(5)}</p>
-      <p>Capacity: {data.capacity}</p>
-      <p>Address: {data.address.street} {data.address.number}</p>
-      <p>Provider: {data.provider}</p>
-      {data.picture && <img src={data.picture} alt={data.name} />}
-    </div>
-  );
-}
-

@@ -177,3 +177,21 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+
+
+### Hubert Setup
+
+```
+database_url = "postgresql://admin:password@localhost:5432/rain"
+
+engine = create_engine(database_url)
+
+df.to_sql("heavy_rain", engine, if_exists="replace", index=False)
+print("CSV file successfully loaded into the database!")
+
+
+```
+
+and then `ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");`
+
