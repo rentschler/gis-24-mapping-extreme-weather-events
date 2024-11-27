@@ -20,29 +20,10 @@ start the docker
 $ docker compose up --build
 ```
 
-execute the `tmp_setup.ipynb` script in the database folder to insert the data into the database
-
-
-connect to the database   "postgresql://admin:password@localhost:5433/rain"
+restart the backend to let it find the correct table
 ```shell
-$ psql -d rain --host localhost --port 5433 -U admin
+$ docker compose restart backend
 ```
-execute the following commands
-```sql
-ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");
-
-SELECT * FROM heavy_rain LIMIT 5;
--- quit
-\q
-```
-
-finally restart the docker
-```shell
-$ docker compose down
-$ docker compose up
-```
-
-
 
 # GIS-2425
 
@@ -66,25 +47,6 @@ $ sudo apt install gdal-bin
 $ ogr2ogr -f "PostgreSQL" PG:'host=localhost port=6543 dbname=gisDatabase user=joni password=Bl4ck0ut' './Carsharing.geojson' -nln car_sharing -overwrite
 $ psql -d gisDatabase --host localhost --port 6543 -U joni
 ```
-
-
-
-# Hubert Setup
-
-```
-database_url = "postgresql://admin:password@localhost:5432/rain"
-
-engine = create_engine(database_url)
-
-df.to_sql("heavy_rain", engine, if_exists="replace", index=False)
-print("CSV file successfully loaded into the database!")
-
-
-```
-
-and then `ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");`
-
-
 
 ## Getting started
 
