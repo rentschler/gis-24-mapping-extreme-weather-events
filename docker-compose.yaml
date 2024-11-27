@@ -7,10 +7,6 @@ services:
       context: ./database
       dockerfile: Dockerfile
     env_file: ./database/.env
-    healthcheck:
-      test: "pg_isready --dbname=rain --host=localhost --username=admin && psql --dbname=rain --username=admin --list"
-      timeout: 5s
-      retries: 20
     ports:
       - "5433:5432"
     volumes:
@@ -21,15 +17,15 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     depends_on:
-      database:
-        condition: service_healthy
+      - database
+      #   condition: service_healthy
     env_file: ./backend/.env
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+
 
   frontend:
     build:
