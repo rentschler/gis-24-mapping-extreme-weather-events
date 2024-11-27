@@ -1,30 +1,62 @@
-#!/bin/sh
+#!/bin/bash
+echo "Entered custom shell script for loading data" 
+# Wait for PostgreSQL to be ready
+until pg_isready -d "rain" -p "5432" -U "admin"; do
+  echo "Waiting for PostgreSQL to be ready..."
+  sleep 2
+done
 
-pg_isready --dbname=rain --username=admin && psql --dbname=rain --username=admin --list
+# Create the table (you can modify the schema as needed)
+psql  -p "5432" -U "admin" -d "rain" <<EOF
+CREATE TABLE IF NOT EXISTS heavy_rain (
+    ID INTEGER  PRIMARY KEY,
+    QC_LEVEL TEXT,
+    INFO_SOURCE TEXT,
+    CONTACT TEXT,
+    ORGANISATION TEXT,
+    ORGANISATION_ID TEXT,
+    NO_REVISION INTEGER,
+    PERSON_REVISION TEXT,
+    TIME_EVENT TEXT,
+    TIME_CREATION TEXT,
+    TIME_LAST_REVISION TEXT,
+    TIME_ACCURACY TEXT,
+    COUNTRY TEXT,
+    STATE TEXT,
+    PLACE TEXT,
+    PLACE_LOCAL_LANGUAGE TEXT,
+    DETAILED_LOCATION TEXT,
+    LATITUDE FLOAT,
+    LONGITUDE FLOAT,
+    PLACE_ACCURACY TEXT,
+    SURFACE_INITIAL_LOCATION TEXT,
+    SURFACE_CROSSED TEXT,
+    TYPE_EVENT TEXT,
+    PRECIPITATION_AMOUNT TEXT,
+    MAX_6_HOUR_PRECIP TEXT,
+    MAX_12_HOUR_PRECIP TEXT,
+    MAX_24_HOUR_PRECIP TEXT,
+    CONVECTIVE TEXT,
+    TOTAL_DURATION TEXT,
+    EXCEPT_ELEC_PHENOM TEXT,
+    NO_INJURED TEXT,
+    NO_KILLED TEXT,
+    EVENT_DESCRIPTION TEXT,
+    EXT_URL TEXT,
+    REFERENCE TEXT,
+    IMPACTS TEXT,
+    CREATOR_ID TEXT,
+    REVISOR_ID TEXT,
+    LINK_ORG TEXT,
+    LINK_ID TEXT,
+    DELETED TEXT
+);
+EOF
 
-# Database configuration
-DB_NAME="rain"
-DB_USER="admin"
-DB_HOST=""
-DB_PORT="5432"
+# Load the data from the CSV file into the table
+echo "Loading data from /docker-entrypoint-initdb.d/data.csv into heavy_rain table..."
+psql -p "5432" -U "admin" -d "rain" <<EOF
+\COPY heavy_rain(ID,QC_LEVEL,INFO_SOURCE,CONTACT,ORGANISATION,ORGANISATION_ID,NO_REVISION,PERSON_REVISION,TIME_EVENT,TIME_CREATION,TIME_LAST_REVISION,TIME_ACCURACY,COUNTRY,STATE,PLACE,PLACE_LOCAL_LANGUAGE,DETAILED_LOCATION,LATITUDE,LONGITUDE,PLACE_ACCURACY,SURFACE_INITIAL_LOCATION,SURFACE_CROSSED,TYPE_EVENT,PRECIPITATION_AMOUNT,MAX_6_HOUR_PRECIP,MAX_12_HOUR_PRECIP,MAX_24_HOUR_PRECIP,CONVECTIVE,TOTAL_DURATION,EXCEPT_ELEC_PHENOM,NO_INJURED,NO_KILLED,EVENT_DESCRIPTION,EXT_URL,REFERENCE,IMPACTS,CREATOR_ID,REVISOR_ID,LINK_ORG,LINK_ID,DELETED) FROM '/docker-entrypoint-initdb.d/data.csv' WITH CSV HEADER QUOTE '"';
+EOF
 
-# Table name to check
-TABLE_NAME="heavy_rain"
-
-# Check if the table exists in the database
-TABLE_EXISTS=$(psql -d "$DB_NAME" -U "$DB_USER" -h "$DB_HOST" -p "$DB_PORT" -tAc \
-"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '$TABLE_NAME');")
-
-# Remove leading/trailing whitespace from the result
-TABLE_EXISTS=$(echo "$TABLE_EXISTS" | xargs)
-
-if [ "$TABLE_EXISTS" == "t" ]; then
-    echo "The table '$TABLE_NAME' exists in the database. No action required."
-else
-    echo "The table '$TABLE_NAME' does not exist in the database. Executing Python script."
-    # python3 run_script.py
-fi
-
-
-# We cannot connect to `localhost`, while exposing a port through Docker Compose (see https://www.reddit.com/r/docker/comments/14kwsy7/comment/jptyb8w) but instead refer to the socket (see https://stackoverflow.com/a/29356068)
-# /usr/bin/ogr2ogr -f "PostgreSQL" PG:"port=5432 dbname=geographic-information-systems user=student password=${POSTGRES_PASSWORD}" '/docker-entrypoint-initdb.d/Carsharing.geojson' -nln car_sharing -overwrite
+echo "Data loaded successfully into the heavy_rain table."

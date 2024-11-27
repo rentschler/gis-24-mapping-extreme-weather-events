@@ -2,6 +2,8 @@ data
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,visualstudiocode,jetbrains+all,database
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,visualstudiocode,jetbrains+all,database
+__pycache__
+*.ipynb
 
 ### Database ###
 *.accdb

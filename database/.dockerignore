@@ -2,3 +2,4 @@
 .env
 Dockerfile
 .gitignore
+__pycache__
