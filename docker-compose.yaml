@@ -8,14 +8,16 @@ services:
       dockerfile: Dockerfile
     env_file: ./database/.env
     healthcheck:
-      test: "pg_isready --dbname=geographic-information-systems --host=localhost --username=student && psql --dbname=geographic-information-systems --username=student --list"
+      test: "pg_isready --dbname=rain --host=localhost --username=admin && psql --dbname=rain --username=admin --list"
       timeout: 5s
       retries: 20
     ports:
       - "5433:5432"
     volumes:
-      - ./database/data:/var/lib/postgresql/data
-
+      - ./database/data:/var/lib/postgresql/data # this loads the data, but no preprocessing, todo later
+      - ./database:/app
+  
+  
   backend:
     build:
       context: ./backend

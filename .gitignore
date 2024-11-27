@@ -1,3 +1,11 @@
+/setup-exercise/.idea
+/setup-exercise/backend/venv/
+/.idea
+gdal/
+bin/
+data/raw.csv
+*.zip
+node_modules/
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,jetbrains+all,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,jetbrains+all,visualstudiocode
 
