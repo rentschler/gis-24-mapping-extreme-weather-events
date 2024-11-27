@@ -4,7 +4,7 @@ from fastapi import APIRouter, FastAPI, Query
 from geoalchemy2 import Geography
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from CarSharingResponse import CarSharingResponse
 from settings import settings
@@ -19,14 +19,27 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = automap_base()
 Base.prepare(engine, reflect=True)
 
-CarSharing = Base.classes.car_sharing
-
+HeavyRain = Base.classes.heavy_rain
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
+@app.get("/api/data")
+async def get_data():
 
+    db  = Session(engine)
+    res = db.query(HeavyRain).all()
+    return res
+
+@app.get("/api/health")
+async def car_sharing_capacity():
+    return {"status": "api proxy ok"}
+
+
+
+
+""" 
 @router.get("/car-sharing")
 async def car_sharing():
     with SessionLocal() as session:
@@ -128,6 +141,6 @@ def convert_car_sharing_entities(entities):
         )
 
     return converted_entities
-
+ """
 
 app.include_router(router)
