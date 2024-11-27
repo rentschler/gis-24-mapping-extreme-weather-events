@@ -4,14 +4,49 @@ Welcome to your project template! This template includes several fixes based on 
 
 You may experience a delay in the backend startup until the database initialization is complete, as data import is now included in this process. To minimize this delay, adjust the value of the key `services.database.healthcheck.timeout` in `docker-compose.yaml`. A manual data import is no longer necessary unless desired.
 
+
+## How to start the project
+
+remove exsiting files
+```shell
+$ docker compose down
+$ sudo rm database/data -r
+# remove existing docker volumes
+$ docker system prune # warning this will delete other volumes as well
+```
+
+start the docker
+```shell
+$ docker compose up --build
+```
+
+execute the `tmp_setup.ipynb` script in the database folder to insert the data into the database
+
+
+connect to the database   "postgresql://admin:password@localhost:5433/rain"
+```shell
+$ psql -d rain --host localhost --port 5433 -U admin
+```
+execute the following commands
+```sql
+ALTER TABLE heavy_rain ADD CONSTRAINT heavy_rain_pkey PRIMARY KEY ("ID");
+
+SELECT * FROM heavy_rain LIMIT 5;
+-- quit
+\q
+```
+
+finally restart the docker
+```shell
+$ docker compose down
+$ docker compose up
+```
+
+
+
 # GIS-2425
 
-startup
-```shell
-$ cd setup-exercise
-$ dockercompose up --build
-```
-                      
+
 creating and activating a virtual environment
 ```shell
 $ cd backend
