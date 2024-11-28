@@ -16,5 +16,12 @@ def preprocess():
 
     # Step 2: Fill NaN values with empty strings
     raw_df = raw_df.fillna("NA")
+    
+    date_time_cols = ['TIME_EVENT', 'TIME_CREATION', 'TIME_LAST_REVISION']
+    
+    for col in date_time_cols:
+        raw_df[col] = pd.to_datetime(raw_df[col])
 
     raw_df.to_csv('data.csv',index=False,header=True, quoting=csv.QUOTE_NONE)
+    
+preprocess()
