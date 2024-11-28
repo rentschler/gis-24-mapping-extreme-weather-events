@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Map from "./Map";
+import Map from "./pages/Map";
 import SimpleNavbar from "./components/navbar/SimpleNavbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
