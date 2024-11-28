@@ -5,6 +5,7 @@ from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
 from sqlalchemy.orm import mapped_column, declarative_base
 
 from typing import Optional, Dict, Union
+from datetime import date, datetime, timedelta
 
 Base = declarative_base()
 
@@ -56,10 +57,9 @@ class HeavyRain(Base):
     link_id = mapped_column(Text)
     deleted = mapped_column(Text)
 
-class QcEnum(Enum):
+class QcEnum(str, Enum):
     QC1 = "QC1"
-    QC2 = "QC2"
-    QC3 = "QC3"
+    QC0plus = 'QC0+'
 
 class Coordinates(BaseModel):
     latitude: Optional[float]
@@ -78,16 +78,16 @@ class LocationDetails(BaseModel):
 
 
 class EventDetails(BaseModel):
-    qc_level: Optional[str] = None
+    qc_level: Optional[QcEnum] = None
     info_source: Optional[str] = None
     contact: Optional[str] = None
     organisation: Optional[str] = None
     organisation_id: Optional[str] = None
     no_revision: Optional[int] = None
     person_revision: Optional[str] = None
-    time_event: Optional[str] = None
-    time_creation: Optional[str] = None
-    time_last_revision: Optional[str] = None
+    time_event: Optional[datetime] = None
+    time_creation: Optional[datetime] = None
+    time_last_revision: Optional[datetime] = None
     time_accuracy: Optional[str] = None
     type_event: Optional[str] = None
     precipitation_amount: Optional[str] = None

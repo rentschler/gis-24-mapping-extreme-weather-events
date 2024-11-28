@@ -191,5 +191,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,jetbrains+all,visualstudiocode
+testing.ipynb
 database_test.pgsql
-.gitignore
