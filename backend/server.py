@@ -1,13 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, FastAPI, Query
+from fastapi import APIRouter, FastAPI, Query, HTTPException, Depends
 from geoalchemy2 import Geography
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 
-from CarSharingResponse import CarSharingResponse
 from settings import settings
+
+from DataModel import HeavyRainResponse, HeavyRain
 
 DATABASE_URL = settings.database_url
 
@@ -16,28 +17,31 @@ router = APIRouter(prefix="/api")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 Base = automap_base()
 Base.prepare(engine, reflect=True)
-
-HeavyRain = Base.classes.heavy_rain
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-@app.get("/api/data")
-async def get_data():
+@app.get("/api/data", response_model=list[HeavyRainResponse])
+async def get_data(db: Session = Depends(get_db)):
+    
+    res = db.query(HeavyRain).limit(2).all()
+    return [HeavyRainResponse.from_flat_dict(item) for item in res]
 
-    db  = Session(engine)
-    res = db.query(HeavyRain).all()
+@app.get("/api/data_raw")
+async def get_data(db: Session = Depends(get_db)):
+    
+    res = db.query(HeavyRain).limit(2).all()
     return res
-
-@app.get("/api/health")
-async def car_sharing_capacity():
-    return {"status": "api proxy ok"}
-
-
-
 
 """ 
 @router.get("/car-sharing")
