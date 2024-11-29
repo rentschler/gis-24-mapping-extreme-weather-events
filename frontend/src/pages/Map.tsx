@@ -28,10 +28,10 @@ const Map = () => {
   }, []);
 
   return (
-    <div style={{ height: "500px" }}>
-    <MapContainer
+    <div className="map-container px-3">
+          <MapContainer
       center={[47.69162, 9.187]}
-      className="w-screen h-screen"
+      className="map-content"
       zoom={8}
     >
         <TileLayer

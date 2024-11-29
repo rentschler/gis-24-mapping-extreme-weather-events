@@ -10,7 +10,7 @@ function ExampleSideBar() {
 
   return (
     <>
-      <Button variant="outline-dark" onClick={handleShow}>
+      <Button variant="outline-light" onClick={handleShow}>
         Options
       </Button>
 
