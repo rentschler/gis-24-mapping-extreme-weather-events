@@ -1,11 +1,12 @@
-import { MapContainer, Marker, Popup, TileLayer, CircleMarker  } from "react-leaflet";
-import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, CircleMarker  } from "react-leaflet";
+import { useState, useEffect } from "react";
 
 
 import "leaflet/dist/leaflet.css";
+import { MeteorologicalEventRecord } from "../types/response";
 
 const Map = () => {
-  const [points, setPoints] = useState([]);
+  const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -27,20 +28,22 @@ const Map = () => {
   }, []);
 
   return (
-    <div style={{ height: "500px" }}>
-    <MapContainer
+    <div className="map-container px-2">
+          <MapContainer
       center={[47.69162, 9.187]}
-      className="w-screen h-screen"
+      className="map-content"
       zoom={8}
     >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {points.map((point) => {
-          const latitude = point["LATITUDE"];
-          const longitude = point["LONGITUDE"];
+          const latitude = point.latitude
+          const longitude = point.longitude
+          if(!latitude || !longitude) return null;
           return (
               <CircleMarker
+                key={point.id}
                 center={[latitude, longitude]}
                 radius={2} // Radius of the dot, adjust as needed
                 color="red" // Border color
