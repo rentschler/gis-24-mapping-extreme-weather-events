@@ -28,7 +28,7 @@ const Map = () => {
   }, []);
 
   return (
-    <div className="map-container px-3">
+    <div className="map-container px-2">
           <MapContainer
       center={[47.69162, 9.187]}
       className="map-content"
