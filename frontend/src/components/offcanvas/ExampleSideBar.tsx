@@ -10,11 +10,11 @@ function ExampleSideBar() {
 
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        Toggle static offcanvas
+      <Button variant="outline-dark" onClick={handleShow}>
+        Options
       </Button>
 
-      <Offcanvas show={show} onHide={handleClose} backdrop="static">
+      <Offcanvas show={show} onHide={handleClose} backdrop="static" placement="end">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Offcanvas</Offcanvas.Title>
         </Offcanvas.Header>
