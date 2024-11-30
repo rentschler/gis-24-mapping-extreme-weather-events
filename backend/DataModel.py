@@ -3,6 +3,7 @@ from enum import Enum
 from datetime import date, datetime, time, timedelta
 from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
 from sqlalchemy.orm import mapped_column, declarative_base
+from geoalchemy2 import Geometry
 
 from typing import Optional, Dict, Union
 from datetime import date, datetime, timedelta
@@ -56,6 +57,7 @@ class HeavyRain(Base):
     link_org = mapped_column(Text)
     link_id = mapped_column(Text)
     deleted = mapped_column(Text)
+    geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
 
 class QcEnum(str, Enum):
     QC1 = "QC1"
@@ -177,3 +179,8 @@ class HeavyRainResponse(BaseModel):
                 deleted=getattr(heavy_rain, "deleted", None),
             ),
         )
+        
+        
+class GeometryPost(BaseModel):
+    geometry: dict
+    

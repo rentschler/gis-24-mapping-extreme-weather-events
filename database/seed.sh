@@ -59,4 +59,18 @@ psql -p "5432" -U "admin" -d "rain" <<EOF
 \COPY heavy_rain(ID,QC_LEVEL,INFO_SOURCE,CONTACT,ORGANISATION,ORGANISATION_ID,NO_REVISION,PERSON_REVISION,TIME_EVENT,TIME_CREATION,TIME_LAST_REVISION,TIME_ACCURACY,COUNTRY,STATE,PLACE,PLACE_LOCAL_LANGUAGE,DETAILED_LOCATION,LATITUDE,LONGITUDE,PLACE_ACCURACY,SURFACE_INITIAL_LOCATION,SURFACE_CROSSED,TYPE_EVENT,PRECIPITATION_AMOUNT,MAX_6_HOUR_PRECIP,MAX_12_HOUR_PRECIP,MAX_24_HOUR_PRECIP,CONVECTIVE,TOTAL_DURATION,EXCEPT_ELEC_PHENOM,NO_INJURED,NO_KILLED,EVENT_DESCRIPTION,EXT_URL,REFERENCE,IMPACTS,CREATOR_ID,REVISOR_ID,LINK_ORG,LINK_ID,DELETED) FROM '/docker-entrypoint-initdb.d/data.csv' WITH CSV HEADER QUOTE '"' NULL AS 'NA';
 EOF
 
+# Add geometry column and populate it
+echo "Adding geometry column and populating it with lat/lon data..."
+psql -p "5432" -U "admin" -d "rain" <<EOF
+-- Add the geometry column
+ALTER TABLE heavy_rain ADD COLUMN geom geometry(Point, 4326);
+
+-- Populate the geometry column
+UPDATE heavy_rain
+SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);
+
+-- Create a spatial index for the geometry column
+CREATE INDEX idx_heavy_rain_geom ON heavy_rain USING GIST (geom);
+EOF
+
 echo "Data loaded successfully into the heavy_rain table."
