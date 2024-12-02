@@ -1,0 +1,46 @@
+import { InfoSource } from "./response";
+import { ImpactCode, impactCodeData } from "./response";
+
+
+export function parseInfoSource(input: string, delimiter: string = ";"): InfoSource[] {
+    const validSources: Set<string> = new Set(Object.values(InfoSource));
+    return input
+      .split(delimiter) // Split by the specified delimiter (default is ";")
+      .map((item) => item.trim()) // Trim any whitespace around each part
+      .filter((item): item is InfoSource => validSources.has(item)); // Filter valid values
+  }
+  
+export function getImpactDescription(impactCode: ImpactCode): string {
+    const impact = impactCodeData.find((item) => item.code === impactCode);
+    return impact ? impact.description : "";
+}
+
+/**
+ * Parses an impact code list into an array of ImpactCode values.
+ * Each impact code is two or three characters long.
+ * All available impact codes are defined in the ImpactCode enum.
+ * @param input ImpactCodeList like T1T4H6H7H8H9V1E1
+ */
+export function parseImpactCode(input: string): ImpactCode[] {
+    const validCodes: Set<string> = new Set(Object.values(ImpactCode));
+    const codes: ImpactCode[] = [];
+    let i = 0;
+    while (i < input.length) {
+      const code = input.substr(i, 2);
+      if (validCodes.has(code)) {
+        codes.push(code as ImpactCode);
+        i += 2;
+      } else {
+        const code = input.substr(i, 3);
+        if (validCodes.has(code)) {
+          codes.push(code as ImpactCode);
+          i += 3;
+        } else {
+          i++;
+        }
+      }
+    }
+    return codes;
+}
+
+
