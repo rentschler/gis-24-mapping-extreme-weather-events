@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import FilterOptions from '../filterOptions/FilterOptions';
 
 function ExampleSideBar() {
   const [show, setShow] = useState(false);
@@ -14,12 +15,12 @@ function ExampleSideBar() {
         Options
       </Button>
 
-      <Offcanvas show={show} onHide={handleClose} backdrop="static" placement="end">
+      <Offcanvas show={show} onHide={handleClose}  placement="end">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Offcanvas</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          I will not close if you click outside of me.
+         <FilterOptions></FilterOptions>
         </Offcanvas.Body>
       </Offcanvas>
     </>
