@@ -1,14 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, FastAPI, Query
+from fastapi import APIRouter, FastAPI, Query, HTTPException, Depends
+from fastapi.encoders import jsonable_encoder
 from geoalchemy2 import Geography
+from geoalchemy2.functions import ST_Within, ST_GeomFromGeoJSON
+from shapely.geometry import shape, Polygon, MultiPolygon
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 
-from CarSharingResponse import CarSharingResponse
 from settings import settings
+from datetime import datetime, date
+import json
 
+from DataModel import *
 DATABASE_URL = settings.database_url
 
 app = FastAPI()
@@ -16,131 +21,97 @@ router = APIRouter(prefix="/api")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 Base = automap_base()
 Base.prepare(engine, reflect=True)
-
-HeavyRain = Base.classes.heavy_rain
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-@app.get("/api/data")
-async def get_data():
-
-    db  = Session(engine)
-    res = db.query(HeavyRain).all()
-    return res
-
-@app.get("/api/health")
-async def car_sharing_capacity():
-    return {"status": "api proxy ok"}
-
-
-
-
-""" 
-@router.get("/car-sharing")
-async def car_sharing():
-    with SessionLocal() as session:
-        sharing_query = select(
-            CarSharing.name,
-            CarSharing.street,
-            CarSharing.streetnr,
-            CarSharing.districtna,
-            func.ST_Y(CarSharing.wkb_geometry).label("latitude"),
-            func.ST_X(CarSharing.wkb_geometry).label("longitude"),
-            CarSharing.capacity,
-            CarSharing.provider,
-        ).order_by(CarSharing.name)
-
-        sharing = session.execute(sharing_query).all()
-
-    return convert_car_sharing_entities(sharing)
+@app.get("/api/data", response_model=list[HeavyRainResponse])
+async def get_data(db: Session = Depends(get_db), 
+                   date_from: date = None,
+                   date_to: date = None,
+                   limit: int = None,
+                   qc : QcEnum = None):
+    
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(status_code=400, detail="Invalid date range, date_from must be before date_to")
+    
+    # Start the query
+    query = db.query(HeavyRain)
+    
+    # Add date filtering conditions to the query
+    if date_from:
+        query = query.filter(HeavyRain.time_event >= date_from)
+    if date_to:
+        query = query.filter(HeavyRain.time_event <= date_to)
+    if qc:
+        query = query.filter(HeavyRain.qc_level == qc)
+    
+    if limit:
+        query = query.limit(limit)
+    
+    # Execute query with a limit of 2
+    res = query.all()
+    
+    return [HeavyRainResponse.from_db(item) for item in res]
 
 
-@router.get("/car-sharing/capacity")
-async def car_sharing_capacity(districts: Annotated[list[str] | None, Query()] = None):
-    print(districts)
-
-    with SessionLocal() as session:
-        sharing_capacities_query = select(
-            CarSharing.name,
-            CarSharing.street,
-            CarSharing.streetnr,
-            CarSharing.districtna,
-            CarSharing.capacity,
-            CarSharing.provider,
-        ).order_by(CarSharing.capacity.desc())
-
-        if districts is not None:
-            sharing_capacities_query = sharing_capacities_query.filter(
-                CarSharing.districtna.in_(districts)
+@app.post("/api/data/geometry", response_model=list[HeavyRainResponse])
+async def get_data_with_geometry(
+    body: GeometryPost,  # Accept GeoJSON as a dictionary
+    db: Session = Depends(get_db),
+):
+    """
+    Fetch HeavyRain records that fall within the specified GeoJSON geometry
+    with optional date and QC filtering.
+    """
+    try:
+        if not body.geometry:
+            raise HTTPException(status_code=400, detail="Geometry payload is required")
+        # Validate and parse GeoJSON geometry
+        geojson_geometry = jsonable_encoder(body.geometry)
+        shapely_geom = shape(body.geometry)  # Convert GeoJSON to Shapely geometry
+        if not shapely_geom.is_valid:
+            raise HTTPException(status_code=400, detail="Invalid GeoJSON geometry")
+        if not isinstance(shapely_geom, (Polygon, MultiPolygon)):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid geometry type: {shapely_geom.geom_type}. Expected Polygon or MultiPolygon."
             )
-
-        sharing_capacities = session.execute(sharing_capacities_query).all()
-
-    return convert_car_sharing_entities(sharing_capacities)
-
-
-@router.get("/car-sharing/points")
-async def car_sharing_points(latitude: float = None, longitude: float = None):
-    with SessionLocal() as session:
-        if latitude is None or longitude is None:
-            sharing_points_query = select(
-                CarSharing.name,
-                CarSharing.street,
-                CarSharing.streetnr,
-                func.ST_Y(CarSharing.wkb_geometry).label("latitude"),
-                func.ST_X(CarSharing.wkb_geometry).label("longitude"),
-                CarSharing.capacity,
-                CarSharing.provider,
-                CarSharing.picture,
-            ).order_by(CarSharing.name)
-        else:
-            sharing_points_query = select(
-                CarSharing.name,
-                CarSharing.street,
-                CarSharing.streetnr,
-                func.ST_Y(CarSharing.wkb_geometry).label("latitude"),
-                func.ST_X(CarSharing.wkb_geometry).label("longitude"),
-                CarSharing.capacity,
-                CarSharing.provider,
-                func.ST_Distance(
-                    CarSharing.wkb_geometry,
-                    func.ST_SetSRID(func.ST_MakePoint(longitude, latitude), 4326).cast(
-                        Geography
-                    ),
-                ).label("distance"),
-                CarSharing.picture,
-            ).order_by("distance")
-
-        sharing_points = session.execute(sharing_points_query).all()
-
-    return convert_car_sharing_entities(sharing_points)
-
-
-@router.get("/car-sharing/providers")
-async def car_sharing_providers():
-    with SessionLocal() as session:
-        sharing_providers_query = (
-            select(CarSharing.provider).distinct().order_by(CarSharing.provider)
-        )
-        sharing_providers = session.execute(sharing_providers_query).scalars().all()
-
-        return sharing_providers
-
-
-def convert_car_sharing_entities(entities):
-    converted_entities = []
-    for entity in entities:
-        converted_entities.append(
-            CarSharingResponse.model_validate(entity).model_dump(
-                exclude={"street", "street_number"}, exclude_none=True
+        
+        # Construct the base query
+        query = db.query(HeavyRain).filter(
+            ST_Within(
+                HeavyRain.geom,  # Assuming `geom` is the geometry column in HeavyRain
+                ST_GeomFromGeoJSON(json.dumps(body.geometry))  # Convert GeoJSON to PostGIS geometry
             )
         )
 
-    return converted_entities
- """
+        # Add date filtering conditions if provided
+        # if date_from:
+        #     query = query.filter(HeavyRain.time_event >= date_from)
+        # if date_to:
+        #     query = query.filter(HeavyRain.time_event <= date_to)
+
+        # # Add QC level filtering if provided
+        # if qc:
+        #     query = query.filter(HeavyRain.qc_level == qc)
+
+        # Execute the query and fetch results
+        results = query.all()
+
+        return [HeavyRainResponse.from_db(item) for item in results]
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
 
 app.include_router(router)
