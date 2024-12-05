@@ -62,7 +62,7 @@ async def get_data(db: Session = Depends(get_db),
     # Execute query with a limit of 2
     res = query.all()
     
-    return [HeavyRainResponse.from_flat_dict(item) for item in res]
+    return [HeavyRainResponse.from_db(item) for item in res]
 
 
 @app.post("/api/data/geometry", response_model=list[HeavyRainResponse])
@@ -109,7 +109,7 @@ async def get_data_with_geometry(
         # Execute the query and fetch results
         results = query.all()
 
-        return [HeavyRainResponse.from_flat_dict(item) for item in results]
+        return [HeavyRainResponse.from_db(item) for item in results]
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")

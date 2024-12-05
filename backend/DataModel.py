@@ -60,6 +60,7 @@ class HeavyRain(Base):
     geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
 
 class QcEnum(str, Enum):
+    QC2 = "QC2"
     QC1 = "QC1"
     QC0plus = 'QC0+'
 
@@ -68,12 +69,11 @@ class Coordinates(BaseModel):
     longitude: Optional[float]
 
 class LocationDetails(BaseModel):
+    coordinates: Optional[Coordinates] = None
     country: Optional[str] = None
     state: Optional[str] = None
     place: Optional[str] = None
     place_local_language: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
     place_accuracy: Optional[str] = None
     surface_initial_location: Optional[str] = None
     surface_crossed: Optional[str] = None
@@ -81,12 +81,6 @@ class LocationDetails(BaseModel):
 
 class EventDetails(BaseModel):
     qc_level: Optional[QcEnum] = None
-    info_source: Optional[str] = None
-    contact: Optional[str] = None
-    organisation: Optional[str] = None
-    organisation_id: Optional[str] = None
-    no_revision: Optional[int] = None
-    person_revision: Optional[str] = None
     time_event: Optional[datetime] = None
     time_creation: Optional[datetime] = None
     time_last_revision: Optional[datetime] = None
@@ -102,56 +96,56 @@ class EventDetails(BaseModel):
     no_injured: Optional[str] = None
     no_killed: Optional[str] = None
     event_description: Optional[str] = None
-    ext_url: Optional[str] = None
-    reference: Optional[str] = None
     impacts: Optional[str] = None
-
-
-class CreatorRevisorDetails(BaseModel):
+    
+    
+class Source(BaseModel):
+    info_source: Optional[str] = None
+    contact: Optional[str] = None
+    organisation: Optional[str] = None
+    organisation_id: Optional[str] = None
+    no_revision: Optional[int] = None
+    person_revision: Optional[str] = None
     creator_id: Optional[str] = None
     revisor_id: Optional[str] = None
     link_org: Optional[str] = None
     link_id: Optional[str] = None
     deleted: Optional[str] = None
-
+    ext_url: Optional[str] = None
+    reference: Optional[str] = None
 
 class HeavyRainResponse(BaseModel):
     id: int
     location: LocationDetails
     event: EventDetails
-    creator_revisor: CreatorRevisorDetails
+    source: Source
 
     class Config:
         orm_mode = True
         
     @classmethod
-    def from_flat_dict(cls, heavy_rain: "HeavyRain") -> "HeavyRainResponse":
-        """Converts a HeavyRain SQLAlchemy model instance into a nested HeavyRainModel."""
+    def from_db(cls, heavy_rain: "HeavyRain") -> "HeavyRainResponse":
+        """Converts a HeavyRain SQLAlchemy model instance into a nested HeavyRainResponse."""
         if not isinstance(heavy_rain, HeavyRain):
             raise TypeError(f"Expected a HeavyRain instance, got {type(heavy_rain).__name__}")
 
         return cls(
-            id=heavy_rain.id,
+            id=getattr(heavy_rain, "id", None),
             location=LocationDetails(
+                coordinates=Coordinates(
+                    latitude=getattr(heavy_rain, "latitude", None),
+                    longitude=getattr(heavy_rain, "longitude", None),
+                ),
                 country=getattr(heavy_rain, "country", None),
                 state=getattr(heavy_rain, "state", None),
                 place=getattr(heavy_rain, "place", None),
                 place_local_language=getattr(heavy_rain, "place_local_language", None),
-                detailed_location=getattr(heavy_rain, "detailed_location", None),
-                latitude=getattr(heavy_rain, "latitude", None),
-                longitude=getattr(heavy_rain, "longitude", None),
                 place_accuracy=getattr(heavy_rain, "place_accuracy", None),
                 surface_initial_location=getattr(heavy_rain, "surface_initial_location", None),
-                surface_crossed=getattr(heavy_rain, "surface_crossed", None),
-            ),
+                surface_crossed=getattr(heavy_rain, "surface_crossed", None)
+                ),
             event=EventDetails(
                 qc_level=getattr(heavy_rain, "qc_level", None),
-                info_source=getattr(heavy_rain, "info_source", None),
-                contact=getattr(heavy_rain, "contact", None),
-                organisation=getattr(heavy_rain, "organisation", None),
-                organisation_id=getattr(heavy_rain, "organisation_id", None),
-                no_revision=getattr(heavy_rain, "no_revision", None),
-                person_revision=getattr(heavy_rain, "person_revision", None),
                 time_event=getattr(heavy_rain, "time_event", None),
                 time_creation=getattr(heavy_rain, "time_creation", None),
                 time_last_revision=getattr(heavy_rain, "time_last_revision", None),
@@ -167,17 +161,23 @@ class HeavyRainResponse(BaseModel):
                 no_injured=getattr(heavy_rain, "no_injured", None),
                 no_killed=getattr(heavy_rain, "no_killed", None),
                 event_description=getattr(heavy_rain, "event_description", None),
-                ext_url=getattr(heavy_rain, "ext_url", None),
-                reference=getattr(heavy_rain, "reference", None),
-                impacts=getattr(heavy_rain, "impacts", None),
-            ),
-            creator_revisor=CreatorRevisorDetails(
+                impacts=getattr(heavy_rain, "impacts", None)
+                ),
+            source=Source(
+                info_source=getattr(heavy_rain, "info_source", None),
+                contact=getattr(heavy_rain, "contact", None),
+                organisation=getattr(heavy_rain, "organisation", None),
+                organisation_id=getattr(heavy_rain, "organisation_id", None),
+                no_revision=getattr(heavy_rain, "no_revision", None),
+                person_revision=getattr(heavy_rain, "person_revision", None),
                 creator_id=getattr(heavy_rain, "creator_id", None),
                 revisor_id=getattr(heavy_rain, "revisor_id", None),
                 link_org=getattr(heavy_rain, "link_org", None),
                 link_id=getattr(heavy_rain, "link_id", None),
                 deleted=getattr(heavy_rain, "deleted", None),
-            ),
+                ext_url=getattr(heavy_rain, "ext_url", None),
+                reference=getattr(heavy_rain, "reference", None)
+            )
         )
         
         
