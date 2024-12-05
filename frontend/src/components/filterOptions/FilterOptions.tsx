@@ -1,9 +1,21 @@
 import { Select, Space } from 'antd';
+import { QCLevel, QCLevelDescriptions } from '../../types/response';
+import type { SelectProps } from 'antd';
 
 import Check from './Check';
 import DateRange from './DateRange';
+import RangeSlider from './RangeSlider';
+import MultiSelect from './MultiSelect';
 
+const options: SelectProps['options'] = [];
+const defaultValues = [QCLevel.QC1, QCLevel.QC2];
 
+Object.entries(QCLevelDescriptions).forEach(([value, label]) => {
+    options.push({ value, label: <span>{label.title}<title>{label.description}</title></span> });
+});
+const handleChange = (value: string[]) => {
+    console.log(`selected ${value}`);
+};
 
 
 const FilterOptions = () => {
@@ -13,7 +25,8 @@ const FilterOptions = () => {
         <Check label="Show Point Events" />
         <Check label="Show Aggregated Events" />
         <Check label="Show Summaries" />
-        <Select options={[{ value: 'qc0', label: <span>qc0</span> },{ value: 'qc0+', label: <span>qc0+</span> },{ value: 'qc1', label: <span>qc1</span> },{ value: 'qc2', label: <span>qc2</span> }]} />
+        <MultiSelect options={options} defaultValues={defaultValues} handleChange={handleChange} placeholder='Select QC Levels' />
+        <RangeSlider />
     </Space>
   )
 }
