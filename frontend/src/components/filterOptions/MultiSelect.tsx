@@ -36,7 +36,7 @@ const MultiSelect = ({
                 <label 
                     onClick={handleLabelClick} 
                     htmlFor={id}
-                    style={{ cursor: 'pointer', display: 'block', marginBottom: '8px' }}
+                    style={{ cursor: 'pointer', display: 'block', marginBottom: '2px' }}
                 >
                     {label}
                 </label>

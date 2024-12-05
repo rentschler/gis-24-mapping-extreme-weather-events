@@ -12,7 +12,7 @@ const DateRange = () => {
 
     return (
         <>
-            <label style={{ cursor: 'pointer', display: 'block', marginBottom: '8px' }} htmlFor='custom-date-range'>Select Date Range</label>
+            <label style={{ cursor: 'pointer', display: 'block', marginBottom: '2px' }} htmlFor='custom-date-range'>Select Date Range</label>
             <RangePicker
                 id="custom-date-range"
                 showTime={{ format: 'HH:mm' }}

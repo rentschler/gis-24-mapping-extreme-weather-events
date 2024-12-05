@@ -17,7 +17,7 @@ function ExampleSideBar() {
 
       <Offcanvas show={show} onHide={handleClose}  placement="end">
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+          <Offcanvas.Title>Options</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
          <FilterOptions></FilterOptions>
