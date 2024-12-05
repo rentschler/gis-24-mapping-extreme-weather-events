@@ -1,4 +1,4 @@
-import { Select, Space } from 'antd';
+import { Space } from 'antd';
 import { QCLevel, QCLevelDescriptions } from '../../types/response';
 import type { SelectProps } from 'antd';
 
@@ -11,7 +11,7 @@ const options: SelectProps['options'] = [];
 const defaultValues = [QCLevel.QC1, QCLevel.QC2];
 
 Object.entries(QCLevelDescriptions).forEach(([value, label]) => {
-    options.push({ value, label: <span>{label.title}<title>{label.description}</title></span> });
+    options.push({ value, label: <div title={label.description}>{label.title}</div> });
 });
 const handleChange = (value: string[]) => {
     console.log(`selected ${value}`);
@@ -25,7 +25,7 @@ const FilterOptions = () => {
         <Check label="Show Point Events" />
         <Check label="Show Aggregated Events" />
         <Check label="Show Summaries" />
-        <MultiSelect options={options} defaultValues={defaultValues} handleChange={handleChange} placeholder='Select QC Levels' />
+        <MultiSelect id="qc-multi-select" options={options} defaultValues={defaultValues} handleChange={handleChange} placeholder='Select QC Levels' label='Quality Control Levels' />
         <RangeSlider />
     </Space>
   )

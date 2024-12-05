@@ -3,7 +3,7 @@ import { Slider } from 'antd';
 const RangeSlider = () => {
   return (
     <>
-    <label>Number of Impacts</label>
+    <label style={{ display: 'block', marginBottom: '8px' }}>Number of Impacts</label>
         <Slider range={{ draggableTrack: true }} 
             defaultValue={[2, 10]} 
             styles={{
