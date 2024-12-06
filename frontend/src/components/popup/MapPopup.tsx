@@ -7,18 +7,18 @@ interface MapPopupProps {
 const MapPopup = ({record}:MapPopupProps) => {
   return (
     <div>
-        <h1>{record.type_event + ' - ' +  record.qc_level}</h1>
-        <p>{record.event_description}</p>
-        <p>{record.time_event}</p>
-        <p>no injured {record.no_injured}</p>
-        <p>no dead {record.no_killed}</p>
-        <a href={record.ext_url} target="_blank" rel="noreferrer">More info</a>
-        <p> source : {record.info_source}</p>
+        <h1>{record.event.type_event + ' - ' +  record.event.qc_level}</h1>
+        <p>{record.event.event_description}</p>
+        <p>{record.event.time_event}</p>
+        <p>no injured {record.event.no_injured}</p>
+        <p>no dead {record.event.no_killed}</p>
+        <a href={record.source.ext_url} target="_blank" rel="noreferrer">More info</a>
+        <p> source : {record.source.info_source}</p>
 
-        {record.impacts && (
+        {record.event.impacts && (
             <div>
                 <ul style={{ listStyleType: 'circle' }}>
-                    {parseImpactCode(record.impacts).map((code) => (
+                    {parseImpactCode(record.event.impacts).map((code) => (
                         <li key={code}>{getImpactDescription(code)}</li>
                     ))}
                 </ul>
