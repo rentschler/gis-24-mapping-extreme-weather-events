@@ -13,6 +13,9 @@ $ docker compose down
 $ sudo rm database/data -r
 # remove existing docker volumes
 $ docker system prune # warning this will delete other volumes as well
+# better way is by re building the docker without cache
+$ docker-compose build --no-cache
+
 ```
 
 start the docker
