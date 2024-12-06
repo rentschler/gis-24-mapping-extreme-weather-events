@@ -1,11 +1,20 @@
 import { Slider } from 'antd';
 
-const RangeSlider = () => {
+interface RangeSliderProps {
+    label: string;
+    title: string;
+    defaultValue: number[];
+    min: number;
+    max: number;
+    onChange: (value: number[]) => void;
+}
+
+const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSliderProps) => {
   return (
-    <div title="Filter the results based on the Number of Impacts">
-    <label style={{ display: 'block', marginBottom: '2px' }}>Number of Impacts</label>
+    <div title={title}>
+    <label style={{ display: 'block', marginBottom: '2px' }}>{label}</label>
         <Slider range={{ draggableTrack: true }} 
-            defaultValue={[2, 10]} 
+            defaultValue={defaultValue} 
             styles={{
                 track: {
                     background: 'gray',
@@ -14,8 +23,9 @@ const RangeSlider = () => {
                     background: 'lightgray',
                 },
             }} 
-            min={0}
-            max={10}
+            min={min}
+            max={max}
+            onChangeComplete={onChange}
         />
     </div>
   )

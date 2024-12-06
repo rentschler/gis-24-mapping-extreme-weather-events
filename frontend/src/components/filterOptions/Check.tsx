@@ -1,16 +1,16 @@
 import { Checkbox, CheckboxProps } from 'antd'
-import React, { useState } from 'react'
 
 interface CheckProps {
     label: string;
+    checked: boolean;
+    setChecked: (checked: boolean) => void;
 }
 
-const Check = ({ label }: CheckProps) => {
+const Check = ({ label, checked, setChecked }: CheckProps) => {
     const onChange2: CheckboxProps['onChange'] = (e) => {
         console.log('checked = ', e.target.checked);
         setChecked(e.target.checked);
     };
-    const [checked, setChecked] = useState(true);
 
     return (
         <Checkbox checked={checked} onChange={onChange2} style={{ color: 'white' }}>

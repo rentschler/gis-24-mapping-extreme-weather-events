@@ -25,8 +25,6 @@ const MultiSelect = ({
         // Open the dropdown programmatically when the label is clicked
         if (selectRef.current) {
             selectRef.current.focus();
-            // trigger a click event to open the dropdown
-            selectRef.current.click();
         }
     };
 
