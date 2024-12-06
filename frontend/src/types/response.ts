@@ -62,7 +62,30 @@ export enum InfoSource {
     GOV = "GOV", // Government-based sources / administrative organisations
   }
   
-  export type InfoSourceList = InfoSource[];
+export type InfoSourceList = InfoSource[];
+
+export type InfoSourceData = {
+    code: InfoSource;
+    description: string;
+};
+
+export const infoSourceData: InfoSourceData[] = [
+    { code: InfoSource.NWSP, description: "A newspaper" },
+    { code: InfoSource.WWW, description: "A website" },
+    { code: InfoSource.EMAIL, description: "A report received by email" },
+    { code: InfoSource.TV, description: "A television or radio broadcast" },
+    { code: InfoSource.WXSVC, description: "A weather service" },
+    { code: InfoSource.SPTR, description: "A storm spotter" },
+    { code: InfoSource.LIT, description: "Scientific literature" },
+    { code: InfoSource.OLIT, description: "Other literature" },
+    { code: InfoSource.EYEWTN, description: "An eyewitness" },
+    { code: InfoSource.DMGEYEWTN, description: "An eyewitness of the damage" },
+    { code: InfoSource.EVTPHOTO, description: "A photo or video of the event" },
+    { code: InfoSource.DMGPHOTO, description: "A photo or video of the damage" },
+    { code: InfoSource.DMGSVY, description: "A damage survey by a severe weather expert" },
+    { code: InfoSource.GOV, description: "Government-based sources / administrative organisations" }
+];
+
 
 
 export enum RequestType {
