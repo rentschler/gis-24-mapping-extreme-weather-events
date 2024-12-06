@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 
 interface DateRangeProps {
+    value: [string, string];
     onChange?: TimeRangePickerProps['onChange'];
 }
 
@@ -16,7 +17,7 @@ const rangePresets: TimeRangePickerProps['presets'] = [
 
   
   
-const DateRange = ({ onChange }: DateRangeProps) => {
+const DateRange = ({ value, onChange }: DateRangeProps) => {
 
     const dateFormat = 'YYYY-MM-DD';
 
@@ -26,6 +27,7 @@ const DateRange = ({ onChange }: DateRangeProps) => {
             <RangePicker
                 id="custom-date-range"
                 // showTime={{ format: 'HH:mm' }}
+                allowClear={false}
                 presets={rangePresets}
                 format={dateFormat}
                 onChange={onChange}
@@ -35,6 +37,7 @@ const DateRange = ({ onChange }: DateRangeProps) => {
                 minDate={dayjs('2021-01-01', dateFormat)}
                 maxDate={dayjs('2022-01-01', dateFormat)}
                 placement='bottomRight'
+                value={[dayjs(value[0], dateFormat), dayjs(value[1], dateFormat)]}
                 >
                 <p>RangePicker</p>
                 
