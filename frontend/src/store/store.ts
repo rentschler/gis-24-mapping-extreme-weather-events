@@ -1,12 +1,49 @@
 // store/index.ts
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import {
+    persistStore,
+    persistReducer,
+    FLUSH,
+    REHYDRATE,
+    PAUSE,
+    PERSIST,
+    PURGE,
+    REGISTER,
+  } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'; // Default is localStorage
 import settingsReducer from './settingsSlice';
 
-export const store = configureStore({
-  reducer: {
-    settings: settingsReducer,
-  },
+const persistConfig = {
+  key: 'root', // The key for localStorage
+  storage,     // Storage type (localStorage)
+  whitelist: ['settings'], // Specify slices of state to persist
+  debug: true, // Logs all persistence actions
+};
+
+const rootReducer = combineReducers({
+  settings: settingsReducer,
+  
+//   query: queryReducer,
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    })
+});
+
+export const persistor = persistStore(store);
+
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export type AppDispatch = typeof store.dispatch
+
+export default store
