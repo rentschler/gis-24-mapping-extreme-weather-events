@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from enum import Enum
 from datetime import date, datetime, time, timedelta
 from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
@@ -78,6 +78,46 @@ class LocationDetails(BaseModel):
     surface_initial_location: Optional[str] = None
     surface_crossed: Optional[str] = None
 
+impact_code_data = {
+        "T1": "Road(s) impassable or closed",
+        "T2": "Road(s) damaged or destroyed",
+        "T3": "Bridge(s) damaged or destroyed",
+        "T4": "Rail-/tram-/subway(s) unusable or closed",
+        "T5": "Rail-/tram-/subway infrastructure damaged",
+        "T6": "Rail-/tram-/subway vehicle(s) damaged or destroyed",
+        "T7": "Airport(s) closed (for more than an hour)",
+        "T8": "Aircraft damaged or destroyed",
+        "T9": "Ship(s) damaged or destroyed",
+        "T10": "Inhabited place(s) cut off from transport infrastructure",
+        "I1": "Power transmission damaged or destroyed",
+        "I2": "Telecommunication infrastructure damaged or destroyed",
+        "H1": "Damage (any damage)",
+        "H2": "Damage to roof(s) and/or chimney(s)",
+        "H3": "Roof(s) destroyed",
+        "H4": "Damage to window(s) and/or insulation layer(s)",
+        "H5": "Wall(s) (partly) collapsed",
+        "H6": "Building(s) (almost) fully destroyed",
+        "H7": "Basement(s) flooded",
+        "H8": "Flooding of ground floor",
+        "H9": "Flooding above ground floor",
+        "V1": "Car(s) damaged (any damage)",
+        "V2": "Car(s) dented",
+        "V3": "Car window(s) and/or windshield(s) broken",
+        "V4": "Car(s) damaged beyond repair",
+        "V5": "Car(s) lifted",
+        "V6": "Truck(s) and/or trailer(s) overturned",
+        "W1": "Tree(s) damaged",
+        "W2": "Large tree branch(es) broken",
+        "W3": "Tree(s) uprooted or snapped",
+        "W4": "Forest(s) damaged or destroyed",
+        "A1": "Crops/farmland damaged",
+        "A2": "Farmland flooded",
+        "A3": "Greenhouse(s) damaged or destroyed",
+        "A4": "Animal(s) killed",
+        "E1": "Land- or mudslide(s)",
+        "E2": "Fire as a consequence of the event",
+        "E3": "Evacuation order by authorities",
+    }
 
 class EventDetails(BaseModel):
     qc_level: Optional[QcEnum] = None
@@ -96,8 +136,14 @@ class EventDetails(BaseModel):
     no_injured: Optional[str] = None
     no_killed: Optional[str] = None
     event_description: Optional[str] = None
-    impacts: Optional[str] = None
+    impacts: Optional[list[str]] = None
     
+    
+    @field_validator('impacts', mode='before')
+    def convert_str_to_list(cls, value):
+        if isinstance(value, str):
+            return [impact_code_data[value[i:i+2]] for i in range(0, len(value), 2)]
+        return value
     
 class Source(BaseModel):
     info_source: Optional[str] = None

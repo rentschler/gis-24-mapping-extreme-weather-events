@@ -64,6 +64,12 @@ async def get_data(db: Session = Depends(get_db),
     
     return [HeavyRainResponse.from_db(item) for item in res]
 
+@app.get("/api/data/{id}", response_model=HeavyRainResponse)
+async def get_data_by_id(id: int, db: Session = Depends(get_db)):
+    item = db.query(HeavyRain).filter(HeavyRain.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return HeavyRainResponse.from_db(item)
 
 @app.post("/api/data/geometry", response_model=list[HeavyRainResponse])
 async def get_data_with_geometry(
