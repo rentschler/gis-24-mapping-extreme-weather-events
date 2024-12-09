@@ -9,6 +9,7 @@ interface MultiSelectProps {
     id: string;
     placeholder?: string;
     label?: string;
+    multiLine?: boolean; // allow the selecter to go over multiple lines 
 }
 
 const MultiSelect = ({ 
@@ -17,7 +18,8 @@ const MultiSelect = ({
     handleChange, 
     id,
     placeholder = "Please select", 
-    label 
+    label,
+    multiLine = false
 }: MultiSelectProps) => {
     const selectRef = useRef<any>(null); // Ref to access the Select component
 
@@ -40,8 +42,7 @@ const MultiSelect = ({
                 </label>
             )}
             <Select
-              maxTagCount={"responsive"}
-
+                maxTagCount={multiLine? undefined : "responsive"}
                 id={id}
                 mode="multiple"
                 allowClear

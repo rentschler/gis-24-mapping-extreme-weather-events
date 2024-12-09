@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
-import FilterOptions from '../filterOptions/FilterOptions';
+import SettingsPage from '../../pages/settings/SettingsPage';
+
 
 function ExampleSideBar() {
   const [show, setShow] = useState(false);
@@ -20,7 +21,7 @@ function ExampleSideBar() {
           <Offcanvas.Title>Options</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-         <FilterOptions></FilterOptions>
+         <SettingsPage></SettingsPage>
         </Offcanvas.Body>
       </Offcanvas>
     </>
