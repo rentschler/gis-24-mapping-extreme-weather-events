@@ -1,45 +1,53 @@
 export type MeteorologicalEventRecord = {
-    info_source: string; // Source(s) of information, e.g., WWW, TV, photos.
-    latitude: number; // decimal degrees north latitude
-    event_description: string; // Description of the event.
-    contact: string; // Contact person or observer.
-    time_creation: string; // ISO 8601 timestamp of the record's creation.
-    time_last_revision: string; // ISO 8601 timestamp of the last revision.
-    time_accuracy: string; // Accuracy of the time data, e.g., "3H".
-    time_event: string; // ISO 8601 timestamp of the event's occurrence.
-    longitude: number; // Longitude of the event's location.
-    ext_url?: string; // External URL for more information.
-    reference: string; // Reference to a source or report.
-    place_accuracy: string; // Accuracy of the location data, e.g., "3KM".
-    impacts?: string; // Encoded string representing event impacts.
-    organisation?: string | null; // Organisation associated with the record.
-    organisation_id?: string | null; // ID of the organisation, if any.
-    country: string; // Country code (ISO 3166-1 alpha-2 format).
-    surface_initial_location?: string | null; // Initial surface impacted, if applicable.
-    convective?: string | null; // Convective properties, if applicable.
-    creator_id: string; // ID of the record's creator.
-    state?: string; // State or region of the event.
-    surface_crossed?: string | null; // Description of any crossed surfaces, if applicable.
-    total_duration?: number | null; // Duration of the event in hours.
-    revisor_id: string; // ID of the person who revised the record.
-    person_revision?: string | null; // Name of the revising person or entity.
-    place: string; // Name of the place where the event occurred.
-    type_event: string; // Type of event, e.g., "PRECIP".
-    except_elec_phenom?: string; // Exception for electrical phenomena, if applicable.
-    link_org?: string; // Associated organisation link.
-    place_local_language?: string | null; // Local-language name of the place, if available.
-    precipitation_amount?: number | null; // Total precipitation amount, if available.
-    link_id?: string; // Link identifier.
-    qc_level: string; // Quality control level, e.g., "QC1".
+    event: {
+        convective?: string | null; // Convective properties, if applicable.
+        impacts?: string; // Encoded string representing event impacts.
+        no_injured?: number | null; // Number of injured persons, if reported.
+        no_killed?: number | null; // Number of fatalities, if reported.
+        precipitation_amount?: number | null; // Total precipitation amount, if available.
+        qc_level: string; // Quality control level, e.g., "QC1".
+        total_duration?: number | null; // Duration of the event in hours.
+        time_creation: string; // ISO 8601 timestamp of the record's creation.
+        time_last_revision: string; // ISO 8601 timestamp of the last revision.
+        time_accuracy: string; // Accuracy of the time data, e.g., "3H".
+        time_event: string; // ISO 8601 timestamp of the event's occurrence.
+        event_description: string; // Description of the event.
+        max_24_hour_precip?: number | null; // Maximum precipitation in 24 hours, if available.
+        max_12_hour_precip?: number | null; // Maximum precipitation in 12 hours, if available.
+        max_6_hour_precip?: number | null; // Maximum precipitation in 6 hours, if available.
+        type_event: string; // Type of event, e.g., "PRECIP".
+        except_elec_phenom?: string; // Exception for electrical phenomena, if applicable.
+    }, 
     id: number; // Unique ID for the record.
-    detailed_location?: string | null; // Additional location details, if available.
-    max_24_hour_precip?: number | null; // Maximum precipitation in 24 hours, if available.
-    max_12_hour_precip?: number | null; // Maximum precipitation in 12 hours, if available.
-    max_6_hour_precip?: number | null; // Maximum precipitation in 6 hours, if available.
-    no_revision: number; // Number of revisions made to the record.
-    no_injured?: number | null; // Number of injured persons, if reported.
-    no_killed?: number | null; // Number of fatalities, if reported.
-    deleted: string; // Deletion status, e.g., "N" for not deleted.
+    location:{
+        coordinates: {
+            latitude: number; // decimal degrees north latitude
+            longitude: number; // Longitude of the event's location.
+        },
+        country: string; // Country code (ISO 3166-1 alpha-2 format).
+        place: string; // Name of the place where the event occurred.
+        place_local_language?: string | null; // Local-language name of the place, if available.
+        place_accuracy: string; // Accuracy of the location data, e.g., "3KM".
+        surface_crossed?: string | null; // Description of any crossed surfaces, if applicable.
+        surface_initial_location?: string | null; // Initial surface impacted, if applicable.
+        state?: string; // State or region of the event.
+        detailed_location?: string | null; // Additional location details, if available.
+    },
+    source: {
+        info_source: string; // Source(s) of information, e.g., WWW, TV, photos.
+        contact: string; // Contact person or observer.
+        ext_url?: string; // External URL for more information.
+        reference: string; // Reference to a source or report.
+        organisation?: string | null; // Organisation associated with the record.
+        organisation_id?: string | null; // ID of the organisation, if any.
+        creator_id: string; // ID of the record's creator.
+        revisor_id: string; // ID of the person who revised the record.
+        person_revision?: string | null; // Name of the revising person or entity.
+        link_org?: string; // Associated organisation link.
+        link_id?: string; // Link identifier.
+        no_revision: number; // Number of revisions made to the record.
+        deleted: string; // Deletion status, e.g., "N" for not deleted.
+    }
 };
 
 export type MeteorologicalEventRecordFormated = {
@@ -62,7 +70,30 @@ export enum InfoSource {
     GOV = "GOV", // Government-based sources / administrative organisations
   }
   
-  export type InfoSourceList = InfoSource[];
+export type InfoSourceList = InfoSource[];
+
+export type InfoSourceData = {
+    code: InfoSource;
+    description: string;
+};
+
+export const infoSourceData: InfoSourceData[] = [
+    { code: InfoSource.NWSP, description: "A newspaper" },
+    { code: InfoSource.WWW, description: "A website" },
+    { code: InfoSource.EMAIL, description: "A report received by email" },
+    { code: InfoSource.TV, description: "A television or radio broadcast" },
+    { code: InfoSource.WXSVC, description: "A weather service" },
+    { code: InfoSource.SPTR, description: "A storm spotter" },
+    { code: InfoSource.LIT, description: "Scientific literature" },
+    { code: InfoSource.OLIT, description: "Other literature" },
+    { code: InfoSource.EYEWTN, description: "An eyewitness" },
+    { code: InfoSource.DMGEYEWTN, description: "An eyewitness of the damage" },
+    { code: InfoSource.EVTPHOTO, description: "A photo or video of the event" },
+    { code: InfoSource.DMGPHOTO, description: "A photo or video of the damage" },
+    { code: InfoSource.DMGSVY, description: "A damage survey by a severe weather expert" },
+    { code: InfoSource.GOV, description: "Government-based sources / administrative organisations" }
+];
+
 
 
 export enum RequestType {
