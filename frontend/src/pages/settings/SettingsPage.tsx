@@ -6,15 +6,19 @@ import Check from '../../components/filterOptions/Check';
 import DateRange from '../../components/filterOptions/DateRange';
 import RangeSlider from '../../components/filterOptions/RangeSlider';
 import MultiSelect from '../../components/filterOptions/MultiSelect';
-import { useState } from 'react';
 import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateTimeRange } from '../../store/settingsSlice';
+import { setHideEventsWithoutDescription, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, updateTimeRange } from '../../store/settingsSlice';
 
 const SettingsPage = () => {
+    // redux state variables
     const dispatch: AppDispatch = useDispatch();
-    const { timeRange } = useSelector((state: RootState) => state.settings);
-
+    const { timeRange,
+        showPointEvents,
+        showAggregatedEvents,
+        showSummaries,
+        hideEventsWithoutDescription,
+     } = useSelector((state: RootState) => state.settings);
 
     const options: SelectProps['options'] = [];
     const defaultValues = [QCLevel.QC1, QCLevel.QC2];
@@ -43,20 +47,33 @@ const SettingsPage = () => {
 
     const ImpactDefaultValues = [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1];
 
-    const onDateChange = (_: any, dateString: [string, string]) => {
-        dispatch(updateTimeRange(dateString));
-    }
-
-
-
-    const [checked, setChecked] = useState(true);
     return (
         <Space direction="vertical" size={18}>
-            <DateRange onChange={onDateChange} value={timeRange}/>
-            <Check checked={checked} setChecked={setChecked} label="Show Point Events" />
-            <Check checked={checked} setChecked={setChecked} label="Show Aggregated Events" />
-            <Check checked={checked} setChecked={setChecked} label="Show Summaries" />
-            <Check checked={checked} setChecked={setChecked} label="Hide Events Without Description" />
+            <DateRange value={timeRange}
+                onChange={(_: any, dateString: [string, string]) => {
+                    // dispatch sends the action to the reducer to update the state
+                    dispatch(updateTimeRange(dateString));
+                }} />
+            <Check checked={showPointEvents} 
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowPointEvents(checked));
+                }} 
+                label="Show Point Events" />
+            <Check checked={showAggregatedEvents} 
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowAggregatedEvents(checked));
+                }} 
+                label="Show Aggregated Events" />
+            <Check checked={showSummaries} 
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowSummaries(checked));
+                }} 
+                label="Show Summaries" />
+            <Check checked={hideEventsWithoutDescription} 
+                setChecked={(checked: boolean) => {
+                    dispatch(setHideEventsWithoutDescription(checked));
+                }} 
+                label="Hide Events Without Description" />
             <RangeSlider
                 label="Number of Impacts"
                 title="Filter the results based on the Number of Impacts"
