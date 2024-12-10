@@ -11,9 +11,17 @@ import React from "react";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 import geojsonData from '../combined_reports.geo.json'; // Replace with your actual geoJSON file
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 
 const Map = () => {
+
+
+  const { 
+    filters
+  } = useSelector((state: RootState) => state.query);
+
 
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
   
@@ -29,7 +37,14 @@ const Map = () => {
 
     const fetchPoints = async () => {
       try {
-        const response = await fetch("/api/data");
+      
+        const response = await fetch("/api/data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(filters),
+        });
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
 
@@ -75,7 +90,7 @@ const Map = () => {
       }
     };
     fetchPoints();
-  }, []);
+  }, [filters]);
 
 
   // Custom component to listen to map zoom changes
