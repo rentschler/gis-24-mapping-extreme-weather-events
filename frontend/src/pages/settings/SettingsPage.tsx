@@ -9,7 +9,7 @@ import MultiSelect from '../../components/filterOptions/MultiSelect';
 import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHideEventsWithoutDescription, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, updateTimeRange } from '../../store/settingsSlice';
-
+import { Button } from 'antd';
 const SettingsPage = () => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
@@ -33,7 +33,7 @@ const SettingsPage = () => {
     const sourceOptions: SelectProps['options'] = [];
     infoSourceData.forEach((source) => {
         sourceOptions.push({
-            value: source.code, label: <div title={source.description}>{source.code}</div>
+            value: source.code, label: <div title={source.description}>{source.description}</div>
         });
     });
     const sourceDefaultValues = [InfoSource.GOV, InfoSource.NWSP];
@@ -41,7 +41,7 @@ const SettingsPage = () => {
     const ImpactOptions: SelectProps['options'] = [];
     impactCodeData.forEach((impact) => {
         ImpactOptions.push({
-            value: impact.code, label: <div title={impact.description}>{impact.code}</div>
+            value: impact.code, label: <div title={impact.description}>{impact.description}</div>
         });
     });
 
@@ -101,6 +101,8 @@ const SettingsPage = () => {
                 handleChange={handleChange}
                 placeholder="Select Impact Codes"
                 label="Impact Codes"
+                multiLine={true}
+
             />
             <MultiSelect
                 id="qc-multi-select"
@@ -118,7 +120,11 @@ const SettingsPage = () => {
                 handleChange={handleChange}
                 placeholder="Select Info Sources"
                 label="Info Sources"
-            /></Space>
+                multiLine={true}
+
+            />
+            <Button className='mt-3'>Apply</Button>
+            </Space>
     )
 }
 
