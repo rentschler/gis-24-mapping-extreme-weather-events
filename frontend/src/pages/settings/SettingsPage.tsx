@@ -10,15 +10,12 @@ import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHideEventsWithoutDescription, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, updateTimeRange } from '../../store/settingsSlice';
 import { Button } from 'antd';
-import { setEndDate, setFilters, setStartDate } from '../../store/querySlice';
+import {  setFilters } from '../../store/querySlice';
 const SettingsPage = () => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
-    const { timeRange,
-        showPointEvents,
-        showAggregatedEvents,
-        showSummaries,
-        hideEventsWithoutDescription,
+    const { queryFilters,
+         visualFilters 
     } = useSelector((state: RootState) => state.settings);
     const { 
         filters
@@ -54,38 +51,37 @@ const SettingsPage = () => {
 
     return (
         <Space direction="vertical" size={18}>
-            <p>{filters.startDate}</p>
-            <p>{filters.endDate}</p>
+            <p>{filters.timeRange}</p>
             <DateRange
-                value={timeRange}
+                value={queryFilters.timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
                     // dispatch sends the action to the reducer to update the state
                     dispatch(updateTimeRange(dateString));
                 }}
             />
             <Check
-                checked={showPointEvents}
+                checked={visualFilters.showPointEvents}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowPointEvents(checked));
                 }}
                 label="Show Point Events"
             />
             <Check
-                checked={showAggregatedEvents}
+                checked={visualFilters.showAggregatedEvents}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowAggregatedEvents(checked));
                 }}
                 label="Show Aggregated Events"
             />
             <Check
-                checked={showSummaries}
+                checked={visualFilters.showSummaries}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowSummaries(checked));
                 }}
                 label="Show Summaries"
             />
             <Check
-                checked={hideEventsWithoutDescription}
+                checked={visualFilters.hideEventsWithoutDescription}
                 setChecked={(checked: boolean) => {
                     dispatch(setHideEventsWithoutDescription(checked));
                 }}
@@ -134,11 +130,8 @@ const SettingsPage = () => {
                 className='mt-3'
                 onClick={() => {
                     console.log("apply button clicked");
-                    const payLoad = {
-                        startDate: timeRange[0],
-                        endDate: timeRange[1]
-                    }
-                    dispatch(setFilters(payLoad));
+      
+                    dispatch(setFilters(queryFilters));
                 }}
             >Apply</Button>
             </Space>

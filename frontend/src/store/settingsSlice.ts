@@ -18,59 +18,76 @@ import { ImpactCode, InfoSource, QCLevel } from "../types/response";
 
 
 type SettingsState = {
-    timeRange: [string, string]; // [startDate, endDate]
-    showPointEvents: boolean;
-    showAggregatedEvents: boolean;
-    showSummaries: boolean;
-    hideEventsWithoutDescription: boolean;
-    numberOfImpacts: [number, number]; // [min, max]
-    impactCodes: ImpactCode[]; // enum, e.g., ['T1', 'T2']
-    qcLevels: QCLevel[]; // enum, e.g., ['QC0+', 'QC1']
-    infoSources: InfoSource[]; // enum, e.g., ['WWW', 'TV']
+  queryFilters: QueryState;
+  visualFilters: VisualState;
 };
 
-const initialState: SettingsState = {
-    timeRange: ['2021-01-01', '2021-12-01'],
-    showPointEvents: true,
-    showAggregatedEvents: false,
-    showSummaries: false,
-    hideEventsWithoutDescription: false,
-    numberOfImpacts: [2, 10],
-    impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
-    qcLevels: [QCLevel.QC1, QCLevel.QC2],
-    infoSources: [InfoSource.GOV, InfoSource.NWSP],
-  };
+export type QueryState = {
+  timeRange: [string, string]; // date Format: 'YYYY-MM-DD'
+  numberOfImpacts: [number, number]; // [min, max]
+  impactCodes: ImpactCode[]; // enum, e.g., ['T1', 'T2']
+  qcLevels: QCLevel[]; // enum, e.g., ['QC0+', 'QC1']
+  infoSources: InfoSource[]; // enum, e.g., ['WWW', 'TV']
+};
+
+export type VisualState = {
+  showPointEvents: boolean;
+  showAggregatedEvents: boolean;
+  showSummaries: boolean;
+  hideEventsWithoutDescription: boolean;
+};
+
+export const initialQueryState: QueryState = {
+  timeRange: ['2021-01-01', '2021-12-01'],
+  numberOfImpacts: [2, 10],
+  impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
+  qcLevels: [QCLevel.QC1, QCLevel.QC2],
+  infoSources: [InfoSource.GOV, InfoSource.NWSP],
+};
+
+export const initialVisualState: VisualState = {
+  showPointEvents: true,
+  showAggregatedEvents: false,
+  showSummaries: false,
+  hideEventsWithoutDescription: false,
+};
+
+
+ const initialState: SettingsState = {
+  queryFilters: initialQueryState,
+  visualFilters: initialVisualState,
+}
 
   const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
       updateTimeRange: (state, action) => {
-        state.timeRange = action.payload;
+        state.queryFilters.timeRange = action.payload;
       },
       setShowPointEvents: (state, action) => {
-        state.showPointEvents = action.payload;
+        state.visualFilters.showPointEvents = action.payload;
       },
       setShowAggregatedEvents: (state, action) => {
-        state.showAggregatedEvents = action.payload;
+        state.visualFilters.showAggregatedEvents = action.payload;
       },
       setShowSummaries: (state, action) => {
-        state.showSummaries = action.payload;
+        state.visualFilters.showSummaries = action.payload;
       },
       setHideEventsWithoutDescription: (state, action) => {
-        state.hideEventsWithoutDescription = action.payload;
+        state.visualFilters.hideEventsWithoutDescription = action.payload;
       },
       setNumberOfImpacts: (state, action) => {
-        state.numberOfImpacts = action.payload;
+        state.queryFilters.numberOfImpacts = action.payload;
       },
       setImpactCodes: (state, action) => {
-        state.impactCodes = action.payload;
+        state.queryFilters.impactCodes = action.payload;
       },
       setQCLevels: (state, action) => {
-        state.qcLevels = action.payload;
+        state.queryFilters.qcLevels = action.payload;
       },
       setInfoSources: (state, action) => {
-        state.infoSources = action.payload;
+        state.queryFilters.infoSources = action.payload;
       },
     },
   });
