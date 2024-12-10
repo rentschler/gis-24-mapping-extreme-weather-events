@@ -10,6 +10,7 @@ import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHideEventsWithoutDescription, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, updateTimeRange } from '../../store/settingsSlice';
 import { Button } from 'antd';
+import { setEndDate, setFilters, setStartDate } from '../../store/querySlice';
 const SettingsPage = () => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
@@ -19,6 +20,10 @@ const SettingsPage = () => {
         showSummaries,
         hideEventsWithoutDescription,
     } = useSelector((state: RootState) => state.settings);
+    const { 
+        filters
+      } = useSelector((state: RootState) => state.query);
+    
 
     const options: SelectProps['options'] = [];
     const defaultValues = [QCLevel.QC1, QCLevel.QC2];
@@ -49,6 +54,8 @@ const SettingsPage = () => {
 
     return (
         <Space direction="vertical" size={18}>
+            <p>{filters.startDate}</p>
+            <p>{filters.endDate}</p>
             <DateRange
                 value={timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
@@ -123,7 +130,17 @@ const SettingsPage = () => {
                 multiLine={true}
 
             />
-            <Button className='mt-3'>Apply</Button>
+            <Button 
+                className='mt-3'
+                onClick={() => {
+                    console.log("apply button clicked");
+                    const payLoad = {
+                        startDate: timeRange[0],
+                        endDate: timeRange[1]
+                    }
+                    dispatch(setFilters(payLoad));
+                }}
+            >Apply</Button>
             </Space>
     )
 }

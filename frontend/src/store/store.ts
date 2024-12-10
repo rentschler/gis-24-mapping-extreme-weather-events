@@ -12,18 +12,18 @@ import {
   } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'; // Default is localStorage
 import settingsReducer from './settingsSlice';
+import queryReducer from './querySlice';
 
 const persistConfig = {
   key: 'root', // The key for localStorage
   storage,     // Storage type (localStorage)
-  whitelist: ['settings'], // Specify slices of state to persist
+  whitelist: ['settings', 'query'], // Specify slices of state to persist
   debug: true, // Logs all persistence actions
 };
 
 const rootReducer = combineReducers({
   settings: settingsReducer,
-  
-//   query: queryReducer,
+  query: queryReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
