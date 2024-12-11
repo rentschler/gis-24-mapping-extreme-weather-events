@@ -13,6 +13,7 @@ import React from "react";
 import geojsonData from '../combined_reports.geo.json'; // Replace with your actual geoJSON file
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { QueryState } from "../store/settingsSlice";
 
 
 const Map = () => {
@@ -37,13 +38,15 @@ const Map = () => {
 
     const fetchPoints = async () => {
       try {
-      
+        const payLoad : { filters: QueryState } = {
+          filters: filters
+        } 
         const response = await fetch("/api/data", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(filters),
+          body: JSON.stringify(payLoad),
         });
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
