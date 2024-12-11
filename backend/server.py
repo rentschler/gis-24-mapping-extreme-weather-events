@@ -64,6 +64,27 @@ async def get_data(db: Session = Depends(get_db),
     
     return [HeavyRainResponse.from_db(item) for item in res]
 
+@app.post("/api/data", response_model=list[HeavyRainResponse])
+async def get_data_with_geometry(
+    body: HeavyRainPost,  # Accept GeoJSON as a dictionary
+    db: Session = Depends(get_db),
+):
+    try:
+        query = db.query(HeavyRain)
+        
+        if body.date_from:
+            query = query.filter(HeavyRain.time_event >= body.date_from)
+        if body.date_to:
+            query = query.filter(HeavyRain.time_event <= body.date_to)
+        
+        res = query.all()
+        
+        return [HeavyRainResponse.from_db(item) for item in res]        
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+
+
 @app.get("/api/data/{id}", response_model=HeavyRainResponse)
 async def get_data_by_id(id: int, db: Session = Depends(get_db)):
     item = db.query(HeavyRain).filter(HeavyRain.id == id).first()

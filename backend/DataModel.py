@@ -119,6 +119,47 @@ impact_code_data = {
         "E3": "Evacuation order by authorities",
     }
 
+class ImpactCodeEnum(Enum):
+    T1 = "T1"
+    T2 = "T2"
+    T3 = "T3"
+    T4 = "T4"
+    T5 = "T5"
+    T6 = "T6"
+    T7 = "T7"
+    T8 = "T8"
+    T9 = "T9"
+    T10 = "T10"
+    I1 = "I1"
+    I2 = "I2"
+    H1 = "H1"
+    H2 = "H2"
+    H3 = "H3"
+    H4 = "H4"
+    H5 = "H5"
+    H6 = "H6"
+    H7 = "H7"
+    H8 = "H8"
+    H9 = "H9"
+    V1 = "V1"
+    V2 = "V2"
+    V3 = "V3"
+    V4 = "V4"
+    V5 = "V5"
+    V6 = "V6"
+    W1 = "W1"
+    W2 = "W2"
+    W3 = "W3"
+    W4 = "W4"
+    A1 = "A1"
+    A2 = "A2"
+    A3 = "A3"
+    A4 = "A4"
+    E1 = "E1"
+    E2 = "E2"
+    E3 = "E3"
+
+
 class EventDetails(BaseModel):
     qc_level: Optional[QcEnum] = None
     time_event: Optional[datetime] = None
@@ -136,7 +177,7 @@ class EventDetails(BaseModel):
     no_injured: Optional[str] = None
     no_killed: Optional[str] = None
     event_description: Optional[str] = None
-    impacts: Optional[list[str]] = None
+    impacts: Optional[list[ImpactCodeEnum]] = None
     
     
     @field_validator('impacts', mode='before')
@@ -226,7 +267,11 @@ class HeavyRainResponse(BaseModel):
             )
         )
         
-        
+class HeavyRainPost(BaseModel):
+    date_from: Optional[date] = None
+    date_to: Optional[date] = None
+    qc: Optional[list[QcEnum]] = None
+
 class GeometryPost(BaseModel):
     geometry: dict
     
