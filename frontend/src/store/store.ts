@@ -13,17 +13,19 @@ import {
 import storage from 'redux-persist/lib/storage'; // Default is localStorage
 import settingsReducer from './settingsSlice';
 import queryReducer from './querySlice';
+import visReducer from './visSlice';
 
 const persistConfig = {
   key: 'root', // The key for localStorage
   storage,     // Storage type (localStorage)
-  whitelist: ['settings', 'query'], // Specify slices of state to persist
+  whitelist: ['settings', 'query', 'vis'], // Specify slices of state to persist
   debug: true, // Logs all persistence actions
 };
 
 const rootReducer = combineReducers({
   settings: settingsReducer,
   query: queryReducer,
+  vis: visReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -39,7 +41,6 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
-
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>

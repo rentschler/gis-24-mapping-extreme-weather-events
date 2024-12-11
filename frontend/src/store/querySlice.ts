@@ -16,12 +16,12 @@ const querySlice = createSlice({
   initialState: initialState,
   reducers: {
 
-    setFilters(state, action: PayloadAction<State['filters']>) {
+    setQueryFilters(state, action: PayloadAction<State['filters']>) {
         state.filters = action.payload;
         },
   },
 });
 
-export const { setFilters } = querySlice.actions;
+export const { setQueryFilters } = querySlice.actions;
 
 export default querySlice.reducer;

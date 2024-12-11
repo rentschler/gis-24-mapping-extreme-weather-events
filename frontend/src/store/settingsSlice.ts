@@ -19,7 +19,8 @@ import { ImpactCode, InfoSource, QCLevel } from "../types/response";
 
 type SettingsState = {
   queryFilters: QueryState;
-  visualFilters: VisualState;
+  visOptions: VisualState;
+  hasChanged: boolean
 };
 
 export type QueryState = {
@@ -39,10 +40,10 @@ export type VisualState = {
 
 export const initialQueryState: QueryState = {
   timeRange: ['2021-01-01', '2021-12-01'],
-  impactRange: [2, 10],
+  impactRange: [1, 10],
   impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
   qcLevels: [QCLevel.QC1, QCLevel.QC2],
-  infoSources: [InfoSource.GOV, InfoSource.NWSP],
+  infoSources: [],
 };
 
 export const initialVisualState: VisualState = {
@@ -55,54 +56,75 @@ export const initialVisualState: VisualState = {
 
  const initialState: SettingsState = {
   queryFilters: initialQueryState,
-  visualFilters: initialVisualState,
+  visOptions: initialVisualState,
+  hasChanged: false,
 }
 
   const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
-      updateTimeRange: (state, action) => {
+      setTimeRange: (state, action) => {
+        state.hasChanged = true;
         state.queryFilters.timeRange = action.payload;
       },
       setShowPointEvents: (state, action) => {
-        state.visualFilters.showPointEvents = action.payload;
+        state.hasChanged = true;
+        state.visOptions.showPointEvents = action.payload;
       },
       setShowAggregatedEvents: (state, action) => {
-        state.visualFilters.showAggregatedEvents = action.payload;
+        state.hasChanged = true;
+
+        state.visOptions.showAggregatedEvents = action.payload;
       },
       setShowSummaries: (state, action) => {
-        state.visualFilters.showSummaries = action.payload;
+        state.hasChanged = true;
+
+        state.visOptions.showSummaries = action.payload;
       },
       setHideEventsWithoutDescription: (state, action) => {
-        state.visualFilters.hideEventsWithoutDescription = action.payload;
+        state.hasChanged = true;
+
+        state.visOptions.hideEventsWithoutDescription = action.payload;
       },
-      setNumberOfImpacts: (state, action) => {
+      setImpactRange: (state, action) => {
+        state.hasChanged = true;
+
         state.queryFilters.impactRange = action.payload;
       },
       setImpactCodes: (state, action) => {
+        state.hasChanged = true;
+
         state.queryFilters.impactCodes = action.payload;
       },
       setQCLevels: (state, action) => {
+        state.hasChanged = true;
+
         state.queryFilters.qcLevels = action.payload;
       },
       setInfoSources: (state, action) => {
+        state.hasChanged = true;
+
         state.queryFilters.infoSources = action.payload;
+      },
+      setHasChanged: (state, action) => {
+        state.hasChanged = action.payload
       },
     },
   });
 
 
 export const {
-    updateTimeRange,
+    setTimeRange,
     setShowPointEvents,
     setShowAggregatedEvents,
     setShowSummaries,
     setHideEventsWithoutDescription,
-    setNumberOfImpacts,
+    setImpactRange,
     setImpactCodes,
     setQCLevels,
     setInfoSources,
+    setHasChanged,
   } = settingsSlice.actions;
   
   export default settingsSlice.reducer;
