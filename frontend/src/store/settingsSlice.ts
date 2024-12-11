@@ -24,7 +24,7 @@ type SettingsState = {
 
 export type QueryState = {
   timeRange: [string, string]; // date Format: 'YYYY-MM-DD'
-  numberOfImpacts: [number, number]; // [min, max]
+  impactRange: [number, number]; // [min, max]
   impactCodes: ImpactCode[]; // enum, e.g., ['T1', 'T2']
   qcLevels: QCLevel[]; // enum, e.g., ['QC0+', 'QC1']
   infoSources: InfoSource[]; // enum, e.g., ['WWW', 'TV']
@@ -39,7 +39,7 @@ export type VisualState = {
 
 export const initialQueryState: QueryState = {
   timeRange: ['2021-01-01', '2021-12-01'],
-  numberOfImpacts: [2, 10],
+  impactRange: [2, 10],
   impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
   qcLevels: [QCLevel.QC1, QCLevel.QC2],
   infoSources: [InfoSource.GOV, InfoSource.NWSP],
@@ -78,7 +78,7 @@ export const initialVisualState: VisualState = {
         state.visualFilters.hideEventsWithoutDescription = action.payload;
       },
       setNumberOfImpacts: (state, action) => {
-        state.queryFilters.numberOfImpacts = action.payload;
+        state.queryFilters.impactRange = action.payload;
       },
       setImpactCodes: (state, action) => {
         state.queryFilters.impactCodes = action.payload;
