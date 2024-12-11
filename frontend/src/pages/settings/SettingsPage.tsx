@@ -35,7 +35,8 @@ const SettingsPage = () => {
     const sourceOptions: SelectProps['options'] = [];
     infoSourceData.forEach((source) => {
         sourceOptions.push({
-            value: source.code, label: <div title={source.description}>{source.description}</div>
+            // text truncate
+            value: source.code, label: <div style={{overflow:"hidden", textOverflow:"ellipsis", maxWidth:"300px"}} title={source.description}>{source.description}</div>
         });
     });
     const sourceDefaultValues = [InfoSource.GOV, InfoSource.NWSP];
@@ -130,7 +131,6 @@ const SettingsPage = () => {
                 className='mt-3'
                 onClick={() => {
                     console.log("apply button clicked");
-      
                     dispatch(setFilters(queryFilters));
                 }}
             >Apply</Button>
