@@ -142,7 +142,7 @@ class EventDetails(BaseModel):
     @field_validator('impacts', mode='before')
     def convert_str_to_list(cls, value):
         if isinstance(value, str):
-            return [impact_code_data[value[i:i+2]] for i in range(0, len(value), 2)]
+            return [value[i:i+2] for i in range(0, len(value), 2)]
         return value
     
 class Source(BaseModel):
