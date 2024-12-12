@@ -61,7 +61,7 @@ export enum InfoSource {
     WXSVC = "WXSVC", // A weather service
     SPTR = "SPTR", // A storm spotter
     LIT = "LIT", // Scientific literature
-    OLIT = "OLIT", // Other literature
+    // OLIT = "OLIT", // Other literature
     EYEWTN = "EYEWTN", // An eyewitness
     DMGEYEWTN = "DMGEYEWTN", // An eyewitness of the damage
     EVTPHOTO = "EVTPHOTO", // A photo or video of the event
@@ -85,7 +85,7 @@ export const infoSourceData: InfoSourceData[] = [
     { code: InfoSource.WXSVC, description: "A weather service" },
     { code: InfoSource.SPTR, description: "A storm spotter" },
     { code: InfoSource.LIT, description: "Scientific literature" },
-    { code: InfoSource.OLIT, description: "Other literature" },
+    // { code: InfoSource.OLIT, description: "Other literature" },
     { code: InfoSource.EYEWTN, description: "An eyewitness" },
     { code: InfoSource.DMGEYEWTN, description: "An eyewitness of the damage" },
     { code: InfoSource.EVTPHOTO, description: "A photo or video of the event" },
@@ -110,17 +110,17 @@ export type GeoLocation = {
 };
 
 export enum QCLevel {
-    QC0 = "QC0",
+    // QC0 = "QC0",
     QC0_PLUS = "QC0+",
     QC1 = "QC1",
     QC2 = "QC2"
 }
 
 export const QCLevelDescriptions = {
-    [QCLevel.QC0]: {
-        title: "As Received",
-        description: "These events are reported as received, but their occurrence is uncertain, and the details are unverified."
-    },
+    // [QCLevel.QC0]: {
+    //     title: "As Received",
+    //     description: "These events are reported as received, but their occurrence is uncertain, and the details are unverified."
+    // },
     [QCLevel.QC0_PLUS]: {
         title: "Plausibility Check Passed",
         description: "These events are very likely to have occurred, but some details, such as their exact time, precise location, or report characteristics, are unknown or uncertain."
