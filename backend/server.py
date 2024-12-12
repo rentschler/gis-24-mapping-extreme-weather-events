@@ -5,15 +5,19 @@ from fastapi.encoders import jsonable_encoder
 from geoalchemy2 import Geography
 from geoalchemy2.functions import ST_Within, ST_GeomFromGeoJSON
 from shapely.geometry import shape, Polygon, MultiPolygon
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, func, select, or_, and_
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 
 from settings import settings
 from datetime import datetime, date
 import json
+import traceback
 
 from DataModel import *
+from DBQueries import *
+from DataProcessing import *
+
 DATABASE_URL = settings.database_url
 
 app = FastAPI()
@@ -72,14 +76,16 @@ async def get_data_with_geometry(
     try:
         query = db.query(HeavyRain)
         
-        if body.date_from:
-            query = query.filter(HeavyRain.time_event >= body.date_from)
-        if body.date_to:
-            query = query.filter(HeavyRain.time_event <= body.date_to)
-        
+        query = heavy_rain_post(body, query)
+            
         res = query.all()
+        res_list = [HeavyRainResponse.from_db(item) for item in res] 
         
-        return [HeavyRainResponse.from_db(item) for item in res]        
+        # post filtering
+        
+        res_list = post_filter_rain(body, res_list)
+        
+        return res_list
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")

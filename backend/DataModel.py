@@ -1,63 +1,13 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, conlist
 from enum import Enum
 from datetime import date, datetime, time, timedelta
-from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
-from sqlalchemy.orm import mapped_column, declarative_base
-from geoalchemy2 import Geometry
+import re
 
 from typing import Optional, Dict, Union
 from datetime import date, datetime, timedelta
 
-Base = declarative_base()
+from DBModel import *
 
-class HeavyRain(Base):
-    __tablename__ = 'heavy_rain'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='heavy_rain_pkey'),
-    )
-
-    id = mapped_column(Integer)
-    qc_level = mapped_column(Text)
-    info_source = mapped_column(Text)
-    contact = mapped_column(Text)
-    organisation = mapped_column(Text)
-    organisation_id = mapped_column(Text)
-    no_revision = mapped_column(Integer)
-    person_revision = mapped_column(Text)
-    time_event = mapped_column(Text)
-    time_creation = mapped_column(Text)
-    time_last_revision = mapped_column(Text)
-    time_accuracy = mapped_column(Text)
-    country = mapped_column(Text)
-    state = mapped_column(Text)
-    place = mapped_column(Text)
-    place_local_language = mapped_column(Text)
-    detailed_location = mapped_column(Text)
-    latitude = mapped_column(Double(53))
-    longitude = mapped_column(Double(53))
-    place_accuracy = mapped_column(Text)
-    surface_initial_location = mapped_column(Text)
-    surface_crossed = mapped_column(Text)
-    type_event = mapped_column(Text)
-    precipitation_amount = mapped_column(Text)
-    max_6_hour_precip = mapped_column(Text)
-    max_12_hour_precip = mapped_column(Text)
-    max_24_hour_precip = mapped_column(Text)
-    convective = mapped_column(Text)
-    total_duration = mapped_column(Text)
-    except_elec_phenom = mapped_column(Text)
-    no_injured = mapped_column(Text)
-    no_killed = mapped_column(Text)
-    event_description = mapped_column(Text)
-    ext_url = mapped_column(Text)
-    reference = mapped_column(Text)
-    impacts = mapped_column(Text)
-    creator_id = mapped_column(Text)
-    revisor_id = mapped_column(Text)
-    link_org = mapped_column(Text)
-    link_id = mapped_column(Text)
-    deleted = mapped_column(Text)
-    geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
 
 class QcEnum(str, Enum):
     QC2 = "QC2"
@@ -119,7 +69,7 @@ impact_code_data = {
         "E3": "Evacuation order by authorities",
     }
 
-class ImpactCodeEnum(Enum):
+class ImpactCodeEnum(str, Enum):
     T1 = "T1"
     T2 = "T2"
     T3 = "T3"
@@ -130,6 +80,8 @@ class ImpactCodeEnum(Enum):
     T8 = "T8"
     T9 = "T9"
     T10 = "T10"
+    T11 = "T11"
+    T17 = "T17"
     I1 = "I1"
     I2 = "I2"
     H1 = "H1"
@@ -159,6 +111,19 @@ class ImpactCodeEnum(Enum):
     E2 = "E2"
     E3 = "E3"
 
+class InfoSourceEnum(str, Enum):
+    WWW = "WWW"
+    EMAIL = "EMAIL"
+    DMGEYEWTN = "DMGEYEWTN"
+    DMGPHOTO = "DMGPHOTO"
+    NWSP = "NWSP"
+    EYEWTN = "EYEWTN"
+    TV = "TV"
+    GOV = "GOV"
+    WXSVC = "WXSVC"
+    EVTPHOTO = "EVTPHOTO"
+    SPTR = "SPTR"
+    DMGSVY = "DMGSVY"
 
 class EventDetails(BaseModel):
     qc_level: Optional[QcEnum] = None
@@ -177,17 +142,17 @@ class EventDetails(BaseModel):
     no_injured: Optional[str] = None
     no_killed: Optional[str] = None
     event_description: Optional[str] = None
-    impacts: Optional[list[ImpactCodeEnum]] = None
+    impacts: Optional[list[ImpactCodeEnum]] = []
     
     
     @field_validator('impacts', mode='before')
     def convert_str_to_list(cls, value):
         if isinstance(value, str):
-            return [value[i:i+2] for i in range(0, len(value), 2)]
+            return re.findall(r'[A-Z]\d{1,2}', value)
         return value
     
 class Source(BaseModel):
-    info_source: Optional[str] = None
+    info_source: Optional[list[InfoSourceEnum]] = None
     contact: Optional[str] = None
     organisation: Optional[str] = None
     organisation_id: Optional[str] = None
@@ -200,6 +165,12 @@ class Source(BaseModel):
     deleted: Optional[str] = None
     ext_url: Optional[str] = None
     reference: Optional[str] = None
+    
+    @field_validator('info_source', mode='before')
+    def convert_str_to_list(cls, value):
+        if isinstance(value, str):
+            return value.split(';')
+        return value
 
 class HeavyRainResponse(BaseModel):
     id: int
@@ -248,7 +219,7 @@ class HeavyRainResponse(BaseModel):
                 no_injured=getattr(heavy_rain, "no_injured", None),
                 no_killed=getattr(heavy_rain, "no_killed", None),
                 event_description=getattr(heavy_rain, "event_description", None),
-                impacts=getattr(heavy_rain, "impacts", None)
+                impacts=getattr(heavy_rain, "impacts", [])
                 ),
             source=Source(
                 info_source=getattr(heavy_rain, "info_source", None),
@@ -267,10 +238,15 @@ class HeavyRainResponse(BaseModel):
             )
         )
         
+class HeavyRainFilter(BaseModel):
+    timeRange: Optional[conlist(date, min_length=2, max_length=2)] = None
+    impactRange: Optional[conlist(int, min_length=2, max_length=2)] = None
+    impactCodes: Optional[list[ImpactCodeEnum]] = None
+    qcLevels: Optional[list[QcEnum]] = None
+    infoSources: Optional[list[InfoSourceEnum]] = None
+    
 class HeavyRainPost(BaseModel):
-    date_from: Optional[date] = None
-    date_to: Optional[date] = None
-    qc: Optional[list[QcEnum]] = None
+    filters: HeavyRainFilter
 
 class GeometryPost(BaseModel):
     geometry: dict
