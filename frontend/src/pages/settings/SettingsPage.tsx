@@ -1,5 +1,5 @@
 import { Space } from 'antd';
-import { ImpactCode, impactCodeData, InfoSource, infoSourceData, QCLevel, QCLevelDescriptions } from '../../types/response';
+import { impactCodeData, infoSourceData, QCLevelDescriptions } from '../../types/response';
 import type { SelectProps } from 'antd';
 
 import Check from '../../components/filterOptions/Check';
@@ -8,77 +8,78 @@ import RangeSlider from '../../components/filterOptions/RangeSlider';
 import MultiSelect from '../../components/filterOptions/MultiSelect';
 import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setHideEventsWithoutDescription, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, updateTimeRange } from '../../store/settingsSlice';
-
+import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpactRange, setInfoSources, setQCLevels, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, setTimeRange } from '../../store/settingsSlice';
+import { Button } from 'antd';
+import {  setQueryFilters } from '../../store/querySlice';
+import { setVisoptions } from '../../store/visSlice';
 const SettingsPage = () => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
-    const { timeRange,
-        showPointEvents,
-        showAggregatedEvents,
-        showSummaries,
-        hideEventsWithoutDescription,
+    const { 
+        queryFilters,
+        visOptions,
+        hasChanged
     } = useSelector((state: RootState) => state.settings);
 
+    // QC level options
     const options: SelectProps['options'] = [];
-    const defaultValues = [QCLevel.QC1, QCLevel.QC2];
-
     Object.entries(QCLevelDescriptions).forEach(([value, label]) => {
         options.push({ value, label: <div title={label.description}>{label.title}</div> });
     });
-    const handleChange = (value: string[]) => {
-        console.log(`selected ${value}`);
-    };
 
+    // info source options
     const sourceOptions: SelectProps['options'] = [];
     infoSourceData.forEach((source) => {
         sourceOptions.push({
-            value: source.code, label: <div title={source.description}>{source.code}</div>
+            // text truncate
+            value: source.code, label: <div style={{overflow:"hidden", textOverflow:"ellipsis", maxWidth:"300px"}} title={source.description}>{source.description}</div>
         });
     });
-    const sourceDefaultValues = [InfoSource.GOV, InfoSource.NWSP];
 
+    // impact code options
     const ImpactOptions: SelectProps['options'] = [];
     impactCodeData.forEach((impact) => {
         ImpactOptions.push({
-            value: impact.code, label: <div title={impact.description}>{impact.code}</div>
+            value: impact.code, label: <div title={impact.description}>{impact.description}</div>
         });
     });
 
-    const ImpactDefaultValues = [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1];
+    console.log(visOptions, queryFilters, hasChanged);
+    
+    if(!visOptions) return;
 
     return (
         <Space direction="vertical" size={18}>
             <DateRange
-                value={timeRange}
+                value={queryFilters.timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
                     // dispatch sends the action to the reducer to update the state
-                    dispatch(updateTimeRange(dateString));
+                    dispatch(setTimeRange(dateString));
                 }}
             />
             <Check
-                checked={showPointEvents}
+                checked={visOptions.showPointEvents}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowPointEvents(checked));
                 }}
                 label="Show Point Events"
             />
             <Check
-                checked={showAggregatedEvents}
+                checked={visOptions.showAggregatedEvents}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowAggregatedEvents(checked));
                 }}
                 label="Show Aggregated Events"
             />
             <Check
-                checked={showSummaries}
+                checked={visOptions.showSummaries}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowSummaries(checked));
                 }}
                 label="Show Summaries"
             />
             <Check
-                checked={hideEventsWithoutDescription}
+                checked={visOptions.hideEventsWithoutDescription}
                 setChecked={(checked: boolean) => {
                     dispatch(setHideEventsWithoutDescription(checked));
                 }}
@@ -87,38 +88,61 @@ const SettingsPage = () => {
             <RangeSlider
                 label="Number of Impacts"
                 title="Filter the results based on the Number of Impacts"
-                defaultValue={[2, 10]}
+                defaultValue={queryFilters.impactRange}
                 min={0}
                 max={10}
                 onChange={(value: number[]) => {
-                    handleChange(value.map(String));
+                    dispatch(setImpactRange(value))
                 }}
-            ></RangeSlider>
+                ></RangeSlider>
             <MultiSelect
                 id="impact-multi-select"
                 options={ImpactOptions}
-                defaultValues={ImpactDefaultValues}
-                handleChange={handleChange}
-                placeholder="Select Impact Codes"
+                defaultValues={queryFilters.impactCodes}
+                handleChange={(value: string[]) => {
+                    dispatch(setImpactCodes(value))
+                }}
+                placeholder="No Filter Applied"
                 label="Impact Codes"
+                multiLine={true}
             />
             <MultiSelect
                 id="qc-multi-select"
                 options={options}
-                defaultValues={defaultValues}
-                handleChange={handleChange}
-                placeholder="Select QC Levels"
+                defaultValues={queryFilters.qcLevels}
+                handleChange={(value: string[]) => {
+                    dispatch(setQCLevels(value))
+                }}
+                placeholder="No Filter Applied"
                 label="Quality Control Levels"
                 multiLine={true}
             />
             <MultiSelect
                 id="source-multi-select"
                 options={sourceOptions}
-                defaultValues={sourceDefaultValues}
-                handleChange={handleChange}
-                placeholder="Select Info Sources"
+                defaultValues={queryFilters.infoSources}
+                handleChange={(value: string[]) => {
+                    dispatch(setInfoSources(value))
+                }}
+                placeholder="No Filter Applied"
                 label="Info Sources"
-            /></Space>
+                multiLine={true}
+
+            />
+            <Button 
+                className='mt-3'
+                style={!hasChanged?{background:"#F5F5F5"}:{}}
+                onClick={() => {
+                    console.log("apply button clicked");
+                    // submit changes to the query state
+                    dispatch(setQueryFilters(queryFilters));
+                    // submit changes to the vis state
+                    dispatch(setVisoptions(visOptions));
+                    dispatch(setHasChanged(false))
+                }}
+                disabled={!hasChanged}
+            >Apply</Button>
+            </Space>
     )
 }
 

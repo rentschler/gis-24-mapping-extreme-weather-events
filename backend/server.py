@@ -5,15 +5,19 @@ from fastapi.encoders import jsonable_encoder
 from geoalchemy2 import Geography
 from geoalchemy2.functions import ST_Within, ST_GeomFromGeoJSON
 from shapely.geometry import shape, Polygon, MultiPolygon
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, func, select, or_, and_
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 
 from settings import settings
 from datetime import datetime, date
 import json
+import traceback
 
 from DataModel import *
+from DBQueries import *
+from DataProcessing import *
+
 DATABASE_URL = settings.database_url
 
 app = FastAPI()
@@ -64,6 +68,35 @@ async def get_data(db: Session = Depends(get_db),
     
     return [HeavyRainResponse.from_db(item) for item in res]
 
+@app.post("/api/data", response_model=list[HeavyRainResponse])
+async def get_data_with_geometry(
+    body: HeavyRainPost,  # Accept GeoJSON as a dictionary
+    db: Session = Depends(get_db),
+):
+    try:
+        query = db.query(HeavyRain)
+        
+        query = heavy_rain_post(body, query)
+            
+        res = query.all()
+        res_list = [HeavyRainResponse.from_db(item) for item in res] 
+        
+        # post filtering
+        
+        res_list = post_filter_rain(body, res_list)
+        
+        return res_list
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+
+
+@app.get("/api/data/{id}", response_model=HeavyRainResponse)
+async def get_data_by_id(id: int, db: Session = Depends(get_db)):
+    item = db.query(HeavyRain).filter(HeavyRain.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return HeavyRainResponse.from_db(item)
 
 @app.post("/api/data/geometry", response_model=list[HeavyRainResponse])
 async def get_data_with_geometry(

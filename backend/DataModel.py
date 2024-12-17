@@ -1,63 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, conlist
 from enum import Enum
 from datetime import date, datetime, time, timedelta
-from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
-from sqlalchemy.orm import mapped_column, declarative_base
-from geoalchemy2 import Geometry
+import re
 
 from typing import Optional, Dict, Union
 from datetime import date, datetime, timedelta
 
-Base = declarative_base()
+from DBModel import *
 
-class HeavyRain(Base):
-    __tablename__ = 'heavy_rain'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='heavy_rain_pkey'),
-    )
-
-    id = mapped_column(Integer)
-    qc_level = mapped_column(Text)
-    info_source = mapped_column(Text)
-    contact = mapped_column(Text)
-    organisation = mapped_column(Text)
-    organisation_id = mapped_column(Text)
-    no_revision = mapped_column(Integer)
-    person_revision = mapped_column(Text)
-    time_event = mapped_column(Text)
-    time_creation = mapped_column(Text)
-    time_last_revision = mapped_column(Text)
-    time_accuracy = mapped_column(Text)
-    country = mapped_column(Text)
-    state = mapped_column(Text)
-    place = mapped_column(Text)
-    place_local_language = mapped_column(Text)
-    detailed_location = mapped_column(Text)
-    latitude = mapped_column(Double(53))
-    longitude = mapped_column(Double(53))
-    place_accuracy = mapped_column(Text)
-    surface_initial_location = mapped_column(Text)
-    surface_crossed = mapped_column(Text)
-    type_event = mapped_column(Text)
-    precipitation_amount = mapped_column(Text)
-    max_6_hour_precip = mapped_column(Text)
-    max_12_hour_precip = mapped_column(Text)
-    max_24_hour_precip = mapped_column(Text)
-    convective = mapped_column(Text)
-    total_duration = mapped_column(Text)
-    except_elec_phenom = mapped_column(Text)
-    no_injured = mapped_column(Text)
-    no_killed = mapped_column(Text)
-    event_description = mapped_column(Text)
-    ext_url = mapped_column(Text)
-    reference = mapped_column(Text)
-    impacts = mapped_column(Text)
-    creator_id = mapped_column(Text)
-    revisor_id = mapped_column(Text)
-    link_org = mapped_column(Text)
-    link_id = mapped_column(Text)
-    deleted = mapped_column(Text)
-    geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
 
 class QcEnum(str, Enum):
     QC2 = "QC2"
@@ -78,6 +28,102 @@ class LocationDetails(BaseModel):
     surface_initial_location: Optional[str] = None
     surface_crossed: Optional[str] = None
 
+impact_code_data = {
+        "T1": "Road(s) impassable or closed",
+        "T2": "Road(s) damaged or destroyed",
+        "T3": "Bridge(s) damaged or destroyed",
+        "T4": "Rail-/tram-/subway(s) unusable or closed",
+        "T5": "Rail-/tram-/subway infrastructure damaged",
+        "T6": "Rail-/tram-/subway vehicle(s) damaged or destroyed",
+        "T7": "Airport(s) closed (for more than an hour)",
+        "T8": "Aircraft damaged or destroyed",
+        "T9": "Ship(s) damaged or destroyed",
+        "T10": "Inhabited place(s) cut off from transport infrastructure",
+        "I1": "Power transmission damaged or destroyed",
+        "I2": "Telecommunication infrastructure damaged or destroyed",
+        "H1": "Damage (any damage)",
+        "H2": "Damage to roof(s) and/or chimney(s)",
+        "H3": "Roof(s) destroyed",
+        "H4": "Damage to window(s) and/or insulation layer(s)",
+        "H5": "Wall(s) (partly) collapsed",
+        "H6": "Building(s) (almost) fully destroyed",
+        "H7": "Basement(s) flooded",
+        "H8": "Flooding of ground floor",
+        "H9": "Flooding above ground floor",
+        "V1": "Car(s) damaged (any damage)",
+        "V2": "Car(s) dented",
+        "V3": "Car window(s) and/or windshield(s) broken",
+        "V4": "Car(s) damaged beyond repair",
+        "V5": "Car(s) lifted",
+        "V6": "Truck(s) and/or trailer(s) overturned",
+        "W1": "Tree(s) damaged",
+        "W2": "Large tree branch(es) broken",
+        "W3": "Tree(s) uprooted or snapped",
+        "W4": "Forest(s) damaged or destroyed",
+        "A1": "Crops/farmland damaged",
+        "A2": "Farmland flooded",
+        "A3": "Greenhouse(s) damaged or destroyed",
+        "A4": "Animal(s) killed",
+        "E1": "Land- or mudslide(s)",
+        "E2": "Fire as a consequence of the event",
+        "E3": "Evacuation order by authorities",
+    }
+
+class ImpactCodeEnum(str, Enum):
+    T1 = "T1"
+    T2 = "T2"
+    T3 = "T3"
+    T4 = "T4"
+    T5 = "T5"
+    T6 = "T6"
+    T7 = "T7"
+    T8 = "T8"
+    T9 = "T9"
+    T10 = "T10"
+    T11 = "T11"
+    T17 = "T17"
+    I1 = "I1"
+    I2 = "I2"
+    H1 = "H1"
+    H2 = "H2"
+    H3 = "H3"
+    H4 = "H4"
+    H5 = "H5"
+    H6 = "H6"
+    H7 = "H7"
+    H8 = "H8"
+    H9 = "H9"
+    V1 = "V1"
+    V2 = "V2"
+    V3 = "V3"
+    V4 = "V4"
+    V5 = "V5"
+    V6 = "V6"
+    W1 = "W1"
+    W2 = "W2"
+    W3 = "W3"
+    W4 = "W4"
+    A1 = "A1"
+    A2 = "A2"
+    A3 = "A3"
+    A4 = "A4"
+    E1 = "E1"
+    E2 = "E2"
+    E3 = "E3"
+
+class InfoSourceEnum(str, Enum):
+    WWW = "WWW"
+    EMAIL = "EMAIL"
+    DMGEYEWTN = "DMGEYEWTN"
+    DMGPHOTO = "DMGPHOTO"
+    NWSP = "NWSP"
+    EYEWTN = "EYEWTN"
+    TV = "TV"
+    GOV = "GOV"
+    WXSVC = "WXSVC"
+    EVTPHOTO = "EVTPHOTO"
+    SPTR = "SPTR"
+    DMGSVY = "DMGSVY"
 
 class EventDetails(BaseModel):
     qc_level: Optional[QcEnum] = None
@@ -96,11 +142,17 @@ class EventDetails(BaseModel):
     no_injured: Optional[str] = None
     no_killed: Optional[str] = None
     event_description: Optional[str] = None
-    impacts: Optional[str] = None
+    impacts: Optional[list[ImpactCodeEnum]] = []
     
+    
+    @field_validator('impacts', mode='before')
+    def convert_str_to_list(cls, value):
+        if isinstance(value, str):
+            return re.findall(r'[A-Z]\d{1,2}', value)
+        return value
     
 class Source(BaseModel):
-    info_source: Optional[str] = None
+    info_source: Optional[list[InfoSourceEnum]] = None
     contact: Optional[str] = None
     organisation: Optional[str] = None
     organisation_id: Optional[str] = None
@@ -113,6 +165,12 @@ class Source(BaseModel):
     deleted: Optional[str] = None
     ext_url: Optional[str] = None
     reference: Optional[str] = None
+    
+    @field_validator('info_source', mode='before')
+    def convert_str_to_list(cls, value):
+        if isinstance(value, str):
+            return value.split(';')
+        return value
 
 class HeavyRainResponse(BaseModel):
     id: int
@@ -161,7 +219,7 @@ class HeavyRainResponse(BaseModel):
                 no_injured=getattr(heavy_rain, "no_injured", None),
                 no_killed=getattr(heavy_rain, "no_killed", None),
                 event_description=getattr(heavy_rain, "event_description", None),
-                impacts=getattr(heavy_rain, "impacts", None)
+                impacts=getattr(heavy_rain, "impacts", [])
                 ),
             source=Source(
                 info_source=getattr(heavy_rain, "info_source", None),
@@ -180,7 +238,16 @@ class HeavyRainResponse(BaseModel):
             )
         )
         
-        
+class HeavyRainFilter(BaseModel):
+    timeRange: Optional[conlist(date, min_length=2, max_length=2)] = None
+    impactRange: Optional[conlist(int, min_length=2, max_length=2)] = None
+    impactCodes: Optional[list[ImpactCodeEnum]] = None
+    qcLevels: Optional[list[QcEnum]] = None
+    infoSources: Optional[list[InfoSourceEnum]] = None
+    
+class HeavyRainPost(BaseModel):
+    filters: HeavyRainFilter
+
 class GeometryPost(BaseModel):
     geometry: dict
     
