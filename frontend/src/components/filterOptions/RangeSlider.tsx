@@ -1,4 +1,5 @@
 import { Slider, SliderSingleProps, Tooltip } from 'antd';
+import { CloseOutlined } from "@ant-design/icons";
 
 interface RangeSliderProps {
     label: string;
@@ -53,7 +54,11 @@ const marks: SliderSingleProps['marks'] = {
 const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSliderProps) => {
   return (
     <Tooltip title={title} placement="left">
-    <label style={{ display: 'block', marginBottom: '2px' }}>{label}</label>
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <label style={{ display: 'block', marginBottom: '2px' }}>{label}</label>
+        <a onClick={() => console.log("close")}>{<CloseOutlined />}</a>
+    </div>
+
         <Slider range={{ draggableTrack: true }} 
             defaultValue={defaultValue} 
             styles={{
