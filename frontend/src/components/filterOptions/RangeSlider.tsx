@@ -1,4 +1,4 @@
-import { Slider } from 'antd';
+import { Slider, SliderSingleProps } from 'antd';
 
 interface RangeSliderProps {
     label: string;
@@ -8,6 +8,28 @@ interface RangeSliderProps {
     max: number;
     onChange: (value: number[]) => void;
 }
+
+const marks: SliderSingleProps['marks'] = {
+    0: {
+      style: {
+        color: 'white',
+      },
+      label: <p>0</p>,
+    },
+    10: {
+      style: {
+        color: 'white',
+      },
+      label: <p>10</p>,
+    },
+    11: {
+      style: {
+        color: 'white',
+      },
+      label: <strong>10+</strong>,
+    },
+  };
+  
 
 const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSliderProps) => {
   return (
@@ -25,6 +47,7 @@ const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSl
             }} 
             min={min}
             max={max}
+            marks={marks} 
             onChangeComplete={onChange}
         />
     </div>
