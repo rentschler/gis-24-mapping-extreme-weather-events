@@ -1,4 +1,4 @@
-import { Slider, SliderSingleProps } from 'antd';
+import { Slider, SliderSingleProps, Tooltip } from 'antd';
 
 interface RangeSliderProps {
     label: string;
@@ -16,13 +16,32 @@ const marks: SliderSingleProps['marks'] = {
       },
       label: <p>0</p>,
     },
-    10: {
-      style: {
-        color: 'white',
-      },
-      label: <p>10</p>,
+    2: {
+        style: {
+            color: 'white',
+        },
+        label: <p>2</p>,
     },
-    11: {
+    4: {
+        style: {
+            color: 'white',
+        },
+        label: <p>4</p>,
+    },
+    6: {
+        style: {
+            color: 'white',
+        },
+        label: <p>6</p>,
+    },
+    8: {
+        style: {
+            color: 'white',
+        },
+        label: <p>8</p>,
+    },
+
+    10: {
       style: {
         color: 'white',
       },
@@ -33,7 +52,7 @@ const marks: SliderSingleProps['marks'] = {
 
 const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSliderProps) => {
   return (
-    <div title={title}>
+    <Tooltip title={title} placement="left">
     <label style={{ display: 'block', marginBottom: '2px' }}>{label}</label>
         <Slider range={{ draggableTrack: true }} 
             defaultValue={defaultValue} 
@@ -50,7 +69,7 @@ const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSl
             marks={marks} 
             onChangeComplete={onChange}
         />
-    </div>
+    </Tooltip>
   )
 }
 

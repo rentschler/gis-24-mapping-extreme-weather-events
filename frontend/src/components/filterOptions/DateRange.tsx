@@ -1,4 +1,4 @@
-import { DatePicker, TimeRangePickerProps } from 'antd';
+import { DatePicker, TimeRangePickerProps, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 
 
@@ -7,6 +7,7 @@ const { RangePicker } = DatePicker;
 interface DateRangeProps {
     value: [string, string];
     onChange?: TimeRangePickerProps['onChange'];
+    title?: string;
 }
 
 
@@ -17,12 +18,12 @@ const rangePresets: TimeRangePickerProps['presets'] = [
 
   
   
-const DateRange = ({ value, onChange }: DateRangeProps) => {
+const DateRange = ({ value, onChange, title }: DateRangeProps) => {
 
     const dateFormat = 'YYYY-MM-DD';
 
     return (
-        <>
+        <Tooltip title={title} placement="left">
             <label style={{ cursor: 'pointer', display: 'block', marginBottom: '2px' }} htmlFor='custom-date-range'>Select Date Range</label>
             <RangePicker
                 id="custom-date-range"
@@ -42,7 +43,7 @@ const DateRange = ({ value, onChange }: DateRangeProps) => {
                 <p>RangePicker</p>
                 
             </RangePicker>
-        </>
+        </Tooltip>
     )
 }
 

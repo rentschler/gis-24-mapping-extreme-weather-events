@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Select } from 'antd';
+import { Select, Tooltip } from 'antd';
 import type { SelectProps } from 'antd';
 
 interface MultiSelectProps {
@@ -10,6 +10,7 @@ interface MultiSelectProps {
     placeholder?: string;
     label?: string;
     multiLine?: boolean; // allow the selecter to go over multiple lines 
+    title?: string;
 }
 
 const MultiSelect = ({ 
@@ -19,7 +20,8 @@ const MultiSelect = ({
     id,
     placeholder = "Please select", 
     label,
-    multiLine = false
+    multiLine = false,
+    title
 }: MultiSelectProps) => {
     const selectRef = useRef<any>(null); // Ref to access the Select component
 
@@ -31,7 +33,7 @@ const MultiSelect = ({
     };
 
     return (
-        <div>
+        <Tooltip title={title} placement="left">
             {label && (
                 <label 
                     onClick={handleLabelClick} 
@@ -55,7 +57,7 @@ const MultiSelect = ({
             >
                 {"hello world" }
             </Select>
-        </div>
+        </Tooltip>
     );
 };
 
