@@ -1,5 +1,6 @@
 import { DatePicker, TimeRangePickerProps, Tooltip } from 'antd';
 import dayjs from 'dayjs';
+import ClearButton from './ClearButton';
 
 
 const { RangePicker } = DatePicker;
@@ -13,7 +14,8 @@ interface DateRangeProps {
 
 const rangePresets: TimeRangePickerProps['presets'] = [
     { label: 'All Dates', value: [dayjs('2021-01-01'), dayjs('2022-01-01')] },
-    { label: 'July 2021', value: [dayjs('2021-06-01'), dayjs('2021-06-30')] },
+    { label: 'June 2021', value: [dayjs('2021-06-01'), dayjs('2021-06-30')] },
+    { label: 'July 2021', value: [dayjs('2021-07-01'), dayjs('2021-07-31')] },
   ];
 
   
@@ -21,10 +23,18 @@ const rangePresets: TimeRangePickerProps['presets'] = [
 const DateRange = ({ value, onChange, title }: DateRangeProps) => {
 
     const dateFormat = 'YYYY-MM-DD';
+    const handleClear = ()=>{
+        if(onChange)
+        onChange(null, ['2021-01-01', '2022-01-01'])
+    }
 
     return (
         <Tooltip title={title} placement="left">
-            <label style={{ cursor: 'pointer', display: 'block', marginBottom: '2px' }} htmlFor='custom-date-range'>Select Date Range</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '9px' }}>
+                <label style={{ cursor: 'pointer', display: 'block' }} htmlFor='custom-date-range'>Select Date Range</label>
+                <ClearButton handleClear={handleClear} />
+            </div>
+            
             <RangePicker
                 id="custom-date-range"
                 // showTime={{ format: 'HH:mm' }}
@@ -32,13 +42,15 @@ const DateRange = ({ value, onChange, title }: DateRangeProps) => {
                 presets={rangePresets}
                 format={dateFormat}
                 onChange={onChange}
-                separator="to"
+                // prefix="start"
+                // separator="end"
                 size="small"
                 defaultValue={[dayjs('2021-01-01', dateFormat), dayjs('2022-01-01', dateFormat)]}
                 minDate={dayjs('2021-01-01', dateFormat)}
                 maxDate={dayjs('2022-01-01', dateFormat)}
                 placement='bottomRight'
                 value={[dayjs(value[0], dateFormat), dayjs(value[1], dateFormat)]}
+                style={{display:"flex"}}
                 >
                 <p>RangePicker</p>
                 

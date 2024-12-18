@@ -23,20 +23,11 @@ const MultiSelect = ({
     multiLine = false,
     title
 }: MultiSelectProps) => {
-    const selectRef = useRef<any>(null); // Ref to access the Select component
-
-    const handleLabelClick = () => {
-        // Open the dropdown programmatically when the label is clicked
-        if (selectRef.current) {
-            selectRef.current.focus();
-        }
-    };
 
     return (
         <Tooltip title={title} placement="left">
             {label && (
                 <label 
-                    onClick={handleLabelClick} 
                     htmlFor={id}
                     style={{ cursor: 'pointer', display: 'block', marginBottom: '2px' }}
                 >
@@ -53,7 +44,6 @@ const MultiSelect = ({
                 defaultValue={defaultValues}
                 onChange={handleChange}
                 options={options}
-                ref={selectRef} // Attach the ref
             >
                 {"hello world" }
             </Select>

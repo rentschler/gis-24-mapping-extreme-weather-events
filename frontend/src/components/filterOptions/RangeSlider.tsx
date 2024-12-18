@@ -1,5 +1,5 @@
 import { Slider, SliderSingleProps, Tooltip } from 'antd';
-import { CloseOutlined } from "@ant-design/icons";
+import ClearButton from './ClearButton';
 
 interface RangeSliderProps {
     label: string;
@@ -12,10 +12,10 @@ interface RangeSliderProps {
 
 const marks: SliderSingleProps['marks'] = {
     0: {
-      style: {
-        color: 'white',
-      },
-      label: <p>0</p>,
+        style: {
+            color: 'white',
+        },
+        label: <p>0</p>,
     },
     2: {
         style: {
@@ -43,39 +43,44 @@ const marks: SliderSingleProps['marks'] = {
     },
 
     10: {
-      style: {
-        color: 'white',
-      },
-      label: <strong>10+</strong>,
+        style: {
+            color: 'white',
+        },
+        label: <strong>10+</strong>,
     },
-  };
-  
+};
 
 const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSliderProps) => {
-  return (
-    <Tooltip title={title} placement="left">
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <label style={{ display: 'block', marginBottom: '2px' }}>{label}</label>
-        <a onClick={() => console.log("close")}>{<CloseOutlined />}</a>
-    </div>
+    // Clear slider values by resetting to initial state
+    const handleClear = () => {
+        const defaultRange = [min, max]; // Adjust based on your requirements
+        onChange(defaultRange);
+    };
 
-        <Slider range={{ draggableTrack: true }} 
-            defaultValue={defaultValue} 
-            styles={{
-                track: {
-                    background: 'gray',
-                },
-                rail: {
-                    background: 'lightgray',
-                },
-            }} 
-            min={min}
-            max={max}
-            marks={marks} 
-            onChangeComplete={onChange}
-        />
-    </Tooltip>
-  )
-}
+    return (
+        <Tooltip title={title} placement="left">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label >{label}</label>
+                <ClearButton handleClear={handleClear} />
+            </div>
+            <Slider
+                range={{ draggableTrack: true }}
+                value={defaultValue} // Fully controlled component
+                styles={{
+                    track: {
+                        background: 'gray',
+                    },
+                    rail: {
+                        background: 'lightgray',
+                    },
+                }} min={min}
+                max={max}
+                marks={marks}
+                onChange={onChange} // Update state on change
+                onAfterChange={onChange} // Ensure state sync after drag
+            />
+        </Tooltip>
+    );
+};
 
-export default RangeSlider
+export default RangeSlider;

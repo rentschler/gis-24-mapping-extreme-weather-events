@@ -49,7 +49,7 @@ const SettingsPage = () => {
     if(!visOptions) return;
 
     return (
-        <Space direction="vertical" size={18}>
+        <Space direction="vertical" size={18} style={{display:"flex"}}>
             <DateRange
                 value={queryFilters.timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
