@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FeatureCollection, GeoJsonProperties, Geometry, Feature, GeoJsonObject } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord, QCLevelDescriptions } from "../types/response";
+import { MeteorologicalEventRecord, QCLevel, QCLevelDescriptions } from "../types/response";
 import { getImpactDescription, parseImpactCode } from "../types/parsing";
 import MapPopup from "../components/popup/MapPopup";
 import React from "react";
@@ -207,9 +207,9 @@ const Map = () => {
             <CircleMarker
               key={point.id}
               center={[latitude, longitude]}
-              radius={radius}
+              radius={point.event.qc_level === QCLevel.QC0_PLUS ? radius * 0.5: radius} // Double the radius for QC0_PLUS
               color={fillColor} // Border color of the dot
-              stroke={false} // Fill color for the dot
+              // stroke={true} // Fill color for the dot
               fillOpacity={1} // Opacity of the fill color
             > <Popup>
                 <MapPopup record={point} />
