@@ -77,7 +77,7 @@ const RangeSlider = ({ label, title, defaultValue, min, max, onChange }: RangeSl
                 max={max}
                 marks={marks}
                 onChange={onChange} // Update state on change
-                onAfterChange={onChange} // Ensure state sync after drag
+                onChangeComplete={onChange} // Ensure state sync after drag
             />
         </Tooltip>
     );

@@ -44,6 +44,8 @@ const Map = () => {
         const payLoad : { filters: QueryState } = {
           filters: filters
         } 
+        console.log("filters:", filters);
+        
         const response = await fetch("/api/data", {
           method: "POST",
           headers: {
@@ -53,6 +55,8 @@ const Map = () => {
         });
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
+          console.log("Fetched data:", data);
+          
 
           // filter points 
           // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 

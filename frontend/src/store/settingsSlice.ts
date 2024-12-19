@@ -40,7 +40,7 @@ export type VisualState = {
 
 export const initialQueryState: QueryState = {
   timeRange: ['2021-01-01', '2021-12-01'],
-  impactRange: [0, 10],
+  impactRange: [0, 100],
   impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
   qcLevels: [QCLevel.QC1, QCLevel.QC2],
   infoSources: [],

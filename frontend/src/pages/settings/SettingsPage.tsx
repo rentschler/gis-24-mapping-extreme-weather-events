@@ -96,7 +96,7 @@ const SettingsPage = () => {
                 min={0}
                 max={10}
                 onChange={(value: number[]) => {
-                    if(value[1] === 12) value[1] = 100;
+                    if(value[1] === 10) value[1] = 100;
                     dispatch(setImpactRange(value))
                 }}
                 ></RangeSlider>
