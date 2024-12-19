@@ -1,6 +1,5 @@
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
 import ExampleSideBar from '../offcanvas/ExampleSideBar';
 
 const MyNavbar = () => {
@@ -21,11 +20,11 @@ const MyNavbar = () => {
         <Navbar.Brand >
           Extreme Weather Events
         </Navbar.Brand>
-          <Nav className="me-auto">
+          {/* <Nav className="me-auto">
             <Nav.Link href="#">Home</Nav.Link>
             <Nav.Link href="#">Overview</Nav.Link>
             <Nav.Link href="https://gitlab.inf.uni-konstanz.de/geographic-information-systems-ws-245/mapping-extreme-weather-events">Gitlab</Nav.Link>
-          </Nav>
+          </Nav> */}
         </Navbar.Collapse>
         <ExampleSideBar />
       </Container>
