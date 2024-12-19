@@ -43,8 +43,6 @@ const SettingsPage = () => {
             value: impact.code, label: <div title={impact.description}>{impact.description}</div>
         });
     });
-
-    console.log(visOptions, queryFilters, hasChanged);
     
     if(!visOptions) return;
 

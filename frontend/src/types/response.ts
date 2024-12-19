@@ -1,7 +1,7 @@
 export type MeteorologicalEventRecord = {
     event: {
         convective?: string | null; // Convective properties, if applicable.
-        impacts?: string; // Encoded string representing event impacts.
+        impacts?: ImpactCode[]; // Encoded string representing event impacts.
         no_injured?: number | null; // Number of injured persons, if reported.
         no_killed?: number | null; // Number of fatalities, if reported.
         precipitation_amount?: number | null; // Total precipitation amount, if available.
