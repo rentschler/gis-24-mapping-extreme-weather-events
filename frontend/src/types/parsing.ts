@@ -1,4 +1,4 @@
-import { InfoSource } from "./response";
+import { InfoSource, infoSourceData } from "./response";
 import { ImpactCode, impactCodeData } from "./response";
 
 
@@ -9,6 +9,11 @@ export function parseInfoSource(input: string, delimiter: string = ";"): InfoSou
       .map((item) => item.trim()) // Trim any whitespace around each part
       .filter((item): item is InfoSource => validSources.has(item)); // Filter valid values
   }
+
+export function getInfoSourceDescription(infoSource: InfoSource): string {
+    const source = infoSourceData.find((item) => item.code === infoSource);
+    return source ? source.description : "";
+}
   
 export function getImpactDescription(impactCode: ImpactCode): string {
     const impact = impactCodeData.find((item) => item.code === impactCode);

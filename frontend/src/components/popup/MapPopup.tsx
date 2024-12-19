@@ -1,5 +1,5 @@
 import { MeteorologicalEventRecord } from '../../types/response'
-import { getImpactDescription, parseImpactCode } from '../../types/parsing'
+import { getImpactDescription, getInfoSourceDescription } from '../../types/parsing'
 
 interface MapPopupProps {
     record: MeteorologicalEventRecord
@@ -13,11 +13,19 @@ const MapPopup = ({record}:MapPopupProps) => {
         <p>no injured {record.event.no_injured || 0}</p>
         <p>no dead {record.event.no_killed || 0 }</p>
         <a href={record.source.ext_url} target="_blank" rel="noreferrer">More info</a>
-        <p> source : {record.source.info_source}</p>
-
-        {record.event.impacts && (
+        {record.source.info_source && (
             <div>
-                <ul style={{ listStyleType: 'circle' }}>
+                <p>source: </p>
+                <ul style={{ listStyleType: 'circle', marginLeft: '20px' }}>
+                    {record.source.info_source.map((code) => (
+                        <li key={code}>{getInfoSourceDescription(code)}</li>
+                    ))}
+                </ul>
+            </div>
+        )}{record.event.impacts && (
+            <div>
+                <p>impacts: </p>
+                <ul style={{ listStyleType: 'circle', marginLeft: '20px' }}>
                     {record.event.impacts.map((code) => (
                         <li key={code}>{getImpactDescription(code)}</li>
                     ))}

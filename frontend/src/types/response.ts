@@ -34,7 +34,7 @@ export type MeteorologicalEventRecord = {
         detailed_location?: string | null; // Additional location details, if available.
     },
     source: {
-        info_source: string; // Source(s) of information, e.g., WWW, TV, photos.
+        info_source: InfoSource[]; // Source(s) of information, e.g., WWW, TV, photos.
         contact: string; // Contact person or observer.
         ext_url?: string; // External URL for more information.
         reference: string; // Reference to a source or report.
