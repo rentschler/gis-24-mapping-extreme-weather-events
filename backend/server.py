@@ -8,6 +8,7 @@ from shapely.geometry import shape, Polygon, MultiPolygon
 from sqlalchemy import create_engine, func, select, or_, and_
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
+from geojson_pydantic import Feature, FeatureCollection, Point
 
 from settings import settings
 from datetime import datetime, date
@@ -39,6 +40,53 @@ Base.prepare(engine, reflect=True)
 async def health():
     return {"status": "ok"}
 
+@app.post("/api/data", response_model=list[HeavyRainResponse])
+async def get_data_with_geometry(
+    body: HeavyRainPost,  # Accept GeoJSON as a dictionary
+    db: Session = Depends(get_db),
+):
+    try:        
+        query = heavy_rain_post(body, db)
+            
+        res = query.all()
+        res_list = [HeavyRainResponse.from_db(item) for item in res] 
+        
+        # post filtering
+        
+        res_list = post_filter_rain(body, res_list)
+        
+        return res_list
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+
+
+@app.get("/api/cluster", response_model=FeatureCollection)
+async def get_clusters(  # Accept GeoJSON as a dictionary
+    db: Session = Depends(get_db),
+):
+    try:
+        EPS = 0.05
+        MINPOINTS = 5
+        
+        query = cluster_post(db, EPS, MINPOINTS)
+            
+        res = query.all()
+        
+        # TODO : post filtering not possible since the data is grouped before, evt possible with separate pointlist
+                
+        cluster = [ClusterDB(**data._mapping) for data in res]
+        
+        return cluster_to_geojson(cluster)
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")
+
+
+
+
+
+
 @app.get("/api/data", response_model=list[HeavyRainResponse])
 async def get_data(db: Session = Depends(get_db), 
                    date_from: date = None,
@@ -67,29 +115,6 @@ async def get_data(db: Session = Depends(get_db),
     res = query.all()
     
     return [HeavyRainResponse.from_db(item) for item in res]
-
-@app.post("/api/data", response_model=list[HeavyRainResponse])
-async def get_data_with_geometry(
-    body: HeavyRainPost,  # Accept GeoJSON as a dictionary
-    db: Session = Depends(get_db),
-):
-    try:
-        query = db.query(HeavyRain)
-        
-        query = heavy_rain_post(body, query)
-            
-        res = query.all()
-        res_list = [HeavyRainResponse.from_db(item) for item in res] 
-        
-        # post filtering
-        
-        res_list = post_filter_rain(body, res_list)
-        
-        return res_list
-        
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
-
 
 @app.get("/api/data/{id}", response_model=HeavyRainResponse)
 async def get_data_by_id(id: int, db: Session = Depends(get_db)):

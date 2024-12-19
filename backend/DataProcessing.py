@@ -13,3 +13,30 @@ def post_filter_rain(body, res):
         return filtered_list
     
     return res
+
+
+def cluster_to_geojson(clusters):
+    data = {
+        "type": "FeatureCollection",
+        "features": [],
+    }
+    
+    for cluster in clusters:
+        buffer = cluster.cluster_polygon.buffer(0.02)
+        coordinates = list(buffer.exterior.coords)
+        properties = cluster.__dict__
+        properties.pop("cluster_polygon")
+        
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [coordinates]
+            },
+            "properties": properties
+        }
+        data["features"].append(feature)
+        
+        
+    
+    return data
