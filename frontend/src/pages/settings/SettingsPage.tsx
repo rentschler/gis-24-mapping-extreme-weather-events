@@ -1,4 +1,4 @@
-import { Space } from 'antd';
+import { Space, Tooltip } from 'antd';
 import { impactCodeData, infoSourceData, QCLevelDescriptions } from '../../types/response';
 import type { SelectProps } from 'antd';
 
@@ -43,19 +43,18 @@ const SettingsPage = () => {
             value: impact.code, label: <div title={impact.description}>{impact.description}</div>
         });
     });
-
-    console.log(visOptions, queryFilters, hasChanged);
     
     if(!visOptions) return;
 
     return (
-        <Space direction="vertical" size={18}>
+        <Space direction="vertical" size={18} style={{display:"flex"}}>
             <DateRange
                 value={queryFilters.timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
                     // dispatch sends the action to the reducer to update the state
                     dispatch(setTimeRange(dateString));
                 }}
+                title="Select the date range to filter the events"
             />
             <Check
                 checked={visOptions.showPointEvents}
@@ -63,6 +62,7 @@ const SettingsPage = () => {
                     dispatch(setShowPointEvents(checked));
                 }}
                 label="Show Point Events"
+                title="Toggle the visibility of the point events"
             />
             <Check
                 checked={visOptions.showAggregatedEvents}
@@ -70,6 +70,8 @@ const SettingsPage = () => {
                     dispatch(setShowAggregatedEvents(checked));
                 }}
                 label="Show Aggregated Events"
+                disabled={true}
+                title="Toggle the visibility of the aggregated events"
             />
             <Check
                 checked={visOptions.showSummaries}
@@ -77,6 +79,7 @@ const SettingsPage = () => {
                     dispatch(setShowSummaries(checked));
                 }}
                 label="Show Summaries"
+                title="Toggle the visibility of the summaries"
             />
             <Check
                 checked={visOptions.hideEventsWithoutDescription}
@@ -84,14 +87,16 @@ const SettingsPage = () => {
                     dispatch(setHideEventsWithoutDescription(checked));
                 }}
                 label="Hide Events Without Description"
+                title="Toggle the visibility of the events without description"
             />
             <RangeSlider
                 label="Number of Impacts"
-                title="Filter the results based on the Number of Impacts"
+                title="Filter the results based on the Number of Impacts. If you dont want to specify a maximum value, select 10+"
                 defaultValue={queryFilters.impactRange}
                 min={0}
                 max={10}
                 onChange={(value: number[]) => {
+                    if(value[1] === 10) value[1] = 100;
                     dispatch(setImpactRange(value))
                 }}
                 ></RangeSlider>
@@ -105,6 +110,7 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Impact Codes"
                 multiLine={true}
+                title="Filter the results based on the Impact Codes of the events. Leave it empty to show all."
             />
             <MultiSelect
                 id="qc-multi-select"
@@ -116,6 +122,7 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Quality Control Levels"
                 multiLine={true}
+                title="Filter the results based on the Quality Control Levels of the events. Leave it empty to show all."
             />
             <MultiSelect
                 id="source-multi-select"
@@ -127,21 +134,24 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Info Sources"
                 multiLine={true}
+                title="Filter the results based on the source that provided the events. Leave it empty to show all."
 
             />
-            <Button 
-                className='mt-3'
-                style={!hasChanged?{background:"#F5F5F5"}:{}}
-                onClick={() => {
-                    console.log("apply button clicked");
-                    // submit changes to the query state
-                    dispatch(setQueryFilters(queryFilters));
-                    // submit changes to the vis state
-                    dispatch(setVisoptions(visOptions));
-                    dispatch(setHasChanged(false))
-                }}
-                disabled={!hasChanged}
-            >Apply</Button>
+            <Tooltip title="Apply the changes to the filters and visualization options" placement="left">
+                <Button 
+                    className='mt-3'
+                    style={!hasChanged?{background:"#F5F5F5"}:{}}
+                    onClick={() => {
+                        console.log("apply button clicked");
+                        // submit changes to the query state
+                        dispatch(setQueryFilters(queryFilters));
+                        // submit changes to the vis state
+                        dispatch(setVisoptions(visOptions));
+                        dispatch(setHasChanged(false))
+                    }}
+                    disabled={!hasChanged}
+                >Apply</Button>
+            </Tooltip>
             </Space>
     )
 }

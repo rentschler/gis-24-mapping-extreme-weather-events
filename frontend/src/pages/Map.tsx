@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FeatureCollection, GeoJsonProperties, Geometry, Feature, GeoJsonObject } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord, QCLevelDescriptions } from "../types/response";
+import { MeteorologicalEventRecord, QCLevel, QCLevelDescriptions } from "../types/response";
 import { getImpactDescription, parseImpactCode } from "../types/parsing";
 import MapPopup from "../components/popup/MapPopup";
 import React from "react";
@@ -22,6 +22,9 @@ const Map = () => {
   const { 
     filters
   } = useSelector((state: RootState) => state.query);
+  const {
+    options
+  } = useSelector((state: RootState) => state.vis);
 
 
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
@@ -41,6 +44,8 @@ const Map = () => {
         const payLoad : { filters: QueryState } = {
           filters: filters
         } 
+        console.log("filters:", filters);
+        
         const response = await fetch("/api/data", {
           method: "POST",
           headers: {
@@ -50,6 +55,8 @@ const Map = () => {
         });
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
+          console.log("Fetched data:", data);
+          
 
           // filter points 
           // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 
@@ -61,6 +68,8 @@ const Map = () => {
             if (point.event.event_description?.startsWith("NOTE: THIS IS A GENERAL COLLECTIVE REPORT")) {
               reportPoints.push(point);
             } else {
+              // in case we only want to show events with description, we skip them
+              if(options.hideEventsWithoutDescription && !point.event.event_description) return;
               eventPoints.push(point);
             }
           });
@@ -93,7 +102,7 @@ const Map = () => {
       }
     };
     fetchPoints();
-  }, [filters]);
+  }, [filters, options.hideEventsWithoutDescription]);
 
 
   // Custom component to listen to map zoom changes
@@ -142,6 +151,7 @@ const Map = () => {
          * 3. Display only the points that are in the query.
          * - Surround with if case for UI selection 
          */
+          options.showSummaries && 
           matchingPolygons.map((feature, index) => {
             
             const customFeature = feature as Feature<Geometry, GeoJsonProperties> & { foreign_key: number };
@@ -181,7 +191,7 @@ const Map = () => {
           })
         }
         {/* Adding the circle markers to the map */}
-        {points.map((point) => {
+        {options.showPointEvents && points.map((point) => {
           const latitude = point.location.coordinates.latitude
           const longitude = point.location.coordinates.longitude
           if (!latitude || !longitude) return null;
@@ -197,9 +207,9 @@ const Map = () => {
             <CircleMarker
               key={point.id}
               center={[latitude, longitude]}
-              radius={radius}
+              radius={point.event.qc_level === QCLevel.QC0_PLUS ? radius * 0.5: radius} // Double the radius for QC0_PLUS
               color={fillColor} // Border color of the dot
-              stroke={false} // Fill color for the dot
+              // stroke={true} // Fill color for the dot
               fillOpacity={1} // Opacity of the fill color
             > <Popup>
                 <MapPopup record={point} />
