@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { Geometry, Feature } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord } from "../types/response";
+import { MeteorologicalEventRecord } from "../../types/response";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
-import geojsonData from '../combined_reports.geo.json'; // Replace with your actual geoJSON file
+import geojsonData from '../../combined_reports.geo.json'; // Replace with your actual geoJSON file
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import { QueryState } from "../store/settingsSlice";
-import Map from "./Map";
+import { RootState } from "../../store/store";
+import { QueryState } from "../../store/settingsSlice";
+import Map from "../Map";
+import { FadeLoader } from "react-spinners";
 
 /**
  * data fetching and processing happens in this component
@@ -35,7 +36,7 @@ const MapWrapper = () => {
 
   useEffect(() => {
     const fetchPoints = async () => {
-      // setIsLoading(true);
+      setIsLoading(true);
       try {
         const payLoad: { filters: QueryState } = {
           filters: filters
@@ -53,6 +54,7 @@ const MapWrapper = () => {
           const data = await response.json() as MeteorologicalEventRecord[];
           console.log("Fetched data:", data);
           setRawData(data);
+
         } else {
           console.error("Failed fetching api data:", response);
           setHasError("Failed fetching api data:");
@@ -66,7 +68,7 @@ const MapWrapper = () => {
   }, [filters]);
 
   useEffect(() => {
-    if (!rawData) return;
+    if (!rawData || rawData.length <1 ) return;
     // filter points 
     // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 
 
@@ -102,20 +104,23 @@ const MapWrapper = () => {
 
     setMatchingPolygons(matchingPolygons);
     // console.log("MatchingPolygons:", matchingPolygons);
-
     setIsLoading(false);
+
   }, [options.hideEventsWithoutDescription, rawData])
 
   if (hasError){
     return <h1>{hasError}</h1>
   }
 
-  if (isLoading){
-    return <h1>Loading...</h1>
-  }
-
   return (
-    <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></Map>
+    <>
+      {isLoading && 
+        <div className="overlay">
+          <FadeLoader></FadeLoader>
+        </div>
+      }
+      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></Map>
+    </>
   )
 }
 

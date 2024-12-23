@@ -3,7 +3,7 @@ import SimpleNavbar from "./components/navbar/SimpleNavbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import SimpleFooter from "./components/footer/SimpleFooter";
-import MapWrapper from "./pages/MapWrapper";
+import MapWrapper from "./pages/Map/MapWrapper";
 
 const queryClient = new QueryClient();
 const App = () =>

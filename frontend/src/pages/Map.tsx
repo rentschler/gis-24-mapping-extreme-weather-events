@@ -70,7 +70,7 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ZoomListener />
+        {/* <ZoomListener /> */}
         {/**
          * The pipeline: 
          * 1. Load the geojson all the times
