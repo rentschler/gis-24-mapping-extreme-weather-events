@@ -15,94 +15,21 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { QueryState } from "../store/settingsSlice";
 
+interface MapProps {
+  points: MeteorologicalEventRecord[],
+  generalReportPoints: MeteorologicalEventRecord[],
+  matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
 
-const Map = () => {
+}
 
+const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
 
-  const { 
-    filters
-  } = useSelector((state: RootState) => state.query);
   const {
     options
   } = useSelector((state: RootState) => state.vis);
 
-
-  const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
-  
-  const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
-  const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
-
   const [zoomLevel, setZoomLevel] = useState(8); // Default zoom level
   const mapRef = React.useRef(null);
-
-
-  useEffect(() => {
-
-
-    const fetchPoints = async () => {
-      try {
-        const payLoad : { filters: QueryState } = {
-          filters: filters
-        } 
-        console.log("filters:", filters);
-        
-        const response = await fetch("/api/data", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payLoad),
-        });
-        if (response.ok) {
-          const data = await response.json() as MeteorologicalEventRecord[];
-          console.log("Fetched data:", data);
-          
-
-          // filter points 
-          // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 
-
-          const eventPoints: MeteorologicalEventRecord[] = [];
-          const reportPoints: MeteorologicalEventRecord[] = [];
-
-          data.forEach((point) => {
-            if (point.event.event_description?.startsWith("NOTE: THIS IS A GENERAL COLLECTIVE REPORT")) {
-              reportPoints.push(point);
-            } else {
-              // in case we only want to show events with description, we skip them
-              if(options.hideEventsWithoutDescription && !point.event.event_description) return;
-              eventPoints.push(point);
-            }
-          });
-          
-          // Extract the ids from general report points
-          const reportIds = new Set(reportPoints.map((point) => point.id));
-
-
-          // Filter the polygons based on matching foreign keys
-          const matchingPolygons = geojsonData.features.filter((feature) =>
-            reportIds.has(feature.foreign_key) 
-          ) as Feature<Geometry>[];
-          
-
-          // Update state with new filtered points
-          setPoints(eventPoints);
-          // console.log("Remaining points:", eventPoints);
-
-          setGeneralReportPoints(reportPoints);
-          // console.log("General report points:", reportPoints);
-
-          setMatchingPolygons(matchingPolygons);
-          // console.log("MatchingPolygons:", matchingPolygons);
-
-        } else {
-          console.error("Failed fetching api data:", response);
-        }
-      } catch (error) {
-        console.error("Error fetching api data:", error);
-      }
-    };
-    fetchPoints();
-  }, [filters, options.hideEventsWithoutDescription]);
 
 
   // Custom component to listen to map zoom changes
