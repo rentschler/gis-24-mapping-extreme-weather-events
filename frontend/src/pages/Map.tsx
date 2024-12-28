@@ -10,6 +10,7 @@ import React from "react";
 import DynamicCluster from "../components/visualizations/DynamicCluster";
 import SimplePoints from "../components/visualizations/SimplePoints";
 import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
+import AggregationData from "../components/visualizations/AggregationVis";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
@@ -83,6 +84,7 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
         <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></ReportPointsPolygons>
         <SimplePoints points={points} radius={calculateRadius(zoomLevel)}/>
         <DynamicCluster points={points} radius={calculateRadius(zoomLevel)}/>
+        <AggregationData points={points} latitude={49.9} longitude={10.35}/>
       </MapContainer>
     </div>
   );
