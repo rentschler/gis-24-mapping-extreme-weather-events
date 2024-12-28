@@ -1,11 +1,8 @@
 
-// Sample GeoJSON (you would typically fetch this from an API or import it)
-import { useState, useEffect } from "react";
 import { MeteorologicalEventRecord } from "../../types/response";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 import {Popup, Polygon } from "react-leaflet";
 import MapPopup from "../../components/popup/MapPopup";
-import geojsonData from '../../combined_reports.geo.json'; // Replace with your actual geoJSON file
 
 
 /**
@@ -15,23 +12,8 @@ import geojsonData from '../../combined_reports.geo.json'; // Replace with your 
          * 3. Display only the points that are in the query.
          * - Surround with if case for UI selection 
          */
-const ReportPointsPolygons: React.FC<{reportPoints: MeteorologicalEventRecord[]}> = ({reportPoints}) => {
+const ReportPointsPolygons: React.FC<{generalReportPoints: MeteorologicalEventRecord[],matchingPolygons: Feature<Geometry, GeoJsonProperties>[]}> = ({generalReportPoints, matchingPolygons}) => {
     
-    const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
-    useEffect(() => {
-        
-          // Extract the ids from general report points
-          const reportIds = new Set(reportPoints.map((point: MeteorologicalEventRecord) => point.id));
-
-
-          // Filter the polygons based on matching foreign keys
-          const matchingPolygons = geojsonData.features.filter((feature) =>
-            reportIds.has(feature.foreign_key)
-          ) as Feature<Geometry>[];
-
-          
-          setMatchingPolygons(matchingPolygons);
-    });
     
     return matchingPolygons.map((feature, index) => {
 
@@ -40,7 +22,7 @@ const ReportPointsPolygons: React.FC<{reportPoints: MeteorologicalEventRecord[]}
 
 
         // Find the corresponding point using the foreign_key from the feature
-        const correspondingPoint = reportPoints.find(
+        const correspondingPoint = generalReportPoints.find(
           (point) => point.id === customFeature.foreign_key
         )!;
         let fillColor = "grey";

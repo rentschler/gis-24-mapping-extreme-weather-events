@@ -40,7 +40,7 @@ export type VisualState = {
 
 export const initialQueryState: QueryState = {
   timeRange: ['2021-01-01', '2021-12-01'],
-  impactRange: [1, 10],
+  impactRange: [0, 100],
   impactCodes: [ImpactCode.H7, ImpactCode.H8, ImpactCode.H9, ImpactCode.V1],
   qcLevels: [QCLevel.QC1, QCLevel.QC2],
   infoSources: [],
@@ -110,6 +110,11 @@ export const initialVisualState: VisualState = {
       setHasChanged: (state, action) => {
         state.hasChanged = action.payload
       },
+      setInitialState: (state) => {
+        state.queryFilters = initialQueryState;
+        state.visOptions = initialVisualState;
+        state.hasChanged = false
+      }
     },
   });
 
@@ -125,6 +130,7 @@ export const {
     setQCLevels,
     setInfoSources,
     setHasChanged,
+    setInitialState
   } = settingsSlice.actions;
   
   export default settingsSlice.reducer;
