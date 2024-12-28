@@ -1,13 +1,16 @@
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap, GeoJSON, Polygon } from "react-leaflet";
+import { MapContainer, TileLayer, Popup, useMap, Polygon } from "react-leaflet";
 import { useState, useEffect } from "react";
-import { FeatureCollection, GeoJsonProperties, Geometry, Feature, GeoJsonObject } from 'geojson';
+import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord, QCLevelDescriptions } from "../types/response";
-import { getImpactDescription, parseImpactCode } from "../types/parsing";
+import { MeteorologicalEventRecord } from "../types/response";
 import MapPopup from "../components/popup/MapPopup";
 import React from "react";
 
+
+import DynamicCluster from "../components/visualizations/DynamicCluster";
+import SimplePoints from "../components/visualizations/SimplePoints";
+import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 import geojsonData from '../combined_reports.geo.json'; // Replace with your actual geoJSON file
@@ -16,16 +19,26 @@ import { RootState } from "../store/store";
 import { QueryState } from "../store/settingsSlice";
 
 
+/**
+ * 
+ * @todo
+ * - Aggregation Visualizations (can be calculated once per API call)
+ * - Heatmap Visualization
+ */
+
+
 const Map = () => {
 
 
-  const { 
+  const {
     filters
   } = useSelector((state: RootState) => state.query);
 
+  // console.log("filters:", filters);
+
 
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
-  
+
   const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
 
@@ -38,9 +51,9 @@ const Map = () => {
 
     const fetchPoints = async () => {
       try {
-        const payLoad : { filters: QueryState } = {
+        const payLoad: { filters: QueryState } = {
           filters: filters
-        } 
+        }
         const response = await fetch("/api/data", {
           method: "POST",
           headers: {
@@ -50,7 +63,7 @@ const Map = () => {
         });
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
-
+          // console.log("data", data);
           // filter points 
           // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 
 
@@ -64,23 +77,22 @@ const Map = () => {
               eventPoints.push(point);
             }
           });
-          
+
           // Extract the ids from general report points
           const reportIds = new Set(reportPoints.map((point) => point.id));
 
 
           // Filter the polygons based on matching foreign keys
           const matchingPolygons = geojsonData.features.filter((feature) =>
-            reportIds.has(feature.foreign_key) 
+            reportIds.has(feature.foreign_key)
           ) as Feature<Geometry>[];
-          
 
           // Update state with new filtered points
           setPoints(eventPoints);
-          // console.log("Remaining points:", eventPoints);
+          console.log("Remaining points:", eventPoints);
 
           setGeneralReportPoints(reportPoints);
-          // console.log("General report points:", reportPoints);
+          console.log("General report points:", reportPoints);
 
           setMatchingPolygons(matchingPolygons);
           // console.log("MatchingPolygons:", matchingPolygons);
@@ -135,78 +147,9 @@ const Map = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomListener />
-        {/**
-         * The pipeline: 
-         * 1. Load the geojson all the times
-         * 2. Filter the result from the query locally here
-         * 3. Display only the points that are in the query.
-         * - Surround with if case for UI selection 
-         */
-          matchingPolygons.map((feature, index) => {
-            
-            const customFeature = feature as Feature<Geometry, GeoJsonProperties> & { foreign_key: number };
-            const coordinates = (feature.geometry as GeoJSON.Polygon).coordinates;
-            
-
-            // Find the corresponding point using the foreign_key from the feature
-            const correspondingPoint = generalReportPoints.find(
-              (point) => point.id === customFeature.foreign_key
-            )!;
-            
-            let fillColor = "grey";
-            if (correspondingPoint.event.impacts) {
-              const impacts = parseImpactCode(correspondingPoint.event.impacts);
-              fillColor = impacts.length > 2 ? impacts.length > 4 ? "red" : "orange" : "yellow";
-            }
-            return (
-
-              <Polygon
-                key={index}
-                positions={coordinates[0].map(([lng, lat]) => [lat, lng])} // Transform [lng, lat] to [lat, lng]
-                pathOptions={{
-                  color: fillColor, // Border color
-                  weight: 2, // Border thickness
-                  opacity: 0.6, // Border opacity
-                  fillColor: fillColor, // Fill color
-                  fillOpacity: 0.4, // Fill opacity
-                }}
-                >
-                <Popup>
-                <MapPopup record={correspondingPoint} />
-                </Popup>
-              </Polygon>
-
-
-            );
-          })
-        }
-        {/* Adding the circle markers to the map */}
-        {points.map((point) => {
-          const latitude = point.location.coordinates.latitude
-          const longitude = point.location.coordinates.longitude
-          if (!latitude || !longitude) return null;
-          let fillColor = "grey";
-          if (point.event.impacts) {
-            const impacts = parseImpactCode(point.event.impacts);
-            fillColor = impacts.length > 2 ? impacts.length > 4 ? "red" : "orange" : "yellow";
-          }
-
-          // Dynamically calculate the radius based on the zoom level
-          const radius = calculateRadius(zoomLevel);
-          return (
-            <CircleMarker
-              key={point.id}
-              center={[latitude, longitude]}
-              radius={radius}
-              color={fillColor} // Border color of the dot
-              stroke={false} // Fill color for the dot
-              fillOpacity={1} // Opacity of the fill color
-            > <Popup>
-                <MapPopup record={point} />
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+        <ReportPointsPolygons reportPoints={generalReportPoints}></ReportPointsPolygons>
+        <SimplePoints points={points} radius={calculateRadius(zoomLevel)}/>
+        <DynamicCluster points={points} radius={calculateRadius(zoomLevel)}/>
       </MapContainer>
     </div>
   );
