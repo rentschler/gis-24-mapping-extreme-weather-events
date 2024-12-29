@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Popup, TileLayer, useMap, Marker } from "react-leaflet";
 import { useState, useEffect } from "react";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 
@@ -10,7 +10,8 @@ import React from "react";
 import DynamicCluster from "../components/visualizations/DynamicCluster";
 import SimplePoints from "../components/visualizations/SimplePoints";
 import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
-
+import AggregationData from "../components/visualizations/AggregationVis";
+import Heatmap from "../components/visualizations/Heatmap";
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
 import { RootState } from "../store/store"; */
@@ -35,6 +36,7 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
   const {
     options
   } = useSelector((state: RootState) => state.vis); */
+  console.log(points, generalReportPoints, matchingPolygons);
 
   const [zoomLevel, setZoomLevel] = useState(8); // Default zoom level
   const mapRef = React.useRef(null);
@@ -80,9 +82,12 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomListener />
+        {/* 
         <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></ReportPointsPolygons>
         <SimplePoints points={points} radius={calculateRadius(zoomLevel)}/>
         <DynamicCluster points={points} radius={calculateRadius(zoomLevel)}/>
+        */}
+        <Heatmap />
       </MapContainer>
     </div>
   );
