@@ -4,12 +4,11 @@ import * as d3 from 'd3';
 import React, { useEffect, useRef } from 'react';
 const AggregationData: React.FC<{
     points: MeteorologicalEventRecord[];
-    latitude: number;
-    longitude: number;
-}> = ({ points, latitude, longitude }) => {
+}> = ({ points }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const svgLegend = useRef<SVGSVGElement | null>(null);
     const donutRef = useRef<SVGSVGElement | null>(null);
+    if (!points || points.length === 0) return;
 
     // adds the scatterplot 
     useEffect(() => {
@@ -29,7 +28,7 @@ const AggregationData: React.FC<{
         // Filter out points with undefined precipitation amount
         const impact_points = points.map((point) => ({
             time: new Date(point.event.time_event),
-            impacts: point.event.impacts!.length
+            impacts: point.event.impacts?.length || 0
         }));
 
         const precipitation_points = points.map((point) => ({
@@ -126,12 +125,23 @@ const AggregationData: React.FC<{
 
     // Adds the donut chart
     useEffect(() => {
-        // Create donut chart for number of impacts
+        if (!points || points.length === 0) return;
         const donutData = [
-            { label: "Small", value: points.filter((p) => p.event.impacts!.length <= 2).length },
-            { label: "Medium", value: points.filter((p) => p.event.impacts!.length > 2 && p.event.impacts!.length <= 4).length },
-            { label: "Large", value: points.filter((p) => p.event.impacts!.length > 4).length },
-        ];
+            {
+              label: "Small",
+              value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
+            },
+            {
+              label: "Medium",
+              value: points.filter(
+                (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
+              ).length,
+            },
+            {
+              label: "Large",
+              value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
+            },
+          ];
 
 
         const donutMargin = { top: 20, right: 0, bottom: 20, left: 20 };
@@ -183,12 +193,22 @@ const AggregationData: React.FC<{
 
     // Adds the legend
     useEffect(() => {
-
         const donutData = [
-            { label: "Small", value: points.filter((p) => p.event.impacts!.length <= 2).length },
-            { label: "Medium", value: points.filter((p) => p.event.impacts!.length > 2 && p.event.impacts!.length <= 4).length },
-            { label: "Large", value: points.filter((p) => p.event.impacts!.length > 4).length },
-        ];
+            {
+              label: "Small",
+              value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
+            },
+            {
+              label: "Medium",
+              value: points.filter(
+                (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
+              ).length,
+            },
+            {
+              label: "Large",
+              value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
+            },
+          ];
         // Create legend
         const svg_legend = d3.select(svgLegend.current).append("g");
 
@@ -252,21 +272,23 @@ const AggregationData: React.FC<{
 
     return (
         <div
-            style={{
+            style={{/* 
                 position: "absolute",
                 bottom: "20px",
-                left: "20px",
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                padding: "15px",
-                borderRadius: "8px",
+                left: "20px", 
                 boxShadow: "0 2px 6px rgb(0, 0, 0)",
                 zIndex: 1000, // Ensure the box appears above the map
-                width: "100%",
-                height: "auto", // Let content adjust dynamically
                 maxWidth: "1000px", // Optional: Limit width for aesthetic purposes
-                display: "flex", // Use flexbox for layout
-                flexDirection: "column", // Stack elements vertically
                 gap: "10px", // Add space between chart and legend
+                */
+               
+               paddingBottom: "15px",
+               width: "1000px",
+               borderRadius: "8px",
+               height: "auto", // Let content adjust dynamically
+               display: "flex", // Use flexbox for layout
+               flexDirection: "column", // Stack elements vertically
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
                 color: "black",
             }}
         >
