@@ -61,15 +61,16 @@ async def get_data_with_geometry(
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
 
 
-@app.get("/api/cluster", response_model=FeatureCollection)
-async def get_clusters(  # Accept GeoJSON as a dictionary
+@app.post("/api/cluster", response_model=FeatureCollection)
+async def get_clusters(
+    body: ClusterPost,
     db: Session = Depends(get_db),
 ):
     try:
         EPS = 0.05
         MINPOINTS = 5
         
-        query = cluster_post(db, EPS, MINPOINTS)
+        query = cluster_post(db, body, EPS, MINPOINTS)
             
         res = query.all()
         

@@ -8,7 +8,7 @@ from sqlalchemy.sql import text
 
 
 from DataModel import *
-
+from DBModel import *
 
 def heavy_rain_post(body: HeavyRainPost, db):
     
@@ -32,75 +32,39 @@ def heavy_rain_post(body: HeavyRainPost, db):
     return query
 
 
-# def cluster_post(db, eps: int, minpoints: int):
-    
-#     raw_sql = text("""
-#         SELECT 
-#             st_clusterdbscan AS cluster_id,
-#             ST_ConvexHull(ST_Collect(geom)) AS cluster_polygon
-#         FROM (
-#             SELECT 
-#                 id, 
-#                 geom, 
-#                 ST_ClusterDBSCAN(geom, eps => :eps, minpoints => :minpoints) OVER () AS st_clusterdbscan
-#             FROM "public"."heavy_rain"
-#             WHERE time_event >= :start_time
-#               AND time_event < :end_time
-#         ) clustered_points
-#         GROUP BY st_clusterdbscan;
-#     """)
-    
-#     params= {
-#         "eps": 0.05,
-#         "minpoints": 5,
-#         "start_time": '2021-07-13',
-#         "end_time": '2021-07-15'
-#         }
-    
-#     # result = db.query(HeavyRain).from_statement(raw_sql).params(params).all()
-    
-#     result = db.execute(raw_sql, params)
-    
-#     return result
 
-def cluster_post(db, eps: float, minpoints: int):
+def cluster_post(db, body, eps: float, minpoints: int):
     # Alias for clustered points
     clustered_points = aliased(HeavyRain)
-
-    start_time = '2021-07-13'
-    end_time = '2021-07-15'
     
     st_clusterdbscan = func.ST_ClusterDBSCAN
     
     # Subquery: Generate clusters using ST_ClusterDBSCAN
-    subquery = (
-        select(
-            clustered_points.id,
+    query = db.query(
+        clustered_points,
+        st_clusterdbscan(
             clustered_points.geom,
-            st_clusterdbscan(
-                clustered_points.geom,
-                text(f"eps => {eps}"),
-                text(f"minpoints => {minpoints}")
-            ).over()  # Window function
-            .label("cluster_id")
-        )
-        .where(
-            and_(
-                clustered_points.time_event >= start_time,
-                clustered_points.time_event < end_time
-            )
-        )
-        .subquery("clustered_points")
+            text(f"eps => {eps}"),
+            text(f"minpoints => {minpoints}")
+        ).over().label("cluster_id")  # Window function
     )
-
-    # Main query: Generate convex hulls for each cluster
-    query = (
-        db.query(
-            subquery.c.cluster_id,
-            func.ST_AsText(func.ST_ConvexHull(func.ST_Collect(subquery.c.geom))).label("cluster_polygon")
-        )
-        .group_by(subquery.c.cluster_id)
-    )
-
+    
+    # Apply filter to exclude rows where cluster_id is None
+    # query = query.filter(text("cluster_id IS NOT NULL"))
+    
+    if body.filters.timeRange:
+        query = query.filter(clustered_points.time_event.between(body.filters.timeRange[0], body.filters.timeRange[1]))
+    
+    if body.filters.impactCodes:
+        string_lookup = [clustered_points.impacts.contains(code) for code in body.filters.impactCodes]
+        query = query.filter(or_(*string_lookup))
+        
+    if body.filters.qcLevels:
+        string_lookup = [clustered_points.qc_level == code for code in body.filters.qcLevels]
+        query = query.filter(or_(*string_lookup))
+        
+    if body.filters.infoSources:
+        string_lookup = [clustered_points.info_source.contains(code) for code in body.filters.infoSources]
+        query = query.filter(or_(*string_lookup))
 
     return query

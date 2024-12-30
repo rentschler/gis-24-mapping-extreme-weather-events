@@ -289,29 +289,39 @@ class Properties(BaseModel):
         extra = 'allow'
 
 
-class ClusterDB(BaseModel):
+class ClusterDB(HeavyRainResponse):
     cluster_id: Optional[int] = None
-    cluster_polygon: Optional[Polygon] = None
+    
+    @classmethod
+    def from_db(cls, cluster):
+        
+        instance = super().from_db(cluster[0])
+        instance.cluster_id = cluster.cluster_id
+        return instance
+
+# class ClusterDB(BaseModel):
+#     cluster_id: Optional[int] = None
+#     cluster_polygon: Optional[Polygon] = None
     
     
-    @field_validator('cluster_polygon', mode='before')
-    def convert_str_to_polygon(cls, value):
-        # Check if the value is a GeoJSON string
-        try:
-            geom = wkt.loads(value)
-            print(type(geom))
-            return geom
-        except Exception as e:
-            raise ValueError(f"Invalid geometry format: {e} \n {traceback.format_exc()}" )
+#     @field_validator('cluster_polygon', mode='before')
+#     def convert_str_to_polygon(cls, value):
+#         # Check if the value is a GeoJSON string
+#         try:
+#             geom = wkt.loads(value)
+#             print(type(geom))
+#             return geom
+#         except Exception as e:
+#             raise ValueError(f"Invalid geometry format: {e} \n {traceback.format_exc()}" )
         
-    class Config:
-        # Allow arbitrary types like Shapely Polygon
-        arbitrary_types_allowed = True
+#     class Config:
+#         # Allow arbitrary types like Shapely Polygon
+#         arbitrary_types_allowed = True
         
-        # Ensure the Polygon is serialized correctly to GeoJSON
-        json_encoders = {
-            Polygon: lambda v: geojson.dumps(v.__geo_interface__)
-        }
+#         # Ensure the Polygon is serialized correctly to GeoJSON
+#         json_encoders = {
+#             Polygon: lambda v: geojson.dumps(v.__geo_interface__)
+#         }
     
             
     

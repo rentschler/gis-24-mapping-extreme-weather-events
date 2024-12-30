@@ -1,5 +1,6 @@
 from sqlalchemy import Double, Integer, PrimaryKeyConstraint, Text
 from sqlalchemy.orm import mapped_column, declarative_base
+from sqlalchemy.ext.declarative import declared_attr
 from geoalchemy2 import Geometry
 
 Base = declarative_base()
@@ -52,3 +53,14 @@ class HeavyRain(Base):
     link_id = mapped_column(Text)
     deleted = mapped_column(Text)
     geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
+
+
+class HeavyRainCluster(HeavyRain):
+    __tablename__ = HeavyRain.__tablename__  # Use the same table as HeavyRain
+    __table_args__ = {'extend_existing': True}
+
+    cluster_id = mapped_column(Integer, nullable=True)
+    
+    # @declared_attr
+    # def cluster_id(cls):
+    #     return mapped_column(Integer, nullable=True)

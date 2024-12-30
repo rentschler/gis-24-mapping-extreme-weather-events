@@ -12,7 +12,18 @@ def post_filter_rain(body, res):
         
         return filtered_list
     
-    return res
+    return res    
+
+def post_filter_cluster(body, res):
+    list = post_filter_rain(body, res)
+    
+    filtered_list = [
+        item for item in list
+        if item.cluster_id != None
+    ]
+    
+    return filtered_list
+    
 
 
 def cluster_to_geojson(clusters):
@@ -25,6 +36,8 @@ def cluster_to_geojson(clusters):
         buffer = cluster.cluster_polygon.buffer(0.02)
         coordinates = list(buffer.exterior.coords)
         properties = cluster.__dict__
+        if properties['cluster_id'] == None:
+            continue
         properties.pop("cluster_polygon")
         
         feature = {
