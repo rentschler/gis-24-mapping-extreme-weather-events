@@ -41,7 +41,7 @@ const Heatmap: React.FC <HeatmapProps> = ({messageApi}) => {
             displayLoadingMessage();
             // Fetch all the data for each feature and wait for all the responses to come back
             await Promise.all(
-                (geojsonData.features as Feature<Geometry>[]).slice(0,10).map(async (feature) => {
+                (geojsonData.features as Feature<Geometry>[]).map(async (feature) => {
                     const response = await fetch("/api/data/geometry", {
                         method: "POST",
                         headers: {
