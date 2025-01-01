@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { QueryState } from "../../store/settingsSlice";
 import Map from "../Map";
-import { FadeLoader } from "react-spinners";
+import { message } from 'antd';
 
 /**
  * data fetching and processing happens in this component
@@ -18,16 +18,30 @@ import { FadeLoader } from "react-spinners";
  */
 const MapWrapper = () => {
 
+  const [messageApi, contextHolder] = message.useMessage();
 
+  const displayLoadingMessage = () => {
+    messageApi.open({
+      type: 'loading',
+      content: 'Loading data...',
+      duration: 0,
+      key: 'loading',
+    });
+    // Dismiss manually and asynchronously
+    // setTimeout(messageApi.destroy, 2500);
+  };
+
+
+  // query filter state (e.g. time range, impact codes, etc)
   const {
     filters
   } = useSelector((state: RootState) => state.query);
+  // vis options state (e.g. showHeatmap, show react cluster markers, etc)
   const {
     options
   } = useSelector((state: RootState) => state.vis);
 
   const [rawData, setRawData] = useState<MeteorologicalEventRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState("")
 
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
@@ -36,7 +50,8 @@ const MapWrapper = () => {
 
   useEffect(() => {
     const fetchPoints = async () => {
-      setIsLoading(true);
+      // open the loading message
+      displayLoadingMessage();
       try {
         const payLoad: { filters: QueryState } = {
           filters: filters
@@ -68,7 +83,7 @@ const MapWrapper = () => {
   }, [filters]);
 
   useEffect(() => {
-    if (!rawData || rawData.length <1 ) return;
+    if (!rawData || rawData.length < 1) return;
     // filter points 
     // NOTE: THIS IS A GENERAL COLLECTIVE REPORT FOR THE NUMBER OF FATALITIES CAUSED BY VIOLENT FLASH FLOODS 
 
@@ -104,22 +119,19 @@ const MapWrapper = () => {
 
     setMatchingPolygons(matchingPolygons);
     // console.log("MatchingPolygons:", matchingPolygons);
-    setIsLoading(false);
 
+    // close the loading message
+    messageApi.destroy('loading');
   }, [options.hideEventsWithoutDescription, rawData])
 
-  if (hasError){
+  if (hasError) {
     return <h1>{hasError}</h1>
   }
 
   return (
     <>
-      {isLoading && 
-        <div className="overlay">
-          <FadeLoader></FadeLoader>
-        </div>
-      }
-      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></Map>
+      {contextHolder}
+      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} messageApi={messageApi}></Map>
     </>
   )
 }
