@@ -1,4 +1,4 @@
-import { Space, Tooltip } from 'antd';
+import { Radio, Space, Tooltip } from 'antd';
 import { impactCodeData, infoSourceData, QCLevelDescriptions } from '../../types/response';
 import type { SelectProps } from 'antd';
 
@@ -10,12 +10,12 @@ import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpactRange, setInfoSources, setQCLevels, setShowDynamicClustering, setShowHeatmap, setShowReportPolygons, setShowSimplePointMap, setTimeRange } from '../../store/settingsSlice';
 import { Button } from 'antd';
-import {  setQueryFilters } from '../../store/querySlice';
+import { setQueryFilters } from '../../store/querySlice';
 import { setVisoptions } from '../../store/visSlice';
 const SettingsPage = () => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
-    const { 
+    const {
         queryFilters,
         visOptions,
         hasChanged
@@ -32,7 +32,7 @@ const SettingsPage = () => {
     infoSourceData.forEach((source) => {
         sourceOptions.push({
             // text truncate
-            value: source.code, label: <div style={{overflow:"hidden", textOverflow:"ellipsis", maxWidth:"300px"}} title={source.description}>{source.description}</div>
+            value: source.code, label: <div style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: "300px" }} title={source.description}>{source.description}</div>
         });
     });
 
@@ -43,11 +43,11 @@ const SettingsPage = () => {
             value: impact.code, label: <div title={impact.description}>{impact.description}</div>
         });
     });
-    
-    if(!visOptions) return;
+
+    if (!visOptions) return;
 
     return (
-        <Space direction="vertical" size={18} style={{display:"flex"}}>
+        <Space direction="vertical" size={18} style={{ display: "flex" }}>
             <DateRange
                 value={queryFilters.timeRange}
                 onChange={(_: any, dateString: [string, string]) => {
@@ -56,6 +56,31 @@ const SettingsPage = () => {
                 }}
                 title="Select the date range to filter the events"
             />
+            <Tooltip 
+                title="Either display the extreme weather events as simple points or show aggregated clusters of events"
+                placement="left" 
+            >
+                <h4 className='mb-2'>Visualization Options</h4>
+            <Radio.Group onChange={(x) => {
+                if (x.target.value === 1) {
+                    dispatch(setShowSimplePointMap(true));
+                    dispatch(setShowDynamicClustering(false));
+                }
+                else {
+                    dispatch(setShowSimplePointMap(false));
+                    dispatch(setShowDynamicClustering(true));
+                }
+            }}
+                value={visOptions.showSimplePointMap ? 1 : 2}>
+                <Radio value={1}
+                    style={{ color: visOptions.showSimplePointMap ? "white" : "gray" }}
+                >Simple Points</Radio>
+                <Radio value={2}
+                    style={{ color: visOptions.showDynamicClustering ? "white" : "gray" }}
+                >Cluster Markers</Radio>
+            </Radio.Group>
+            </Tooltip>
+
             <Check
                 checked={visOptions.showSimplePointMap}
                 setChecked={(checked: boolean) => {
@@ -104,10 +129,10 @@ const SettingsPage = () => {
                 min={0}
                 max={10}
                 onChange={(value: number[]) => {
-                    if(value[1] === 10) value[1] = 100;
+                    if (value[1] === 10) value[1] = 100;
                     dispatch(setImpactRange(value))
                 }}
-                ></RangeSlider>
+            ></RangeSlider>
             <MultiSelect
                 id="impact-multi-select"
                 options={ImpactOptions}
@@ -146,9 +171,9 @@ const SettingsPage = () => {
 
             />
             <Tooltip title="Apply the changes to the filters and visualization options" placement="left">
-                <Button 
+                <Button
                     className='mt-3'
-                    style={!hasChanged?{background:"#F5F5F5"}:{}}
+                    style={!hasChanged ? { background: "#F5F5F5" } : {}}
                     onClick={() => {
                         console.log("apply button clicked");
                         // submit changes to the query state
@@ -160,7 +185,7 @@ const SettingsPage = () => {
                     disabled={!hasChanged}
                 >Apply</Button>
             </Tooltip>
-            </Space>
+        </Space>
     )
 }
 
