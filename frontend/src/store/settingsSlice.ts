@@ -32,9 +32,10 @@ export type QueryState = {
 };
 
 export type VisualState = {
-  showPointEvents: boolean;
-  showAggregatedEvents: boolean;
-  showSummaries: boolean;
+  showSimplePointMap: boolean;
+  showReportPolygons: boolean;
+  showDynamicClustering: boolean;
+  showHeatmap: boolean;
   hideEventsWithoutDescription: boolean;
 };
 
@@ -47,9 +48,10 @@ export const initialQueryState: QueryState = {
 };
 
 export const initialVisualState: VisualState = {
-  showPointEvents: true,
-  showAggregatedEvents: false,
-  showSummaries: false,
+  showSimplePointMap: true,
+  showReportPolygons: false,
+  showDynamicClustering: false,
+  showHeatmap: false,
   hideEventsWithoutDescription: false,
 };
 
@@ -68,19 +70,21 @@ export const initialVisualState: VisualState = {
         state.hasChanged = true;
         state.queryFilters.timeRange = action.payload;
       },
-      setShowPointEvents: (state, action) => {
+      setShowSimplePointMap: (state, action) => {
         state.hasChanged = true;
-        state.visOptions.showPointEvents = action.payload;
+        state.visOptions.showSimplePointMap = action.payload;
       },
-      setShowAggregatedEvents: (state, action) => {
+      setShowReportPolygons: (state, action) => {
         state.hasChanged = true;
-
-        state.visOptions.showAggregatedEvents = action.payload;
+        state.visOptions.showReportPolygons = action.payload;
       },
-      setShowSummaries: (state, action) => {
+      setShowDynamicClustering: (state, action) => {
         state.hasChanged = true;
-
-        state.visOptions.showSummaries = action.payload;
+        state.visOptions.showDynamicClustering = action.payload;
+      },
+      setShowHeatmap: (state, action) => {
+        state.hasChanged = true;
+        state.visOptions.showHeatmap = action.payload;
       },
       setHideEventsWithoutDescription: (state, action) => {
         state.hasChanged = true;
@@ -121,9 +125,10 @@ export const initialVisualState: VisualState = {
 
 export const {
     setTimeRange,
-    setShowPointEvents,
-    setShowAggregatedEvents,
-    setShowSummaries,
+    setShowSimplePointMap,
+    setShowReportPolygons,
+    setShowDynamicClustering,
+    setShowHeatmap,
     setHideEventsWithoutDescription,
     setImpactRange,
     setImpactCodes,

@@ -12,6 +12,8 @@ import SimplePoints from "../components/visualizations/SimplePoints";
 import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
 import AggregationData from "../components/visualizations/AggregationVis";
 import Heatmap from "../components/visualizations/Heatmap";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
 import { RootState } from "../store/store"; */
@@ -32,10 +34,10 @@ interface MapProps {
 }
 
 const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
-/* Do we need this? 
+/* Do we need this? yes to render the visualizations on demand*/
   const {
     options
-  } = useSelector((state: RootState) => state.vis); */
+  } = useSelector((state: RootState) => state.vis); 
   console.log(points, generalReportPoints, matchingPolygons);
 
   const [zoomLevel, setZoomLevel] = useState(8); // Default zoom level
@@ -82,12 +84,14 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomListener />
-        {/* 
-        <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></ReportPointsPolygons>
+        {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
+        {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
+        {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
+        {options.showHeatmap && <Heatmap />}
+        {/* <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></ReportPointsPolygons>
         <SimplePoints points={points} radius={calculateRadius(zoomLevel)}/>
         <DynamicCluster points={points} radius={calculateRadius(zoomLevel)}/>
-        */}
-        <Heatmap />
+        <Heatmap /> */}
       </MapContainer>
     </div>
   );

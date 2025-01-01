@@ -8,7 +8,7 @@ import RangeSlider from '../../components/filterOptions/RangeSlider';
 import MultiSelect from '../../components/filterOptions/MultiSelect';
 import { AppDispatch, RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpactRange, setInfoSources, setQCLevels, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, setTimeRange } from '../../store/settingsSlice';
+import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpactRange, setInfoSources, setQCLevels, setShowDynamicClustering, setShowHeatmap, setShowReportPolygons, setShowSimplePointMap, setTimeRange } from '../../store/settingsSlice';
 import { Button } from 'antd';
 import {  setQueryFilters } from '../../store/querySlice';
 import { setVisoptions } from '../../store/visSlice';
@@ -57,29 +57,37 @@ const SettingsPage = () => {
                 title="Select the date range to filter the events"
             />
             <Check
-                checked={visOptions.showPointEvents}
+                checked={visOptions.showSimplePointMap}
                 setChecked={(checked: boolean) => {
-                    dispatch(setShowPointEvents(checked));
+                    dispatch(setShowSimplePointMap(checked));
                 }}
-                label="Show Point Events"
-                title="Toggle the visibility of the point events"
+                label="Show Simple Point Map"
+                title="Toggle the visibility of the simple point map"
             />
             <Check
-                checked={visOptions.showAggregatedEvents}
+                checked={visOptions.showDynamicClustering}
                 setChecked={(checked: boolean) => {
-                    dispatch(setShowAggregatedEvents(checked));
+                    dispatch(setShowDynamicClustering(checked));
                 }}
-                label="Show Aggregated Events"
-                disabled={true}
-                title="Toggle the visibility of the aggregated events"
+                label="Show Events as cluster markers"
+                title="Toggle the visibility of the events as cluster markers"
             />
             <Check
-                checked={visOptions.showSummaries}
+                checked={visOptions.showReportPolygons}
                 setChecked={(checked: boolean) => {
-                    dispatch(setShowSummaries(checked));
+                    dispatch(setShowReportPolygons(checked));
                 }}
-                label="Show Summaries"
-                title="Toggle the visibility of the summaries"
+                label="Show Report Polygons"
+                // disabled={true}
+                title="Toggle the visibility of the report polygons"
+            />
+            <Check
+                checked={visOptions.showHeatmap}
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowHeatmap(checked));
+                }}
+                label="Show Heatmap"
+                title="Toggle the visibility of the heatmap"
             />
             <Check
                 checked={visOptions.hideEventsWithoutDescription}
