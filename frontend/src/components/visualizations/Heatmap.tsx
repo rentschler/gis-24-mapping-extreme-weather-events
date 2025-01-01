@@ -9,10 +9,25 @@ import geojsonData from "../../europe_admin.geo.json";
 import { Popup } from "react-leaflet";
 import { useEffect } from "react";
 import AggregationData from "./AggregationVis";
-import { FadeLoader } from "react-spinners";
+import { MessageInstance } from "antd/es/message/interface";
+
+interface HeatmapProps {
+    messageApi: MessageInstance
+}
 
 // Load geojson and map precipitation amount to feature
-const Heatmap: React.FC = () => {
+const Heatmap: React.FC <HeatmapProps> = ({messageApi}) => {
+
+    const displayLoadingMessage = () => {
+      messageApi.open({
+        type: 'loading',
+        content: 'Loading event Heat map data...',
+        duration: 0,
+        key: 'heatmap',
+      });
+      // Dismiss manually and asynchronously
+      // setTimeout(messageApi.destroy, 2500);
+    };
     const [geojson, setGeojson] = useState<Feature<Geometry, GeoJsonProperties>[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -21,9 +36,12 @@ const Heatmap: React.FC = () => {
 
     useEffect(() => {
         const fetchPoints = async () => {
+            // open loading message
+            setIsLoading(true);
+            displayLoadingMessage();
             // Fetch all the data for each feature and wait for all the responses to come back
             await Promise.all(
-                (geojsonData.features as Feature<Geometry>[]).map(async (feature) => {
+                (geojsonData.features as Feature<Geometry>[]).slice(0,10).map(async (feature) => {
                     const response = await fetch("/api/data/geometry", {
                         method: "POST",
                         headers: {
@@ -51,6 +69,7 @@ const Heatmap: React.FC = () => {
         // after fetching all the data, set the loading state to false
         fetchPoints().then(() => {
             setIsLoading(false);
+            messageApi.destroy('heatmap');
         });
     }, []); // Empty dependency array ensures this runs only once on mount
 
@@ -99,15 +118,8 @@ const Heatmap: React.FC = () => {
     };
 
 
-    if (true || isLoading || !geojson || geojson.length < 1) {
-        return (
-            <div className="overlay" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-              <FadeLoader color="red"></FadeLoader>
-            </div>
-            )
-          
-    } 
-    return (geojson).map((feature) => {
+    return (<>
+        {!isLoading && geojson && geojson.length> 0 &&(geojson).map((feature) => {
         return <GeoJSON
             data={feature}
             style={() => feature.properties?.style || {}}
@@ -118,7 +130,8 @@ const Heatmap: React.FC = () => {
                 <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} />
             </Popup>
         </GeoJSON>
-    });
+    })}
+    </>);
 }
 
 export default Heatmap;

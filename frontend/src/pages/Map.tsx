@@ -1,4 +1,4 @@
-import { MapContainer, Popup, TileLayer, useMap, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { useState, useEffect } from "react";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 
@@ -10,10 +10,10 @@ import React from "react";
 import DynamicCluster from "../components/visualizations/DynamicCluster";
 import SimplePoints from "../components/visualizations/SimplePoints";
 import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
-import AggregationData from "../components/visualizations/AggregationVis";
 import Heatmap from "../components/visualizations/Heatmap";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { MessageInstance } from "antd/es/message/interface";
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
 import { RootState } from "../store/store"; */
@@ -30,14 +30,15 @@ interface MapProps {
   points: MeteorologicalEventRecord[],
   generalReportPoints: MeteorologicalEventRecord[],
   matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
+  messageApi: MessageInstance
 
 }
 
-const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
-/* Do we need this? yes to render the visualizations on demand*/
+const Map = ({ points, generalReportPoints, matchingPolygons, messageApi }: MapProps) => {
+  /* Do we need this? yes to render the visualizations on demand*/
   const {
     options
-  } = useSelector((state: RootState) => state.vis); 
+  } = useSelector((state: RootState) => state.vis);
   console.log(points, generalReportPoints, matchingPolygons);
 
   const [zoomLevel, setZoomLevel] = useState(8); // Default zoom level
@@ -87,11 +88,7 @@ const Map = ({points, generalReportPoints, matchingPolygons}:MapProps) => {
         {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
-        {options.showHeatmap && <Heatmap />}
-        {/* <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons}></ReportPointsPolygons>
-        <SimplePoints points={points} radius={calculateRadius(zoomLevel)}/>
-        <DynamicCluster points={points} radius={calculateRadius(zoomLevel)}/>
-        <Heatmap /> */}
+        {options.showHeatmap && <Heatmap messageApi={messageApi} />}
       </MapContainer>
     </div>
   );
