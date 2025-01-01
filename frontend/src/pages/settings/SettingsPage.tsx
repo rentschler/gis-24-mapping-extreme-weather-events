@@ -54,13 +54,13 @@ const SettingsPage = () => {
                     // dispatch sends the action to the reducer to update the state
                     dispatch(setTimeRange(dateString));
                 }}
-                title="Select the date range to filter the events"
+                title="Select a date range to filter events."
             />
             <Tooltip 
-                title="Either display the extreme weather events as simple points or show aggregated clusters of events"
+                title="View extreme weather events either as simple dots or as aggregated clusters."
                 placement="left" 
             >
-                <h4 className='mb-2'>Visualization Options</h4>
+                <h4 className='mb-2'>Marker Options</h4>
             <Radio.Group onChange={(x) => {
                 if (x.target.value === 1) {
                     dispatch(setShowSimplePointMap(true));
@@ -74,14 +74,14 @@ const SettingsPage = () => {
                 value={visOptions.showSimplePointMap ? 1 : 2}>
                 <Radio value={1}
                     style={{ color: visOptions.showSimplePointMap ? "white" : "gray" }}
-                >Simple Points</Radio>
+                >Points</Radio>
                 <Radio value={2}
                     style={{ color: visOptions.showDynamicClustering ? "white" : "gray" }}
                 >Cluster Markers</Radio>
             </Radio.Group>
             </Tooltip>
 
-            <Check
+            {/* <Check
                 checked={visOptions.showSimplePointMap}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowSimplePointMap(checked));
@@ -96,15 +96,15 @@ const SettingsPage = () => {
                 }}
                 label="Show Events as cluster markers"
                 title="Toggle the visibility of the events as cluster markers"
-            />
+            /> */}
             <Check
                 checked={visOptions.showReportPolygons}
                 setChecked={(checked: boolean) => {
                     dispatch(setShowReportPolygons(checked));
                 }}
-                label="Show Report Polygons"
+                label="Show event summaries"
                 // disabled={true}
-                title="Toggle the visibility of the report polygons"
+                title="Show or hide general collective reports for the number of fatalities caused by violent flash floods"
             />
             <Check
                 checked={visOptions.showHeatmap}
@@ -112,7 +112,7 @@ const SettingsPage = () => {
                     dispatch(setShowHeatmap(checked));
                 }}
                 label="Show Heatmap"
-                title="Toggle the visibility of the heatmap"
+                title="Show or hide heat map with precipitation number"
             />
             <Check
                 checked={visOptions.hideEventsWithoutDescription}
@@ -120,11 +120,11 @@ const SettingsPage = () => {
                     dispatch(setHideEventsWithoutDescription(checked));
                 }}
                 label="Hide Events Without Description"
-                title="Toggle the visibility of the events without description"
+                title="Activate this option if you are not interested in events that are missing a description."
             />
             <RangeSlider
                 label="Number of Impacts"
-                title="Filter the results based on the Number of Impacts. If you dont want to specify a maximum value, select 10+"
+                title="Filter the results based on the number of impacts. Select '10' if you don't want to specify a maximum value."
                 defaultValue={queryFilters.impactRange}
                 min={0}
                 max={10}
@@ -143,7 +143,7 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Impact Codes"
                 multiLine={true}
-                title="Filter the results based on the Impact Codes of the events. Leave it empty to show all."
+                title="Filter the results based on the Impact Codes of the events. Leave empty to show all."
             />
             <MultiSelect
                 id="qc-multi-select"
@@ -155,7 +155,7 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Quality Control Levels"
                 multiLine={true}
-                title="Filter the results based on the Quality Control Levels of the events. Leave it empty to show all."
+                title="Filter the results based on the quality control level of the events. Leave empty to show all."
             />
             <MultiSelect
                 id="source-multi-select"
@@ -167,10 +167,10 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Info Sources"
                 multiLine={true}
-                title="Filter the results based on the source that provided the events. Leave it empty to show all."
+                title="Filter the results based on the source that provided the events. Leave empty to show all."
 
             />
-            <Tooltip title="Apply the changes to the filters and visualization options" placement="left">
+            <Tooltip title="Apply the changes you made to the filters and options." placement="left">
                 <Button
                     className='mt-3'
                     style={!hasChanged ? { background: "#F5F5F5" } : {}}
