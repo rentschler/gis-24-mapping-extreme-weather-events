@@ -73,12 +73,12 @@ async def get_clusters(
         query = cluster_post(db, body, EPS, MINPOINTS)
             
         res = query.all()
-        
-        # TODO : post filtering not possible since the data is grouped before, evt possible with separate pointlist
                 
-        cluster = [ClusterDB(**data._mapping) for data in res]
+        clusters_raw = [ClusterDB.from_db(item) for item in res]
         
-        return cluster_to_geojson(cluster)
+        clusters_processed = process_cluster(body, clusters_raw)
+        
+        return cluster_to_geojson(clusters_processed)
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")

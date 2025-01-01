@@ -52,7 +52,7 @@ class HeavyRain(Base):
     link_org = mapped_column(Text)
     link_id = mapped_column(Text)
     deleted = mapped_column(Text)
-    geom = mapped_column(Geometry(geometry_type='POLYGON', srid=4326))
+    geom = mapped_column(Geometry(geometry_type='POINT', srid=4326))
 
 
 class HeavyRainCluster(HeavyRain):
