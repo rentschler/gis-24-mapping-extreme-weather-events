@@ -21,7 +21,7 @@ const Heatmap: React.FC <HeatmapProps> = ({messageApi}) => {
     const displayLoadingMessage = () => {
       messageApi.open({
         type: 'loading',
-        content: 'Loading event Heat map data...',
+        content: 'Loading data for heatmap...',
         duration: 0,
         key: 'heatmap',
       });

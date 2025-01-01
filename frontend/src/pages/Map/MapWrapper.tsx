@@ -23,7 +23,7 @@ const MapWrapper = () => {
   const displayLoadingMessage = () => {
     messageApi.open({
       type: 'loading',
-      content: 'Loading event data...',
+      content: 'Loading data...',
       duration: 0,
       key: 'loading',
     });
