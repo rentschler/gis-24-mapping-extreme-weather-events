@@ -18,7 +18,7 @@ function AppearingSidebar() {
 
       <Offcanvas show={show} onHide={handleClose}  placement="end" backdrop={false}>
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Options</Offcanvas.Title>
+          <Offcanvas.Title>Query Options</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
          <SettingsPage onHide={handleClose}></SettingsPage>
