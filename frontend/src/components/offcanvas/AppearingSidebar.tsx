@@ -4,7 +4,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import SettingsPage from '../../pages/settings/SettingsPage';
 
 
-function ExampleSideBar() {
+function AppearingSidebar() {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -16,16 +16,16 @@ function ExampleSideBar() {
         Options
       </Button>
 
-      <Offcanvas show={show} onHide={handleClose}  placement="end">
+      <Offcanvas show={show} onHide={handleClose}  placement="end" backdrop={false}>
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Options</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-         <SettingsPage></SettingsPage>
+         <SettingsPage onHide={handleClose}></SettingsPage>
         </Offcanvas.Body>
       </Offcanvas>
     </>
   );
 }
 
-export default ExampleSideBar;
+export default AppearingSidebar;

@@ -12,13 +12,17 @@ import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpa
 import { Button } from 'antd';
 import { setQueryFilters } from '../../store/querySlice';
 import { setVisoptions } from '../../store/visSlice';
-const SettingsPage = () => {
+
+interface SettingsPageProps {
+    onHide: () => void;
+}
+const SettingsPage = ({ onHide }: SettingsPageProps) => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
     const {
         queryFilters,
         visOptions,
-        hasChanged
+        hasChanged,
     } = useSelector((state: RootState) => state.settings);
 
     // QC level options
@@ -181,6 +185,7 @@ const SettingsPage = () => {
                         // submit changes to the vis state
                         dispatch(setVisoptions(visOptions));
                         dispatch(setHasChanged(false))
+                        onHide();
                     }}
                     disabled={!hasChanged}
                 >Apply</Button>

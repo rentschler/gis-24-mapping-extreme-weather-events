@@ -1,6 +1,6 @@
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
-import ExampleSideBar from '../offcanvas/ExampleSideBar';
+import AppearingSidebar from '../offcanvas/AppearingSidebar.tsx';
 
 const MyNavbar = () => {
 
@@ -11,7 +11,7 @@ const MyNavbar = () => {
       className="bg-body-tertiary"
       collapseOnSelect
     >
-      <Container>
+      <Container fluid>
         <Navbar.Brand >
           GIS Project
         </Navbar.Brand>
@@ -26,7 +26,7 @@ const MyNavbar = () => {
             <Nav.Link href="https://gitlab.inf.uni-konstanz.de/geographic-information-systems-ws-245/mapping-extreme-weather-events">Gitlab</Nav.Link>
           </Nav> */}
         </Navbar.Collapse>
-        <ExampleSideBar />
+        <AppearingSidebar />
       </Container>
     </Navbar>
   );
