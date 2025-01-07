@@ -68,7 +68,7 @@ async def get_clusters(
 ):
     try:
         EPS = 0.05
-        MINPOINTS = 5
+        MINPOINTS = 10
         
         query = cluster_post(db, body, EPS, MINPOINTS)
             
@@ -78,7 +78,9 @@ async def get_clusters(
         
         clusters_processed = process_cluster(body, clusters_raw)
         
-        return cluster_to_geojson(clusters_processed)
+        group_list = [ClusterGrouped(**item) for item in clusters_processed]
+        
+        return cluster_to_geojson(group_list)
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")

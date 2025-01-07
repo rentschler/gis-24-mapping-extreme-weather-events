@@ -74,6 +74,7 @@ def cluster_to_geojson(clusters):
         buffer = cluster.cluster_polygon.buffer(0.02)
         coordinates = list(buffer.exterior.coords)
         properties = cluster.__dict__
+        
         if properties['cluster_id'] == None:
             continue
         properties.pop("cluster_polygon")
