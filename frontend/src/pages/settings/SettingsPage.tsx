@@ -1,30 +1,46 @@
-import { Space } from 'antd';
-import { impactCodeData, infoSourceData, QCLevelDescriptions } from '../../types/response';
-import type { SelectProps } from 'antd';
+import type {SelectProps} from 'antd';
+import {Button, Radio, Space, Tooltip} from 'antd';
+import {impactCodeData, infoSourceData, QCLevelDescriptions} from '../../types/response';
 
 import Check from '../../components/filterOptions/Check';
 import DateRange from '../../components/filterOptions/DateRange';
 import RangeSlider from '../../components/filterOptions/RangeSlider';
 import MultiSelect from '../../components/filterOptions/MultiSelect';
-import { AppDispatch, RootState } from '../../store/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { setHasChanged, setHideEventsWithoutDescription, setImpactCodes, setImpactRange, setInfoSources, setQCLevels, setShowAggregatedEvents, setShowPointEvents, setShowSummaries, setTimeRange } from '../../store/settingsSlice';
-import { Button } from 'antd';
-import {  setQueryFilters } from '../../store/querySlice';
-import { setVisoptions } from '../../store/visSlice';
-const SettingsPage = () => {
+import {AppDispatch, RootState} from '../../store/store';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+    setHasChanged,
+    setHideEventsWithoutDescription,
+    setImpactCodes,
+    setImpactRange,
+    setInfoSources,
+    setQCLevels,
+    setShowDynamicClustering,
+    setShowHeatmap,
+    setShowReportPolygons,
+    setShowSimplePointMap,
+    setTimeRange
+} from '../../store/settingsSlice';
+import {setQueryFilters} from '../../store/querySlice';
+import {setVisoptions} from '../../store/visSlice';
+
+interface SettingsPageProps {
+    onHide: () => void;
+}
+
+const SettingsPage = ({onHide}: SettingsPageProps) => {
     // redux state variables
     const dispatch: AppDispatch = useDispatch();
-    const { 
+    const {
         queryFilters,
         visOptions,
-        hasChanged
+        hasChanged,
     } = useSelector((state: RootState) => state.settings);
 
     // QC level options
     const options: SelectProps['options'] = [];
     Object.entries(QCLevelDescriptions).forEach(([value, label]) => {
-        options.push({ value, label: <div title={label.description}>{label.title}</div> });
+        options.push({value, label: <div title={label.description}>{label.title}</div>});
     });
 
     // info source options
@@ -32,7 +48,9 @@ const SettingsPage = () => {
     infoSourceData.forEach((source) => {
         sourceOptions.push({
             // text truncate
-            value: source.code, label: <div style={{overflow:"hidden", textOverflow:"ellipsis", maxWidth:"300px"}} title={source.description}>{source.description}</div>
+            value: source.code,
+            label: <div style={{overflow: "hidden", textOverflow: "ellipsis", maxWidth: "300px"}}
+                        title={source.description}>{source.description}</div>
         });
     });
 
@@ -44,57 +62,44 @@ const SettingsPage = () => {
         });
     });
 
-    console.log(visOptions, queryFilters, hasChanged);
-    
-    if(!visOptions) return;
+    if (!visOptions) return null;
 
     return (
-        <Space direction="vertical" size={18}>
+        <Space direction="vertical" size={18} style={{display: "flex"}}>
+            {/* data picker*/}
             <DateRange
                 value={queryFilters.timeRange}
-                onChange={(_: any, dateString: [string, string]) => {
+                onChange={(_: unknown, dateString: [string, string]) => {
                     // dispatch sends the action to the reducer to update the state
                     dispatch(setTimeRange(dateString));
                 }}
+                title="Select a date range to filter events."
             />
-            <Check
-                checked={visOptions.showPointEvents}
-                setChecked={(checked: boolean) => {
-                    dispatch(setShowPointEvents(checked));
-                }}
-                label="Show Point Events"
-            />
-            <Check
-                checked={visOptions.showAggregatedEvents}
-                setChecked={(checked: boolean) => {
-                    dispatch(setShowAggregatedEvents(checked));
-                }}
-                label="Show Aggregated Events"
-            />
-            <Check
-                checked={visOptions.showSummaries}
-                setChecked={(checked: boolean) => {
-                    dispatch(setShowSummaries(checked));
-                }}
-                label="Show Summaries"
-            />
+
+            {/* adjust query to hide events without description*/}
             <Check
                 checked={visOptions.hideEventsWithoutDescription}
                 setChecked={(checked: boolean) => {
                     dispatch(setHideEventsWithoutDescription(checked));
                 }}
                 label="Hide Events Without Description"
+                title="Activate this option if you are not interested in events that are missing a description."
             />
+
+            {/* modify impact range*/}
             <RangeSlider
                 label="Number of Impacts"
-                title="Filter the results based on the Number of Impacts"
+                title="Filter the results based on the number of impacts. Select '10' if you don't want to specify a maximum value."
                 defaultValue={queryFilters.impactRange}
                 min={0}
                 max={10}
                 onChange={(value: number[]) => {
+                    if (value[1] === 10) value[1] = 100;
                     dispatch(setImpactRange(value))
                 }}
-                ></RangeSlider>
+            ></RangeSlider>
+
+            {/* impact code filter*/}
             <MultiSelect
                 id="impact-multi-select"
                 options={ImpactOptions}
@@ -105,7 +110,10 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Impact Codes"
                 multiLine={true}
+                title="Filter the results based on the Impact Codes of the events. Leave empty to show all."
             />
+
+            {/* QC level filter*/}
             <MultiSelect
                 id="qc-multi-select"
                 options={options}
@@ -116,7 +124,10 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Quality Control Levels"
                 multiLine={true}
+                title="Filter the results based on the quality control level of the events. Leave empty to show all."
             />
+
+            {/* info source filter*/}
             <MultiSelect
                 id="source-multi-select"
                 options={sourceOptions}
@@ -127,22 +138,78 @@ const SettingsPage = () => {
                 placeholder="No Filter Applied"
                 label="Info Sources"
                 multiLine={true}
+                title="Filter the results based on the source that provided the events. Leave empty to show all."
 
             />
-            <Button 
-                className='mt-3'
-                style={!hasChanged?{background:"#F5F5F5"}:{}}
-                onClick={() => {
-                    console.log("apply button clicked");
-                    // submit changes to the query state
-                    dispatch(setQueryFilters(queryFilters));
-                    // submit changes to the vis state
-                    dispatch(setVisoptions(visOptions));
-                    dispatch(setHasChanged(false))
+
+            {/* ************************** */}
+            <div className="offcanvas-title h5 py-3">Map Options</div>
+
+
+            {/* change how marks are displayed*/}
+            <Tooltip
+                title="View extreme weather events either as simple dots or as aggregated clusters."
+                placement="left"
+            >
+                <h4 className='mb-2'>Display marks as</h4>
+                <Radio.Group onChange={(x) => {
+                    if (x.target.value === 1) {
+                        dispatch(setShowSimplePointMap(true));
+                        dispatch(setShowDynamicClustering(false));
+                    } else {
+                        dispatch(setShowSimplePointMap(false));
+                        dispatch(setShowDynamicClustering(true));
+                    }
                 }}
-                disabled={!hasChanged}
-            >Apply</Button>
-            </Space>
+                             value={visOptions.showSimplePointMap ? 1 : 2}>
+                    <Radio value={1}
+                           style={{color: visOptions.showSimplePointMap ? "white" : "gray"}}
+                    >Points</Radio>
+                    <Radio value={2}
+                           style={{color: visOptions.showDynamicClustering ? "white" : "gray"}}
+                    >Cluster Markers</Radio>
+                </Radio.Group>
+            </Tooltip>
+
+            {/* toggle summary visibility*/}
+            <Check
+                checked={visOptions.showReportPolygons}
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowReportPolygons(checked));
+                }}
+                label="Show event summaries"
+                // disabled={true}
+                title="Show or hide general collective reports for the number of fatalities caused by violent flash floods"
+            />
+
+            {/* toggle heatmap visibility*/}
+            <Check
+                checked={visOptions.showHeatmap}
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowHeatmap(checked));
+                }}
+                label="Show Heatmap"
+                title="Show or hide heat map with precipitation number"
+            />
+
+
+            <Tooltip title="Apply the changes you made to the filters and options." placement="left">
+                <Button
+                    className='mt-3'
+                    style={!hasChanged ? {background: "#F5F5F5"} : {}}
+                    onClick={() => {
+                        console.log("apply button clicked");
+                        // submit changes to the query state
+                        dispatch(setQueryFilters(queryFilters));
+                        // submit changes to the vis state
+                        dispatch(setVisoptions(visOptions));
+                        dispatch(setHasChanged(false))
+                        onHide();
+                    }}
+                    disabled={!hasChanged}
+                >Apply</Button>
+            </Tooltip>
+        </Space>
     )
 }
 
