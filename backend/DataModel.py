@@ -2,9 +2,13 @@ from pydantic import BaseModel, field_validator, conlist
 from enum import Enum
 from datetime import date, datetime, time, timedelta
 import re
-
+from shapely.geometry import shape, Polygon, MultiPolygon, Point
+from shapely import wkb, wkt
+import shapely
+import geojson
 from typing import Optional, Dict, Union
 from datetime import date, datetime, timedelta
+import traceback
 
 from DBModel import *
 
@@ -27,6 +31,37 @@ class LocationDetails(BaseModel):
     place_accuracy: Optional[str] = None
     surface_initial_location: Optional[str] = None
     surface_crossed: Optional[str] = None
+    geom: Optional[Point] = None
+    
+    class Config:
+        arbitrary_types_allowed = True
+        # fields = {'geom': {'exclude': True}}
+        json_encoders = {
+            Point: lambda p: {"x": p.x, "y": p.y}  # Convert Point to a dict
+        }
+    
+    @field_validator("geom", mode="before")
+    def convert_wkb_to_shapely(cls, value):
+        # Assuming value is the WKB and should be converted to a shapely Point
+        if value:
+            shapely_geometry = wkb.loads(value.desc)
+            return shapely_geometry
+        return value
+    
+    # def model_dump(self, *args, **kwargs):
+    #     # Convert Point to a tuple of (x, y)
+    #     data = super().model_dump(*args, **kwargs)
+    #     if self.geom:
+    #         data['geom'] = [self.geom.x, self.geom.y]
+    #     return data
+
+    # @classmethod
+    # def model_validate(cls, obj):
+    #     # Convert a dict to a Point
+    #     if 'geom' in obj and isinstance(obj['geom'], list):
+    #         obj['geom'] = Point(obj['geom'][0], obj['geom'][1])
+    #     return super().model_validate(obj)
+        
 
 impact_code_data = {
         "T1": "Road(s) impassable or closed",
@@ -200,7 +235,8 @@ class HeavyRainResponse(BaseModel):
                 place_local_language=getattr(heavy_rain, "place_local_language", None),
                 place_accuracy=getattr(heavy_rain, "place_accuracy", None),
                 surface_initial_location=getattr(heavy_rain, "surface_initial_location", None),
-                surface_crossed=getattr(heavy_rain, "surface_crossed", None)
+                surface_crossed=getattr(heavy_rain, "surface_crossed", None),
+                geom=getattr(heavy_rain, "geom", None)
                 ),
             event=EventDetails(
                 qc_level=getattr(heavy_rain, "qc_level", None),
@@ -247,6 +283,78 @@ class HeavyRainFilter(BaseModel):
     
 class HeavyRainPost(BaseModel):
     filters: HeavyRainFilter
+
+class ClusterPost(BaseModel):
+    filters: HeavyRainFilter
+    
+class ClusterGeometry(BaseModel):
+    type: str = 'Polygon'
+    coordinates: Optional[list[list[float]]] = None
+    
+    @field_validator('coordinates', mode='before')
+    def convert_str_to_polygon(cls, value):
+        # Check if the value is a GeoJSON string
+        try:
+            geojson_obj = geojson.loads(value)
+            return geojson_obj['coordinates'][0] 
+        except Exception as e:
+            try:
+                # If not GeoJSON, try WKB
+                geom = wkb.loads(bytes.fromhex(value))
+                return list(geom.exterior.coords)
+            except Exception as e:
+                raise ValueError(f"Invalid geometry format: {e}")
+    
+    class Config:
+        # Allow arbitrary types like Shapely Polygon
+        arbitrary_types_allowed = True
+        
+        # Ensure the Polygon is serialized correctly to GeoJSON
+        json_encoders = {
+            Polygon: lambda v: geojson.dumps(v.__geo_interface__)
+        }
+    
+class Properties(BaseModel):
+    cluster_id: Optional[int] = None
+    
+    class Config:
+        extra = 'allow'
+
+
+class ClusterDB(HeavyRainResponse):
+    cluster_id: Optional[int] = None
+    
+    @classmethod
+    def from_db(cls, cluster):
+        
+        instance = super().from_db(cluster[0])
+        instance.cluster_id = cluster.cluster_id
+        return instance
+
+class ClusterGrouped(BaseModel):
+    cluster_id: Optional[int] = None
+    cluster_polygon: Optional[Polygon] = None
+        
+    class Config:
+        # Allow arbitrary types like Shapely Polygon
+        arbitrary_types_allowed = True
+        
+        # Ensure the Polygon is serialized correctly to GeoJSON
+        json_encoders = {
+            Polygon: lambda v: geojson.dumps(v.__geo_interface__)
+        }    
+        
+        
+    # @field_validator('cluster_polygon', mode='before')
+    # def convert_str_to_polygon(cls, value):
+    #     # Check if the value is a GeoJSON string
+    #     try:
+    #         geom = wkt.loads(value)
+    #         print(type(geom))
+    #         return geom
+    #     except Exception as e:
+    #         raise ValueError(f"Invalid geometry format: {e} \n {traceback.format_exc()}" )
+            
 
 class GeometryPost(BaseModel):
     geometry: dict
