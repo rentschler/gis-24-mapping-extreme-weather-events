@@ -36,6 +36,7 @@ export type VisualState = {
   showReportPolygons: boolean;
   showDynamicClustering: boolean;
   showHeatmap: boolean;
+  showDBSCANMap: boolean,
   hideEventsWithoutDescription: boolean;
 };
 
@@ -52,6 +53,7 @@ export const initialVisualState: VisualState = {
   showReportPolygons: false,
   showDynamicClustering: false,
   showHeatmap: false,
+  showDBSCANMap: false,
   hideEventsWithoutDescription: false,
 };
 
@@ -85,6 +87,10 @@ export const initialVisualState: VisualState = {
       setShowHeatmap: (state, action) => {
         state.hasChanged = true;
         state.visOptions.showHeatmap = action.payload;
+      },
+      setShowDBSCANMap: (state, action) => {
+        state.hasChanged = true;
+        state.visOptions.showDBSCANMap = action.payload;
       },
       setHideEventsWithoutDescription: (state, action) => {
         state.hasChanged = true;
@@ -129,6 +135,7 @@ export const {
     setShowReportPolygons,
     setShowDynamicClustering,
     setShowHeatmap,
+    setShowDBSCANMap,
     setHideEventsWithoutDescription,
     setImpactRange,
     setImpactCodes,

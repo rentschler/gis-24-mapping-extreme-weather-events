@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { useState, useEffect } from "react";
-import { GeoJsonProperties, Geometry, Feature } from 'geojson';
+import { GeoJsonProperties, Geometry, Feature, FeatureCollection } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
 import { MeteorologicalEventRecord } from "../types/response";
@@ -14,6 +14,7 @@ import Heatmap from "../components/visualizations/Heatmap";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { MessageInstance } from "antd/es/message/interface";
+import DBSCAN from "../components/visualizations/DBSCAN";
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
 import { RootState } from "../store/store"; */
@@ -30,11 +31,12 @@ interface MapProps {
   points: MeteorologicalEventRecord[],
   generalReportPoints: MeteorologicalEventRecord[],
   matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
-  messageApi: MessageInstance
+  dbscanData: FeatureCollection,
+  messageApi: MessageInstance,
 
 }
 
-const Map = ({ points, generalReportPoints, matchingPolygons, messageApi }: MapProps) => {
+const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscanData }: MapProps) => {
   /* Do we need this? yes to render the visualizations on demand*/
   const {
     options
@@ -89,6 +91,7 @@ const Map = ({ points, generalReportPoints, matchingPolygons, messageApi }: MapP
         {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
         {options.showHeatmap && <Heatmap messageApi={messageApi} />}
+        {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
       </MapContainer>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Geometry, Feature } from 'geojson';
+import { Geometry, Feature, FeatureCollection } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
 import { MeteorologicalEventRecord } from "../../types/response";
@@ -47,6 +47,10 @@ const MapWrapper = () => {
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
+  const [dbscanFeatureCollection, setDBSCANData] = useState<FeatureCollection>({  type: "FeatureCollection",
+    features: [],
+  });
+
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -65,6 +69,8 @@ const MapWrapper = () => {
           },
           body: JSON.stringify(payLoad),
         });
+
+        
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
           console.log("Fetched data:", data);
@@ -74,6 +80,23 @@ const MapWrapper = () => {
           console.error("Failed fetching api data:", response);
           setHasError("Failed fetching api data:");
         }
+
+
+        // Fetch cluster points
+
+        const dbscan_response = await fetch("/api/cluster", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payLoad),
+        });
+        if(dbscan_response.ok){
+          const dbscan_data = await dbscan_response.json() as FeatureCollection; 
+          console.log("DBSCAN Data: ", dbscan_data);
+          setDBSCANData(dbscan_data);
+        }
+
       } catch (error) {
         console.error("Error fetching api data:", error);
         setHasError("Failed fetching api data:");
@@ -131,7 +154,7 @@ const MapWrapper = () => {
   return (
     <>
       {contextHolder}
-      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} messageApi={messageApi}></Map>
+      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} messageApi={messageApi} dbscanData={dbscanFeatureCollection} ></Map>
     </>
   )
 }
