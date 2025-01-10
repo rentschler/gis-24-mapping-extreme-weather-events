@@ -15,6 +15,7 @@ import {
     setImpactRange,
     setInfoSources,
     setQCLevels,
+    setShowDBSCANMap,
     setShowDynamicClustering,
     setShowHeatmap,
     setShowReportPolygons,
@@ -190,6 +191,17 @@ const SettingsPage = ({onHide}: SettingsPageProps) => {
                 }}
                 label="Show Heatmap"
                 title="Show or hide heat map with precipitation number"
+            />
+
+            
+            {/* toggle DBSCAN visibility*/}
+            <Check
+                checked={visOptions.showDBSCANMap}
+                setChecked={(checked: boolean) => {
+                    dispatch(setShowDBSCANMap(checked));
+                }}
+                label="DBSCAN MVP"
+                title="Show or hide DBSCAN Visualisation"
             />
 
 
