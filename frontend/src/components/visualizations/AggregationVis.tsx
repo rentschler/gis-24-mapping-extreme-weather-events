@@ -2,6 +2,7 @@
 import { MeteorologicalEventRecord } from "../../types/response";
 import * as d3 from 'd3';
 import React, { useEffect, useRef } from 'react';
+import { useDimensions } from "../helper/useDimensions";
 const AggregationData: React.FC<{
     points: MeteorologicalEventRecord[];
 }> = ({ points }) => {
@@ -9,6 +10,9 @@ const AggregationData: React.FC<{
     const svgLegend = useRef<SVGSVGElement | null>(null);
     const donutRef = useRef<SVGSVGElement | null>(null);
     if (!points || points.length === 0) return;
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dimensions = useDimensions(containerRef);
 
     // adds the scatterplot 
     useEffect(() => {
@@ -115,11 +119,16 @@ const AggregationData: React.FC<{
         svg
             .append("text")
             .attr("transform", `rotate(-90)`)
-            .attr("y", width + margin.right - 20)
+            .attr("y", width + margin.right - 50)
             .attr("x", 0 - height / 2)
             .attr("dy", "1em")
             .attr("text-anchor", "middle")
             .text("Precipitation Amount");
+
+            return () => {
+                // cleanup
+                svg.selectAll("*").remove();
+            };
 
     }, [points]);
 
@@ -283,7 +292,7 @@ const AggregationData: React.FC<{
                 */
                
                paddingBottom: "15px",
-               width: "1000px",
+               width: "950px",
                borderRadius: "8px",
                height: "auto", // Let content adjust dynamically
                display: "flex", // Use flexbox for layout
@@ -303,6 +312,7 @@ const AggregationData: React.FC<{
                     justifyContent: "space-between",
                     width: "100%", // Ensure it takes full width
                 }}
+                ref={containerRef}
             >
                 {/* Scatterplot */}
                 <svg ref={svgRef} style={{ flex: 1, marginRight: "20px" }}></svg>

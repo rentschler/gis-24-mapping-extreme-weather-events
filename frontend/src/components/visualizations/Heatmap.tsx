@@ -103,7 +103,7 @@ const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
 
             // Fetch all the data for each feature and wait for all the responses to come back
             await Promise.all(
-                (geojsonData.features as Feature<Geometry>[]).map(async (feature) => {
+                (geojsonData.features as Feature<Geometry>[]).slice(1,50).map(async (feature) => {
                     const response = await fetch("/api/data/geometry", {
                         method: "POST",
                         headers: {
@@ -179,9 +179,12 @@ const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
                 style={() => feature.properties?.style || {}}
             >
                 <Popup minWidth={1000} maxWidth={1000} maxHeight={500}>
-                    <p>Country code: {feature.properties?.CNTR_CODE}</p>
-                    <p>NAME_LATN: {feature.properties?.NAME_LATN}</p>
-                    <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} />
+                    <div className="" style={{
+                        overflow: "auto",
+                    }}>
+                        <p>{feature.properties?.CNTR_CODE}: {feature.properties?.NAME_LATN}</p>
+                        <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} />
+                    </div>
                 </Popup>
             </GeoJSON>
         })}
