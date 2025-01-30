@@ -1,21 +1,25 @@
 import {MeteorologicalEventRecord} from "../../../types/response.ts";
-import React from 'react';
+import React, {useState} from 'react';
 import Scatterplot from "./Scatterplot.tsx";
 import PieChart from "./PieChart.tsx";
 import AggregationLegend from "./AggregationLegend.tsx";
+import BarChart from "./BarChart.tsx";
 
 const AggregationData: React.FC<{
     points: MeteorologicalEventRecord[];
     country: string;
     name: string;
 }> = ({points, country, name}) => {
+    const [showBarChart, setShowBarChart] = useState(true)
 
-    if (!points || points.length === 0) return <>
+
+    if (!points || points.length < 2) return <>
         <p style={{margin: "0", fontSize: "14px"}}>
             <p>{country}: {name}</p>
-            <strong>Total Points: </strong> {points.length}
         </p>
     </>
+    console.log("aggregation vis", points)
+
 
     return (
         <div
@@ -52,8 +56,9 @@ const AggregationData: React.FC<{
                     width: "100%", // Ensure it takes full width
                 }}
             >
-                {/* Scatterplot */}
-                <Scatterplot points={points}></Scatterplot>
+
+                {showBarChart ? <BarChart points={points}></BarChart> : <Scatterplot points={points}></Scatterplot>}
+
 
                 {/* Legend and Donut Chart */}
                 <div
@@ -69,7 +74,7 @@ const AggregationData: React.FC<{
 
                     {/* Donut Chart */}
                     <PieChart points={points}></PieChart>
-
+                    <button className={"btn btn-primary"} onClick={() => setShowBarChart(!showBarChart)}>Toggle Chart</button>
                 </div>
             </div>
         </div>

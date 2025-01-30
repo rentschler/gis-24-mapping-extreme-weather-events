@@ -2,11 +2,11 @@ import {useEffect, useRef} from "react";
 import * as d3 from "d3";
 import {MeteorologicalEventRecord} from "../../../types/response";
 
-interface ScatterplotProps {
+interface BarCharProps {
     points: MeteorologicalEventRecord[]
 }
 
-const Scatterplot = ({points}: ScatterplotProps) => {
+const BarChart = ({points}: BarCharProps) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     // draw scatterplot
@@ -44,7 +44,6 @@ const Scatterplot = ({points}: ScatterplotProps) => {
             .range([0, width])
             .nice();
 
-
         svg.append("g")
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(xScale))
@@ -71,16 +70,31 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .attr("font-size", "12px");
 
             // Scatterplot for impacts
-            svg.selectAll(".impact-dot")
+            // svg.selectAll(".impact-dot")
+            //     .data(impact_points)
+            //     .enter()
+            //     .append("circle")
+            //     .attr("class", "impact-dot")
+            //     .attr("cx", (d) => xScale(d.time))
+            //     .attr("cy", (d) => yScale(d.impacts))
+            //     .attr("r", 4)
+            //     .attr("fill", "blue");
+                    // Create bars for impacts
+            svg.append('g')
+                .selectAll('.impact-bars')
                 .data(impact_points.filter(d => d.impacts > 0))
                 .enter()
-                .append("circle")
-                .attr("class", "impact-dot")
-                .attr("cx", (d) => xScale(d.time))
-                .attr("cy", (d) => yScale(d.impacts))
-                .attr("r", 4)
-                .attr("fill", "#00b894")
-                         .append('title')
+                .append('rect')
+                .classed('impact-bars', true)
+                .attr('x', d => xScale(d.time))
+                .attr('y', d => yScale(d.impacts))
+                .attr('width', 10)
+                .attr('height', d => height - yScale(d.impacts))
+                .attr('fill', '#00b894')
+                .attr('rx', 4)
+                .attr('ry', 0)
+                .attr('opacity', 0.5)
+                .append('title')
                 .text(d => (`${d.impacts} impacts at ${d.time}`));
 
             // Labels
@@ -90,8 +104,9 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .attr("x", 0 - height / 2)
                 .attr("dy", "1em")
                 .attr("text-anchor", "middle")
-                .attr("fill", "#00b894")
                 .text("Number of Impacts")
+                .attr("fill", "#00b894")
+
         }
 
 
@@ -104,36 +119,47 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .range([height, 0])
                 .nice();
 
-
             // Axes
-            svg
-                .append("g")
+            svg.append("g")
                 .call(d3.axisRight(y2Scale))
                 .attr("transform", `translate(${width}, 0)`)
                 .attr("font-size", "12px");
 
             // Scatterplot for precipitation
-            svg
-                .selectAll(".precip-dot")
+            // svg
+            //     .selectAll(".precip-dot")
+            //     .data(precipitation_points)
+            //     .enter()
+            //     .append("circle")
+            //     .attr("class", "precip-dot")
+            //     .attr("cx", (d) => xScale(d.time))
+            //     .attr("cy", (d) => y2Scale(d.precipitation || 0))
+            //     .attr("r", 4)
+            //     .attr("fill", "green");
+
+            // Create bars for precipitation
+            svg.append('g')
+                .selectAll('precip-bars')
                 .data(precipitation_points)
                 .enter()
-                .append("circle")
-                .attr("class", "precip-dot")
-                .attr("cx", (d) => xScale(d.time))
-                .attr("cy", (d) => y2Scale(d.precipitation || 0))
-                .attr("r", 4)
-                .attr("fill", "#6c5ce7");
+                .append('rect')
+                .attr('x', d => xScale(d.time) - 10)
+                .attr('y', d => y2Scale(d.precipitation || 0))
+                .attr('width', 10)
+                .attr('height', d => height - y2Scale(d.precipitation || 0))
+                .attr('fill', '#6c5ce7')
+                // .attr('rx', 4)
+                .attr('opacity', 0.5);
 
             // Labels
-            svg
-                .append("text")
+            svg.append("text")
                 .attr("transform", `rotate(-90)`)
                 .attr("y", width + margin.right - 50)
                 .attr("x", 0 - height / 2)
                 .attr("dy", "1em")
                 .attr("text-anchor", "middle")
-                .attr("fill", "#6c5ce7")
                 .text("Precipitation Amount")
+                .attr("fill", "#6c5ce7")
         }
 
 
@@ -147,4 +173,4 @@ const Scatterplot = ({points}: ScatterplotProps) => {
         <svg ref={svgRef} style={{flex: 1, marginRight: "20px"}}></svg>
     </>
 }
-export default Scatterplot
+export default BarChart
