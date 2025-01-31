@@ -1,32 +1,36 @@
-import {useEffect, useRef} from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { MeteorologicalEventRecord } from "../../../types/response";
 
 interface PieChartProps {
-    points:  MeteorologicalEventRecord[]
+    points: MeteorologicalEventRecord[]
 }
-const PieChart = ({points}:PieChartProps) => {
+const PieChart = ({ points }: PieChartProps) => {
     const donutRef = useRef<SVGSVGElement | null>(null);
+    const [hasData, setHasData] = useState(false)
 
     // add donut chart
-        useEffect(() => {
+    useEffect(() => {
         if (!points || points.length === 0) return;
         const donutData = [
             {
-              label: "Small",
-              value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
+                label: "Small",
+                value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
             },
             {
-              label: "Medium",
-              value: points.filter(
-                (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
-              ).length,
+                label: "Medium",
+                value: points.filter(
+                    (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
+                ).length,
             },
             {
-              label: "Large",
-              value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
+                label: "Large",
+                value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
             },
-          ];
+        ].filter((d) => d.value > 0);
+
+        if(donutData.length === 0) return setHasData(false)
+        setHasData(true)
 
 
         const donutMargin = { top: 20, right: 0, bottom: 20, left: 20 };
@@ -74,12 +78,21 @@ const PieChart = ({points}:PieChartProps) => {
             .attr("fill", "black")
             .text((d) => `${d.data.value}`);
 
-    }, [points])
-    return <>
-        <svg
-            ref={donutRef}
-            style={{width: "120px", height: "auto"}}
-        ></svg>
-    </>
+        return () => {
+            svgDonut.selectAll("*").remove();
+        };
+
+    }, [points]);
+
+
+    return (
+        <>
+            {hasData? <p>Impact Distribution</p> : <p>No Impact Data</p>}
+            <svg
+                ref={donutRef}
+                style={{ width: "120px", height: "auto" }}
+            ></svg>
+        </>
+    )
 }
 export default PieChart

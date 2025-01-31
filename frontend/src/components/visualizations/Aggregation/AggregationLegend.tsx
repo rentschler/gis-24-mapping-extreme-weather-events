@@ -1,13 +1,13 @@
-import {MeteorologicalEventRecord} from "../../../types/response.ts";
-import {useEffect, useRef} from "react";
+import { MeteorologicalEventRecord } from "../../../types/response.ts";
+import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 interface AggregationLegendProps {
     points: MeteorologicalEventRecord[]
 }
 
-const AggregationLegend = ({points}: AggregationLegendProps) => {
-        const svgLegend = useRef<SVGSVGElement | null>(null);
+const AggregationLegend = ({ points }: AggregationLegendProps) => {
+    const svgLegend = useRef<SVGSVGElement | null>(null);
 
 
     // add the legend
@@ -28,41 +28,46 @@ const AggregationLegend = ({points}: AggregationLegendProps) => {
                 value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
             },
         ];
+
+        const filtered = donutData.filter((d) => d.value > 0);
+
+        if (filtered.length === 0) return;
+
         // Create legend
         const svg_legend = d3.select(svgLegend.current).append("g");
 
         // Add legend for impacts
-        svg_legend
-            .append("circle")
-            .attr("cx", 10)
-            .attr("cy", 10)
-            .attr("r", 6)
-            .attr("fill", "blue");
+        // svg_legend
+        //     .append("circle")
+        //     .attr("cx", 10)
+        //     .attr("cy", 10)
+        //     .attr("r", 6)
+        //     .attr("fill", "blue");
 
-        svg_legend
-            .append("text")
-            .attr("x", 30)
-            .attr("y", 14)
-            .text("Impacts")
-            .attr("font-size", "12px")
-            .attr("text-anchor", "start");
+        // svg_legend
+        //     .append("text")
+        //     .attr("x", 30)
+        //     .attr("y", 14)
+        //     .text("Impacts")
+        //     .attr("font-size", "12px")
+        //     .attr("text-anchor", "start");
 
-        // Add legend for precipitation
-        svg_legend
-            .append("circle")
-            .attr("cx", 10)
-            .attr("cy", 30)
-            .attr("r", 6)
-            .attr("fill", "green");
+        // // Add legend for precipitation
+        // svg_legend
+        //     .append("circle")
+        //     .attr("cx", 10)
+        //     .attr("cy", 30)
+        //     .attr("r", 6)
+        //     .attr("fill", "green");
 
-        svg_legend
-            .append("text")
-            .attr("x", 30)
-            .attr("y", 34)
-            .text("Precipitation")
-            .attr("font-size", "12px")
-            .attr("text-anchor", "start");
-        console.log("Donut Data", donutData);
+        // svg_legend
+        //     .append("text")
+        //     .attr("x", 30)
+        //     .attr("y", 34)
+        //     .text("Precipitation")
+        //     .attr("font-size", "12px")
+        //     .attr("text-anchor", "start");
+        // console.log("Donut Data", donutData);
 
         donutData.forEach((data, value) => {
             let color = "yellow";
@@ -87,12 +92,16 @@ const AggregationLegend = ({points}: AggregationLegendProps) => {
                 .attr("font-size", "12px")
                 .attr("text-anchor", "start");
         });
+
+        return () => {
+            svg_legend.remove();
+        };
     }, [])
 
     return <>
         <svg
             ref={svgLegend}
-            style={{width: "120px", height: "auto", marginBottom: "10px"}} // Add space between legend and donut
+            style={{ width: "120px", height: "auto", marginBottom: "10px" }} // Add space between legend and donut
         ></svg>
     </>
 }
