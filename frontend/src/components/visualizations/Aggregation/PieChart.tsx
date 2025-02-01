@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { MeteorologicalEventRecord } from "../../../types/response";
+import AggregationLegend from "./AggregationLegend.tsx";
 
 interface PieChartProps {
     points: MeteorologicalEventRecord[]
@@ -33,7 +34,7 @@ const PieChart = ({ points }: PieChartProps) => {
         setHasData(true)
 
 
-        const donutMargin = { top: 20, right: 0, bottom: 20, left: 20 };
+        const donutMargin = { top: 120, right: 100, bottom: 20, left: 20 };
         const donutWidth = 500 - donutMargin.left - donutMargin.right;
         const donutHeight = 500 - donutMargin.top - donutMargin.bottom;
 
@@ -86,13 +87,16 @@ const PieChart = ({ points }: PieChartProps) => {
 
 
     return (
-        <>
-            {hasData? <p>Impact Distribution</p> : <p>No Impact Data</p>}
-            <svg
-                ref={donutRef}
-                style={{ width: "120px", height: "auto" }}
-            ></svg>
-        </>
+        <div className={"d-flex flex-column gap-1"}>
+            {hasData? <p className={"m-0 text-center fw-bold"}>Impact Distribution</p> : <p>No Impact Data</p>}
+            <div className={"d-flex flex-row gap-1 align-items-center"}>
+                <svg
+                    ref={donutRef}
+                    style={{ width: "120px", height: "auto" }}
+                ></svg>
+                <AggregationLegend points={points} />
+            </div>
+        </div>
     )
 }
 export default PieChart

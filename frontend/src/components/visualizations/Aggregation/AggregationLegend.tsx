@@ -101,7 +101,7 @@ const AggregationLegend = ({ points }: AggregationLegendProps) => {
     return <>
         <svg
             ref={svgLegend}
-            style={{ width: "120px", height: "auto", marginBottom: "10px" }} // Add space between legend and donut
+            style={{ width: "80px", height: "auto", marginBottom: "10px" }} // Add space between legend and donut
         ></svg>
     </>
 }

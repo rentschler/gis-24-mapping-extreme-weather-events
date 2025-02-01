@@ -1,57 +1,39 @@
-import { MeteorologicalEventRecord } from "../../../types/response.ts";
-import React, { useState } from 'react';
+import {MeteorologicalEventRecord} from "../../../types/response.ts";
+import React, {useState} from 'react';
 import Scatterplot from "./Scatterplot.tsx";
 import PieChart from "./PieChart.tsx";
 import BarChart from "./BarChart.tsx";
-import AggregationLegend from "./AggregationLegend.tsx";
 
 const AggregationData: React.FC<{
     points: MeteorologicalEventRecord[];
     country: string;
     name: string;
-}> = ({ points, country, name }) => {
+}> = ({points, country, name}) => {
     const [showBarChart, setShowBarChart] = useState(true)
 
 
-    if (!points || points.length < 2) return             <div className={" d-flex flex-row gap-3"}>
-                <p className="h5 m-0  my-auto">{country}: {name}</p>
-            </div>
+    if (!points || points.length < 2) return (
+        // header
+        <div className={" d-flex flex-row gap-3"}>
+            <p className="h5 m-0  my-auto">{country}: {name}</p>
+        </div>
+    )
 
     return (
         <div
-            style={{/* 
-                position: "absolute",
-                bottom: "20px",
-                left: "20px", 
-                boxShadow: "0 2px 6px rgb(0, 0, 0)",
-                zIndex: 1000, // Ensure the box appears above the map
-                maxWidth: "1000px", // Optional: Limit width for aesthetic purposes
-                gap: "10px", // Add space between chart and legend
-                */
-
-                paddingBottom: "15px",
-                width: "1000px",
-                borderRadius: "8px",
-                height: "auto", // Let content adjust dynamically
-                display: "flex", // Use flexbox for layout
-                flexDirection: "column", // Stack elements vertically
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                color: "black",
-            }}
+            className={"d-flex flex-column gap-1"}
         >
+            {/*header*/}
             <div className={"mb-1 pb-1 d-flex flex-row border-bottom gap-3"}>
                 <p className="h5 m-0  my-auto">{country}: {name}</p>
                 <p className="h5 m-0  my-auto">Total Points: {points.length} </p>
-                <button className={"btn btn-primary btn-sm my-auto"} onClick={() => setShowBarChart(!showBarChart)}>Toggle Chart</button>
+                <button className={"btn btn-primary btn-sm my-auto"}
+                        onClick={() => setShowBarChart(!showBarChart)}>Toggle Chart
+                </button>
             </div>
 
             <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row", // Align chart and legend/scatter horizontally
-                    justifyContent: "space-between",
-                    width: "100%", // Ensure it takes full width
-                }}
+                className={"d-flex flex-row gap-1"}
             >
 
                 {showBarChart ? <BarChart points={points}></BarChart> : <Scatterplot points={points}></Scatterplot>}
@@ -59,19 +41,13 @@ const AggregationData: React.FC<{
 
                 {/* Legend and Donut Chart */}
                 <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column", // Stack legend and donut vertically
-                        alignItems: "center", // Center align items
-                        width: "150px", // Set a fixed width for the legend/donut container
-                    }}
+                    className={"d-flex flex-row gap-1"}
                 >
-                    {/* Legend */}
-                    <AggregationLegend points={points}></AggregationLegend>
-
-                    {/* Donut Chart */}
-                    <PieChart points={points}></PieChart>
-                    <button className={"btn btn-primary"} onClick={() => setShowBarChart(!showBarChart)}>Toggle Chart</button>
+                    <div className={"d-flex flex-column gap-3"}>
+                        {/* Donut Chart */}
+                        <PieChart points={points}></PieChart>
+                        <PieChart points={points}></PieChart>
+                    </div>
                 </div>
             </div>
         </div>

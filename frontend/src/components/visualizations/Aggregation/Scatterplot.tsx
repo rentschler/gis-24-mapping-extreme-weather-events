@@ -93,6 +93,20 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .attr("text-anchor", "middle")
                 .attr("fill", "#00b894")
                 .text("Number of Impacts")
+
+        //     // line generator
+        //     const line = d3.line<{ time: Date; impacts: number }>()
+        //         .x((d) => xScale(d.time))
+        //         .y((d) => yScale(d.impacts))
+        //         .curve(d3.curveMonotoneX);
+        //
+        //     // draw line
+        //     svg.append("path")
+        //         .datum(impact_points)
+        //         .attr("fill", "none")
+        //         .attr("stroke", "#00b894")
+        //         .attr("stroke-width", 2)
+        //         .attr("d", line);
         }
 
 
@@ -104,7 +118,6 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .domain([0, d3.max(precipitation_points, (d) => d.precipitation) || 0])
                 .range([height, 0])
                 .nice();
-
 
             // Axes
             svg
