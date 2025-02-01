@@ -8,7 +8,7 @@ import { useState } from "react";
 import geojsonData from "../../europe_admin.geo.json";
 import { Popup } from "react-leaflet";
 import { useEffect } from "react";
-import AggregationData from "./AggregationVis";
+import AggregationData from "./Aggregation/AggregationVis.tsx";
 import { MessageInstance } from "antd/es/message/interface";
 import * as d3 from "d3";
 import L from "leaflet";
@@ -103,7 +103,7 @@ const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
 
             // Fetch all the data for each feature and wait for all the responses to come back
             await Promise.all(
-                (geojsonData.features as Feature<Geometry>[]).slice(1,50).map(async (feature) => {
+                (geojsonData.features as Feature<Geometry>[])/*.slice(1,50)*/.map(async (feature) => {
                     const response = await fetch("/api/data/geometry", {
                         method: "POST",
                         headers: {
@@ -182,8 +182,7 @@ const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
                     <div className="" style={{
                         overflow: "auto",
                     }}>
-                        <p>{feature.properties?.CNTR_CODE}: {feature.properties?.NAME_LATN}</p>
-                        <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} />
+                        <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} country={feature.properties?.CNTR_CODE} name={feature.properties?.NAME_LATN} />
                     </div>
                 </Popup>
             </GeoJSON>
