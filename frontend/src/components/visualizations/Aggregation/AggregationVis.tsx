@@ -45,8 +45,8 @@ const AggregationData: React.FC<{
                 >
                     <div className={"d-flex flex-column gap-3"}>
                         {/* Donut Chart */}
-                        <PieChart points={points}></PieChart>
-                        <PieChart points={points}></PieChart>
+                        <PieChart points={points} impactType={true}></PieChart>
+                        <PieChart points={points} impactType={false}></PieChart>
                     </div>
                 </div>
             </div>

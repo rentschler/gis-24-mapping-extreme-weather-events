@@ -1,46 +1,75 @@
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import * as d3 from "d3";
-import { MeteorologicalEventRecord } from "../../../types/response";
+import {MeteorologicalEventRecord} from "../../../types/response";
 import AggregationLegend from "./AggregationLegend.tsx";
 
 interface PieChartProps {
-    points: MeteorologicalEventRecord[]
+    points: MeteorologicalEventRecord[],
+    impactType?: boolean
 }
-const PieChart = ({ points }: PieChartProps) => {
-    const donutRef = useRef<SVGSVGElement | null>(null);
-    const [hasData, setHasData] = useState(false)
 
-    // add donut chart
-    useEffect(() => {
-        if (!points || points.length === 0) return;
-        const donutData = [
+export interface DonutData {
+    label: string;
+    value: number;
+    color: string;
+}
+
+const PieChart = ({points, impactType = true}: PieChartProps) => {
+    const donutRef = useRef<SVGSVGElement | null>(null);
+    const [hasData, setHasData] = useState(false);
+
+    const colors = !impactType ? d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#98abc5", "#8a89a6", "#7b6888"]) :
+        // d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#d0743c", "#ff8c00", "#a05d56"]);
+        d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#d0743c", "#ff8c00", "#a05d56"]);
+
+    const donutData = useMemo(() => {
+        return [
             {
                 label: "Small",
-                value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
+                value: impactType ?
+                    points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length
+                    : points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount <= 50).length,
+                color: colors("Small") as string
             },
             {
                 label: "Medium",
-                value: points.filter(
-                    (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
-                ).length,
+                value: impactType ?
+                    points.filter(
+                        (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
+                    ).length :
+                    points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount > 50 && p.event.precipitation_amount <= 100).length,
+                color: colors("Medium") as string
             },
             {
                 label: "Large",
-                value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
+                value: impactType ?
+                    points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length :
+                    points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount > 100).length,
+                color: colors("Large") as string
             },
-        ].filter((d) => d.value > 0);
+        ]
+    }, [impactType, points, colors]);
 
-        if(donutData.length === 0) return setHasData(false)
+
+// add donut chart
+    useEffect(() => {
+        if (!points || points.length === 0) return;
+
+        const filtered = donutData.filter((data) => data.value > 0);
+        if (filtered.length === 0) return;
+
+
+        if (donutData.length === 0) return setHasData(false)
         setHasData(true)
 
 
-        const donutMargin = { top: 120, right: 100, bottom: 20, left: 20 };
+        const donutMargin = {top: 120, right: 100, bottom: 20, left: 20};
         const donutWidth = 500 - donutMargin.left - donutMargin.right;
         const donutHeight = 500 - donutMargin.top - donutMargin.bottom;
 
 
         // const arc = d3.arc().outerRadius(radius).innerRadius(radius - 30);
-        const pie = d3.pie<{ label: string; value: number }>().value((d) => d.value);
+        const pie = d3.pie<DonutData>().value((d) => d.value);
         // const pie = d3.pie().value((d: any) => d[1]);
 
         const svgDonut = d3
@@ -52,24 +81,24 @@ const PieChart = ({ points }: PieChartProps) => {
 
 
         // Create an arc generator with appropriate typing
-        const arc = d3.arc<d3.PieArcDatum<{ label: string; value: number }>>()
+        const arc = d3.arc<d3.PieArcDatum<DonutData>>()
             .innerRadius(30) // Set inner radius for a donut chart
             .outerRadius(50); // Set outer radius for the donut chart
 
         svgDonut
             .selectAll(".arc")
-            .data(pie(donutData))
+            .data(pie(filtered))
             .enter()
             .append("g")
             .attr("class", "arc")
             .append("path")
             .attr("d", arc)
-            .attr("fill", (_, i) => (i === 0 ? "yellow" : i === 1 ? "orange" : "red"));
+            .attr("fill", (d) => d.data.color);
 
         // Add labels inside the donut chart
         svgDonut
             .selectAll(".label")
-            .data(pie(donutData))
+            .data(pie(filtered))
             .enter()
             .append("text")
             .attr("transform", (d: any) => `translate(${arc.centroid(d)})`)
@@ -83,18 +112,21 @@ const PieChart = ({ points }: PieChartProps) => {
             svgDonut.selectAll("*").remove();
         };
 
-    }, [points]);
+    }, [colors, impactType, points]);
 
 
     return (
         <div className={"d-flex flex-column gap-1"}>
-            {hasData? <p className={"m-0 text-center fw-bold"}>Impact Distribution</p> : <p>No Impact Data</p>}
+            {impactType ?
+                hasData ? <p className={"m-0 text-center fw-bold"}>Impact Distribution</p> : <p>No Impact Data</p>
+                : hasData ? <p className={"m-0 text-center fw-bold"}>Precipitation Distribution</p> :
+                    <p>No Precipitation Data</p>}
             <div className={"d-flex flex-row gap-1 align-items-center"}>
                 <svg
                     ref={donutRef}
-                    style={{ width: "120px", height: "auto" }}
+                    style={{width: "120px", height: "auto"}}
                 ></svg>
-                <AggregationLegend points={points} />
+                <AggregationLegend donutData={donutData}/>
             </div>
         </div>
     )

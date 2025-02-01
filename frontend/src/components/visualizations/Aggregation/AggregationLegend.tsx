@@ -1,36 +1,19 @@
-import { MeteorologicalEventRecord } from "../../../types/response.ts";
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import {DonutData} from "./PieChart.tsx";
 
 interface AggregationLegendProps {
-    points: MeteorologicalEventRecord[]
+    donutData: DonutData[]
 }
 
-const AggregationLegend = ({ points }: AggregationLegendProps) => {
+const AggregationLegend = ({ donutData }: AggregationLegendProps) => {
     const svgLegend = useRef<SVGSVGElement | null>(null);
 
 
     // add the legend
     useEffect(() => {
-        const donutData = [
-            {
-                label: "Small",
-                value: points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length,
-            },
-            {
-                label: "Medium",
-                value: points.filter(
-                    (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
-                ).length,
-            },
-            {
-                label: "Large",
-                value: points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length,
-            },
-        ];
 
-        const filtered = donutData.filter((d) => d.value > 0);
-
+        const filtered = donutData.filter((data) => data.value > 0);
         if (filtered.length === 0) return;
 
         // Create legend
@@ -70,19 +53,12 @@ const AggregationLegend = ({ points }: AggregationLegendProps) => {
         // console.log("Donut Data", donutData);
 
         donutData.forEach((data, value) => {
-            let color = "yellow";
-
-            if (data.label == "Medium") {
-                color = "orange";
-            } else if (data.label == "Large") {
-                color = "red";
-            }
             svg_legend
                 .append("circle")
                 .attr("cx", 10)
                 .attr("cy", 55 + value * 20)
                 .attr("r", 6)
-                .attr("fill", `${color}`);
+                .attr("fill", `${data.color}`);
 
             svg_legend
                 .append("text")
@@ -96,7 +72,7 @@ const AggregationLegend = ({ points }: AggregationLegendProps) => {
         return () => {
             svg_legend.remove();
         };
-    }, [])
+    }, [donutData])
 
     return <>
         <svg
