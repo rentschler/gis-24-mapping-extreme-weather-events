@@ -29,7 +29,8 @@ const Scatterplot = ({points}: ScatterplotProps) => {
         const impact_points = points.map((point) => ({
             time: new Date(point.event.time_event),
             impacts: point.event.impacts?.length || 0
-        }));
+        }))
+            .filter((d) => d.impacts > 0); // Filter out points with no impacts
 
         const precipitation_points = points.map((point) => ({
             time: new Date(point.event.time_event),
@@ -40,7 +41,7 @@ const Scatterplot = ({points}: ScatterplotProps) => {
         // draw x axis for time
         const xScale = d3
             .scaleTime()
-            .domain(d3.extent(impact_points, (d) => d.time) as [Date, Date])
+            .domain(d3.extent(points, (d) => new Date(d.event.time_event)) as [Date, Date])
             .range([0, width])
             .nice();
 
@@ -80,7 +81,7 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .attr("cy", (d) => yScale(d.impacts))
                 .attr("r", 4)
                 .attr("fill", "#00b894")
-                         .append('title')
+                .append('title')
                 .text(d => (`${d.impacts} impacts at ${d.time}`));
 
             // Labels
@@ -122,7 +123,9 @@ const Scatterplot = ({points}: ScatterplotProps) => {
                 .attr("cx", (d) => xScale(d.time))
                 .attr("cy", (d) => y2Scale(d.precipitation || 0))
                 .attr("r", 4)
-                .attr("fill", "#6c5ce7");
+                .attr("fill", "#6c5ce7")
+                .append('title')
+                .text(d => (`Precipitation: ${d.precipitation} at ${d.time}`));
 
             // Labels
             svg

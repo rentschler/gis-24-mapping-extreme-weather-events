@@ -1,19 +1,19 @@
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import {MeteorologicalEventRecord} from "../../../types/response";
+import { MeteorologicalEventRecord } from "../../../types/response";
 
 interface BarCharProps {
     points: MeteorologicalEventRecord[]
 }
 
-const BarChart = ({points}: BarCharProps) => {
+const BarChart = ({ points }: BarCharProps) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     // draw scatterplot
     useEffect(() => {
         if (!points || points.length === 0) return;
 
-        const margin = {top: 20, right: 100, bottom: 40, left: 60};
+        const margin = { top: 20, right: 100, bottom: 40, left: 60 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
@@ -29,7 +29,8 @@ const BarChart = ({points}: BarCharProps) => {
         const impact_points = points.map((point) => ({
             time: new Date(point.event.time_event),
             impacts: point.event.impacts?.length || 0
-        }));
+        }))
+            .filter((d) => d.impacts > 0); // Filter out points with no impacts
 
         const precipitation_points = points.map((point) => ({
             time: new Date(point.event.time_event),
@@ -40,7 +41,7 @@ const BarChart = ({points}: BarCharProps) => {
         // draw x axis for time
         const xScale = d3
             .scaleTime()
-            .domain(d3.extent(impact_points, (d) => d.time) as [Date, Date])
+            .domain(d3.extent(points, (d) => new Date(d.event.time_event)) as [Date, Date])
             .range([0, width])
             .nice();
 
@@ -69,17 +70,7 @@ const BarChart = ({points}: BarCharProps) => {
                 .call(d3.axisLeft(yScale))
                 .attr("font-size", "12px");
 
-            // Scatterplot for impacts
-            // svg.selectAll(".impact-dot")
-            //     .data(impact_points)
-            //     .enter()
-            //     .append("circle")
-            //     .attr("class", "impact-dot")
-            //     .attr("cx", (d) => xScale(d.time))
-            //     .attr("cy", (d) => yScale(d.impacts))
-            //     .attr("r", 4)
-            //     .attr("fill", "blue");
-                    // Create bars for impacts
+            // Create bars for impacts
             svg.append('g')
                 .selectAll('.impact-bars')
                 .data(impact_points.filter(d => d.impacts > 0))
@@ -149,7 +140,9 @@ const BarChart = ({points}: BarCharProps) => {
                 .attr('height', d => height - y2Scale(d.precipitation || 0))
                 .attr('fill', '#6c5ce7')
                 // .attr('rx', 4)
-                .attr('opacity', 0.5);
+                .attr('opacity', 0.5)
+                .append('title')
+                .text(d => (`Precipitation: ${d.precipitation} at ${d.time}`));
 
             // Labels
             svg.append("text")
@@ -170,7 +163,7 @@ const BarChart = ({points}: BarCharProps) => {
 
     }, [points])
     return <>
-        <svg ref={svgRef} style={{flex: 1, marginRight: "20px"}}></svg>
+        <svg ref={svgRef} style={{ flex: 1, marginRight: "20px" }}></svg>
     </>
 }
 export default BarChart

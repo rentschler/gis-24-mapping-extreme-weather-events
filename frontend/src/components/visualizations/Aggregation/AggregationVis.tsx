@@ -1,25 +1,21 @@
-import {MeteorologicalEventRecord} from "../../../types/response.ts";
-import React, {useState} from 'react';
+import { MeteorologicalEventRecord } from "../../../types/response.ts";
+import React, { useState } from 'react';
 import Scatterplot from "./Scatterplot.tsx";
 import PieChart from "./PieChart.tsx";
-import AggregationLegend from "./AggregationLegend.tsx";
 import BarChart from "./BarChart.tsx";
+import AggregationLegend from "./AggregationLegend.tsx";
 
 const AggregationData: React.FC<{
     points: MeteorologicalEventRecord[];
     country: string;
     name: string;
-}> = ({points, country, name}) => {
+}> = ({ points, country, name }) => {
     const [showBarChart, setShowBarChart] = useState(true)
 
 
-    if (!points || points.length < 2) return <>
-        <p style={{margin: "0", fontSize: "14px"}}>
-            <p>{country}: {name}</p>
-        </p>
-    </>
-    console.log("aggregation vis", points)
-
+    if (!points || points.length < 2) return             <div className={" d-flex flex-row gap-3"}>
+                <p className="h5 m-0  my-auto">{country}: {name}</p>
+            </div>
 
     return (
         <div
@@ -43,9 +39,10 @@ const AggregationData: React.FC<{
                 color: "black",
             }}
         >
-            <div className={"m-1 d-flex flex-row border-bottom gap-3"}>
-                <p className="h5 m-0">{country}: {name}</p>
-                <p className="h5 m-0">Total Points: {points.length} </p>
+            <div className={"mb-1 pb-1 d-flex flex-row border-bottom gap-3"}>
+                <p className="h5 m-0  my-auto">{country}: {name}</p>
+                <p className="h5 m-0  my-auto">Total Points: {points.length} </p>
+                <button className={"btn btn-primary btn-sm my-auto"} onClick={() => setShowBarChart(!showBarChart)}>Toggle Chart</button>
             </div>
 
             <div
