@@ -1,6 +1,6 @@
 // Source: https://datahub.io/core/geo-nuts-administrative-boundaries?utm_source=chatgpt.com#NUTS_RG_60M_2024_4326_LEVL_3
 // Lizenze: https://opendatacommons.org/licenses/pddl/
-import { MeteorologicalEventRecord } from "../../types/response.ts";
+import { MeteorologicalEventRecord, AdminPoint } from "../../types/response.ts";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 import { GeoJSON } from 'react-leaflet/GeoJSON'
 import { useState } from "react";
@@ -14,8 +14,10 @@ import * as d3 from "d3";
 import L from "leaflet";
 
 import { useMap } from "react-leaflet";
-interface HeatmapProps {
-    messageApi: MessageInstance
+interface AdministrativeProps {
+    messageApi: MessageInstance,
+    adminPoints : AdminPoint[],
+    adminBoundaries: Feature<Geometry>[]
 }
 
 // Legend Component
@@ -71,18 +73,18 @@ const Legend: React.FC<{ colorScale: d3.ScaleSequential<string, never>; domain: 
 
 
 // Load geojson and map precipitation amount to feature
-const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
-
+const Choropleth: React.FC<AdministrativeProps> = ({ messageApi, adminPoints, adminBoundaries }: AdministrativeProps) => {
     const displayLoadingMessage = () => {
         messageApi.open({
             type: 'loading',
-            content: 'Loading data for Choropleth...',
+            content: 'Loading data for choropleth map...',
             duration: 0,
             key: 'heatmap',
         });
         // Dismiss manually and asynchronously
         // setTimeout(messageApi.destroy, 2500);
     };
+    const [pointsDict , setAdminPoints] = useState<Record<number, MeteorologicalEventRecord[]>>({});
     const [geojson, setGeojson] = useState<Feature<Geometry, GeoJsonProperties>[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -92,7 +94,10 @@ const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
     // Delay function (Promise-based)
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+    // console.log("testing choropleth params", adminPoints, adminBoundaries);
     useEffect(() => {
+        if (!adminPoints || adminPoints.length === 0) return;
+        // Todo: Make dictionary of admin points, set admin boundaries 
         const fetchPoints = async () => {
             // open loading message
             setIsLoading(true);
@@ -100,10 +105,12 @@ const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
 
             let max = -Infinity;
             let min = Infinity;
+            /* 
 
             // Fetch all the data for each feature and wait for all the responses to come back
             await Promise.all(
-                (geojsonData.features as Feature<Geometry>[])/*.slice(1,50)*/.map(async (feature) => {
+                
+                (geojsonData.features as Feature<Geometry>[])/*.slice(1,50).map(async (feature) => {
                     const response = await fetch("/api/data/geometry", {
                         method: "POST",
                         headers: {
@@ -133,21 +140,30 @@ const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
                     // Sleep for 10 milliseconds before making the next request
                     await sleep(10); // Pause for 10 milliseconds
                 })
-            );
-            setMaxPrecipitation(max);
-            setMinPrecipitation(min);
+            ); */
+            setMaxPrecipitation(10);
+            setMinPrecipitation(1);
+            var dict:  Record<number, MeteorologicalEventRecord[]> = {};
+            adminPoints.forEach((points) => {
+                console.log(points);
+                dict[points.polygon_id] = points.geometry_points as MeteorologicalEventRecord[]
+            });
 
-            setGeojson(geojsonData.features as Feature<Geometry, GeoJsonProperties>[]);
-            console.log("My fetched responses", geojson);
+            
+            setAdminPoints(dict);
+            setGeojson(adminBoundaries as Feature<Geometry, GeoJsonProperties>[]);
+            console.log("loaded admin boundaries", adminBoundaries);
+            console.log("my points dict", dict);
             console.log("Min and max", min, max);
-        };
-
-        // after fetching all the data, set the loading state to false
-        fetchPoints().then(() => {
-            setIsLoading(false);
-            messageApi.destroy('heatmap');
-        });
-    }, []); // Empty dependency array ensures this runs only once on mount
+            }; 
+            
+            // after fetching all the data, set the loading state to false
+            fetchPoints().then(() => {
+                setIsLoading(false);
+                messageApi.destroy('heatmap');
+            }); 
+            
+        }, [adminPoints]); // Empty dependency array ensures this runs only once on mount
 
     const colorScale = d3.scaleSequential(d3.interpolateBlues)
         .domain([minPrecipitation!, maxPrecipitation!]); // Adjust the domain based on your data's expected range
@@ -173,8 +189,9 @@ const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
 
 
     return (<>
-        {!isLoading && geojson && geojson.length > 0 && (geojson).map((feature) => {
+        {!isLoading && adminBoundaries && adminBoundaries.length > 0 && (adminBoundaries).map((feature) => {
             return <GeoJSON
+                key={feature.properties?.NUTS_ID}
                 data={feature}
                 style={() => feature.properties?.style || {}}
             >
@@ -182,7 +199,13 @@ const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
                     <div className="" style={{
                         overflow: "auto",
                     }}>
-                        <AggregationData points={feature.properties?.response as MeteorologicalEventRecord[]} country={feature.properties?.CNTR_CODE} name={feature.properties?.NAME_LATN} />
+                        
+                        {(feature as any).polygon_id}
+
+                        {/*
+                        Eff this: {feature as any}
+                        */}
+                        <AggregationData points={pointsDict[(feature as any).polygon_id] as MeteorologicalEventRecord[]} country={feature.properties?.CNTR_CODE} name={feature.properties?.NAME_LATN} /> 
                     </div>
                 </Popup>
             </GeoJSON>

@@ -152,7 +152,7 @@ async def get_data_with_geometry(
         
         geometry_processed = process_geometry(body, geometry_raw)
         
-        print(geometry_processed)
+        # print(geometry_processed)
         
         group_list = [GeometryGrouped(**item) for item in geometry_processed]
 

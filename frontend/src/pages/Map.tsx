@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { GeoJsonProperties, Geometry, Feature, FeatureCollection } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord } from "../types/response";
+import { MeteorologicalEventRecord, AdminPoint } from "../types/response";
 import React from "react";
 
 
@@ -33,15 +33,17 @@ interface MapProps {
   matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
   dbscanData: FeatureCollection,
   messageApi: MessageInstance,
+  administrativePoints: AdminPoint[],
+  administrativeBoundaries: Feature<Geometry>[]
 
 }
 
-const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscanData }: MapProps) => {
+const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscanData, administrativePoints, administrativeBoundaries }: MapProps) => {
   /* Do we need this? yes to render the visualizations on demand*/
   const {
     options
   } = useSelector((state: RootState) => state.vis);
-  console.log(points, generalReportPoints, matchingPolygons);
+  // console.log(points, generalReportPoints, matchingPolygons);
 
   const [zoomLevel, setZoomLevel] = useState(8); // Default zoom level
   const mapRef = React.useRef(null);
@@ -90,7 +92,7 @@ const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscan
         {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
-        {options.showHeatmap && <Choropleth messageApi={messageApi} />}
+        {options.showHeatmap && <Choropleth messageApi={messageApi} adminPoints={administrativePoints} adminBoundaries={administrativeBoundaries} />}
         {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
       </MapContainer>
     </div>

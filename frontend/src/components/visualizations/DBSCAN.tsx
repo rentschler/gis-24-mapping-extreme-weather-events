@@ -13,7 +13,7 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
 
 
 
-    console.log("dbscan data", data.features[0]);
+    // console.log("dbscan data", data.features[0]);
     // return (<Marker position={[49,9]}></Marker>);
     // return (<>{data.features[0]}</>)
 

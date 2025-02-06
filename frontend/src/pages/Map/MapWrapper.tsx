@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Geometry, Feature, FeatureCollection } from 'geojson';
+import { Geometry, Feature, FeatureCollection, Polygon, GeoJsonProperties } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord } from "../../types/response";
+import { AdminPoint, MeteorologicalEventRecord } from "../../types/response";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
-import geojsonData from '../../combined_reports.geo.json'; // Replace with your actual geoJSON file
+import geojsonData from '../../combined_reports.geo.json'; // geojsons for general report points
+import adminJsonData from "../../europe_admin.geo.json";  // geojsons for administrative boundaries
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { QueryState } from "../../store/settingsSlice";
@@ -47,9 +48,14 @@ const MapWrapper = () => {
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
-  const [dbscanFeatureCollection, setDBSCANData] = useState<FeatureCollection>({  type: "FeatureCollection",
+  const [dbscanFeatureCollection, setAdminPoints] = useState<FeatureCollection>({  type: "FeatureCollection",
     features: [],
   });
+
+  // response of administrative choropleth
+  const [administrativePoints, setAdminstrativePoints] = useState<AdminPoint[]>([]);
+  // coropleth boundaries
+  const [administrativeBoundaries, setAdministrativeBoundaries] = useState<Feature<Geometry>[]>([]);
 
 
   useEffect(() => {
@@ -60,7 +66,7 @@ const MapWrapper = () => {
         const payLoad: { filters: QueryState } = {
           filters: filters
         }
-        console.log("filters:", filters);
+        // console.log("filters:", filters);
 
         const response = await fetch("/api/data", {
           method: "POST",
@@ -73,7 +79,7 @@ const MapWrapper = () => {
         
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
-          console.log("Fetched data:", data);
+          // console.log("Fetched data:", data);
           setRawData(data);
 
         } else {
@@ -83,7 +89,6 @@ const MapWrapper = () => {
 
 
         // Fetch cluster points
-
         const dbscan_response = await fetch("/api/cluster", {
           method: "POST",
           headers: {
@@ -93,9 +98,41 @@ const MapWrapper = () => {
         });
         if(dbscan_response.ok){
           const dbscan_data = await dbscan_response.json() as FeatureCollection; 
-          console.log("DBSCAN Data: ", dbscan_data);
-          setDBSCANData(dbscan_data);
+          // console.log("DBSCAN Data: ", dbscan_data);
+          setAdminPoints(dbscan_data);
         }
+        
+        
+        // Fetch administrative boundaries 
+        var geometries: Geometry[] = [];
+        var id = 1;
+        // Necessary to map the result with polygon_id with the loaded administrative geojson polygons
+        (adminJsonData.features as Feature<Geometry>[]).forEach((feature) => {
+          if (feature.geometry.type === "Polygon") {
+            geometries.push(feature.geometry);
+            (feature as any)["polygon_id"] = id; // Explicitly cast to `any` to avoid TypeScript errors
+            id += 1;
+          }
+        });
+
+        // Query API
+        const geometry_response = await fetch("/api/data/geometry", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+              filters: payLoad,
+              geometry: geometries
+          }),
+      });
+      if(geometry_response.ok){
+        const geometry_data = await geometry_response.json() as AdminPoint[]; 
+        // console.log("Administrative Data: ", geometry_data);
+        setAdminstrativePoints(geometry_data);
+        setAdministrativeBoundaries(adminJsonData.features as Feature<Geometry>[]);
+      }
+      
 
       } catch (error) {
         console.error("Error fetching api data:", error);
@@ -154,7 +191,14 @@ const MapWrapper = () => {
   return (
     <>
       {contextHolder}
-      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} messageApi={messageApi} dbscanData={dbscanFeatureCollection} ></Map>
+      <Map 
+      points={points} 
+      generalReportPoints={generalReportPoints} 
+      matchingPolygons={matchingPolygons} 
+      messageApi={messageApi} 
+      dbscanData={dbscanFeatureCollection} 
+      administrativeBoundaries={administrativeBoundaries} 
+      administrativePoints={administrativePoints} ></Map>
     </>
   )
 }
