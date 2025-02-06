@@ -1,5 +1,7 @@
 from typing import Annotated
 
+import geojson.geometry
+
 from fastapi import APIRouter, FastAPI, Query, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
 from geoalchemy2 import Geography
@@ -9,6 +11,9 @@ from sqlalchemy import create_engine, func, select, or_, and_
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, Session
 from geojson_pydantic import Feature, FeatureCollection, Point
+import geojson_pydantic
+import geojson
+
 
 from settings import settings
 from datetime import datetime, date
@@ -67,7 +72,7 @@ async def get_clusters(
     db: Session = Depends(get_db),
 ):
     try:
-        EPS = 0.05
+        EPS = 0.06
         MINPOINTS = 10
         
         query = cluster_post(db, body, EPS, MINPOINTS)
@@ -78,15 +83,13 @@ async def get_clusters(
         
         clusters_processed = process_cluster(body, clusters_raw)
         
+        
         group_list = [ClusterGrouped(**item) for item in clusters_processed]
         
         return cluster_to_geojson(group_list)
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")
-
-
-
 
 
 
@@ -126,7 +129,7 @@ async def get_data_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Item not found")
     return HeavyRainResponse.from_db(item)
 
-@app.post("/api/data/geometry", response_model=list[HeavyRainResponse])
+@app.post("/api/data/geometry", response_model=list[GeometryGrouped])
 async def get_data_with_geometry(
     body: GeometryPost,  # Accept GeoJSON as a dictionary
     db: Session = Depends(get_db),
@@ -136,43 +139,26 @@ async def get_data_with_geometry(
     with optional date and QC filtering.
     """
     try:
-        if not body.geometry:
-            raise HTTPException(status_code=400, detail="Geometry payload is required")
+        # for feature in body:
+        #     if not geojson.geometry.is_valid(feature):
+        #         raise HTTPException(status_code=400, detail="Invalid GeoJSON feature")
         # Validate and parse GeoJSON geometry
-        geojson_geometry = jsonable_encoder(body.geometry)
-        shapely_geom = shape(body.geometry)  # Convert GeoJSON to Shapely geometry
-        if not shapely_geom.is_valid:
-            raise HTTPException(status_code=400, detail="Invalid GeoJSON geometry")
-        if not isinstance(shapely_geom, (Polygon, MultiPolygon)):
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid geometry type: {shapely_geom.geom_type}. Expected Polygon or MultiPolygon."
-            )
         
-        # Construct the base query
-        query = db.query(HeavyRain).filter(
-            ST_Within(
-                HeavyRain.geom,  # Assuming `geom` is the geometry column in HeavyRain
-                ST_GeomFromGeoJSON(json.dumps(body.geometry))  # Convert GeoJSON to PostGIS geometry
-            )
-        )
-
-        # Add date filtering conditions if provided
-        # if date_from:
-        #     query = query.filter(HeavyRain.time_event >= date_from)
-        # if date_to:
-        #     query = query.filter(HeavyRain.time_event <= date_to)
-
-        # # Add QC level filtering if provided
-        # if qc:
-        #     query = query.filter(HeavyRain.qc_level == qc)
-
-        # Execute the query and fetch results
+        query = geometry_post(body, db)
+        
         results = query.all()
+        
+        geometry_raw = [GeometryDB.from_db(item) for item in results]
+        
+        geometry_processed = process_geometry(body, geometry_raw)
+        
+        print(geometry_processed)
+        
+        group_list = [GeometryGrouped(**item) for item in geometry_processed]
 
-        return [HeavyRainResponse.from_db(item) for item in results]
+        return group_list
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}, {traceback.format_exc()}")
 
 app.include_router(router)

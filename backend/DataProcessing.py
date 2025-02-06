@@ -1,4 +1,6 @@
 from shapely.geometry import Point, MultiPoint, Polygon
+import alphashape
+import numpy as np
 
 def post_filter_rain(body, res):
     if body.filters.impactRange:
@@ -42,11 +44,14 @@ def group_clusters(clusters):
         geom_points = [point.location.geom for point in grouped[cluster_id]]
         
         multipoint = MultiPoint(geom_points)
-        # Generate a convex hull as the polygon, which is the smallest convex polygon that contains all points
-        polygon = multipoint.convex_hull
+        alpha = 4  # Adjust this value to control the level of detail
+        geom_points = np.array([point.coords[0] for point in multipoint.geoms])
+        polygon = alphashape.alphashape(geom_points, alpha)
+        # polygon = polygon.buffer(10, join_style=1).buffer(-10.0, join_style=1)
         cluster = {
             "cluster_id": cluster_id,
-            "cluster_polygon": polygon
+            "cluster_polygon": polygon,
+            "cluster_points": grouped[cluster_id]
         }
         
         polygons.append(cluster)
@@ -61,7 +66,7 @@ def process_cluster(body, res):
     
     return clusters_grouped
     
-    
+
 
 
 def cluster_to_geojson(clusters):
@@ -71,7 +76,7 @@ def cluster_to_geojson(clusters):
     }
     
     for cluster in clusters:
-        buffer = cluster.cluster_polygon.buffer(0.02)
+        buffer = cluster.cluster_polygon.buffer(0.012)
         coordinates = list(buffer.exterior.coords)
         properties = cluster.__dict__
         
@@ -92,3 +97,34 @@ def cluster_to_geojson(clusters):
         
     
     return data
+
+def group_geometries(geometries):
+    grouped = {
+        geometry.polygon_id: []
+        for geometry in geometries
+    }
+    
+    for geometry in geometries:
+        grouped[geometry.polygon_id].append(geometry)
+
+    geometry_list = []
+    
+    for key, value in grouped.items():
+        geometry_list.append({
+            'polygon_id': key,
+            'geometry_points': value
+        })
+    
+    return geometry_list
+
+def process_geometry(body, res):
+    geometries = post_filter_rain(body, res)
+    
+    geometries_grouped = group_geometries(geometries)
+    
+    return geometries_grouped
+
+
+def geometries_to_geojson(geometries_grouped):
+    pass
+    

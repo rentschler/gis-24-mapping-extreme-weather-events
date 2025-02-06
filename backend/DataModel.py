@@ -8,6 +8,7 @@ import shapely
 import geojson
 from typing import Optional, Dict, Union
 from datetime import date, datetime, timedelta
+import geojson_pydantic
 import traceback
 
 from DBModel import *
@@ -334,6 +335,7 @@ class ClusterDB(HeavyRainResponse):
 class ClusterGrouped(BaseModel):
     cluster_id: Optional[int] = None
     cluster_polygon: Optional[Polygon] = None
+    cluster_points: Optional[list[ClusterDB]] = None
         
     class Config:
         # Allow arbitrary types like Shapely Polygon
@@ -357,5 +359,21 @@ class ClusterGrouped(BaseModel):
             
 
 class GeometryPost(BaseModel):
-    geometry: dict
+    filters: Optional[HeavyRainFilter] = None
+    geometry: list[geojson_pydantic.Polygon]
     
+    
+class GeometryDB(HeavyRainResponse):
+    polygon_id: Optional[int] = None
+    
+    @classmethod
+    def from_db(cls, geometry):
+        
+        instance = super().from_db(geometry[0])
+        instance.polygon_id = geometry.polygon_id
+        return instance
+    
+    
+class GeometryGrouped(BaseModel):
+    polygon_id: int
+    geometry_points: Optional[list[GeometryDB]] = None
