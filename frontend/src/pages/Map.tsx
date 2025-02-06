@@ -10,7 +10,7 @@ import React from "react";
 import DynamicCluster from "../components/visualizations/DynamicCluster";
 import SimplePoints from "../components/visualizations/SimplePoints";
 import ReportPointsPolygons from "../components/visualizations/ReportPointsPolygons";
-import Heatmap from "../components/visualizations/Heatmap";
+import Choropleth from "../components/visualizations/Choropleth";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { MessageInstance } from "antd/es/message/interface";
@@ -90,7 +90,7 @@ const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscan
         {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
-        {options.showHeatmap && <Heatmap messageApi={messageApi} />}
+        {options.showHeatmap && <Choropleth messageApi={messageApi} />}
         {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
       </MapContainer>
     </div>

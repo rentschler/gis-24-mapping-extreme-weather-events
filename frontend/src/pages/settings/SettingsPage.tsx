@@ -189,7 +189,7 @@ const SettingsPage = ({onHide}: SettingsPageProps) => {
                 setChecked={(checked: boolean) => {
                     dispatch(setShowHeatmap(checked));
                 }}
-                label="Show Heatmap"
+                label="Show Choropleth Map"
                 title="Show or hide heat map with precipitation number"
             />
 

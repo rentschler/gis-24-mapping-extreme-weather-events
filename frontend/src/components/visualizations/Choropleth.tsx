@@ -1,6 +1,6 @@
 // Source: https://datahub.io/core/geo-nuts-administrative-boundaries?utm_source=chatgpt.com#NUTS_RG_60M_2024_4326_LEVL_3
 // Lizenze: https://opendatacommons.org/licenses/pddl/
-import { MeteorologicalEventRecord } from "../../types/response";
+import { MeteorologicalEventRecord } from "../../types/response.ts";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 import { GeoJSON } from 'react-leaflet/GeoJSON'
 import { useState } from "react";
@@ -71,12 +71,12 @@ const Legend: React.FC<{ colorScale: d3.ScaleSequential<string, never>; domain: 
 
 
 // Load geojson and map precipitation amount to feature
-const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
+const Choropleth: React.FC<HeatmapProps> = ({ messageApi }) => {
 
     const displayLoadingMessage = () => {
         messageApi.open({
             type: 'loading',
-            content: 'Loading data for heatmap...',
+            content: 'Loading data for Choropleth...',
             duration: 0,
             key: 'heatmap',
         });
@@ -194,4 +194,4 @@ const Heatmap: React.FC<HeatmapProps> = ({ messageApi }) => {
     </>);
 }
 
-export default Heatmap;
+export default Choropleth;
