@@ -1,9 +1,11 @@
 
 import "leaflet/dist/leaflet.css";
-import { Popup, Marker } from "react-leaflet";
+import { Popup } from "react-leaflet";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 import { GeoJSON } from 'react-leaflet/GeoJSON';
 import * as d3 from "d3";
+import AggregationData from "./Aggregation/AggregationVis.tsx";
+import { MeteorologicalEventRecord } from "../../types/response.ts";
 
 
 
@@ -11,7 +13,7 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
 
 
 
-    console.log("dbscan data", data.features[0]);
+    // console.log("dbscan data", data.features[0]);
     // return (<Marker position={[49,9]}></Marker>);
     // return (<>{data.features[0]}</>)
 
@@ -34,7 +36,10 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
                 }}
             >
                 <Popup >
-                    <p>Cluster information tbd<br/>ClusterID: {feature.properties!.cluster_id} </p>
+                    <AggregationData 
+                    points={feature.properties?.cluster_points as MeteorologicalEventRecord[]} 
+                    country={feature.properties?.cluster_points[0]?.location.country} 
+                    name={feature.properties?.cluster_points[0]?.location.place} />
                 </Popup>
             </GeoJSON>
         ))}</>);

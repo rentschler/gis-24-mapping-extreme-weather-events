@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Geometry, Feature, FeatureCollection } from 'geojson';
-
 import "leaflet/dist/leaflet.css";
 import { MeteorologicalEventRecord } from "../../types/response";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
-import geojsonData from '../../combined_reports.geo.json'; // Replace with your actual geoJSON file
+import geojsonData from '../../combined_reports.geo.json'; // geojsons for general report points
+import adminJsonData from "../../europe_admin.geo.json";  // geojsons for administrative boundaries
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { QueryState } from "../../store/settingsSlice";
@@ -30,6 +30,16 @@ const MapWrapper = () => {
     // Dismiss manually and asynchronously
     // setTimeout(messageApi.destroy, 2500);
   };
+  const displayChoroplethMessage = () => {
+    messageApi.open({
+      type: 'loading',
+      content: 'Loading choropleth data...',
+      duration: 0,
+      key: 'choropleth',
+    });
+    // Dismiss manually and asynchronously
+    // setTimeout(messageApi.destroy, 2500);
+  };
 
 
   // query filter state (e.g. time range, impact codes, etc)
@@ -47,10 +57,52 @@ const MapWrapper = () => {
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
-  const [dbscanFeatureCollection, setDBSCANData] = useState<FeatureCollection>({  type: "FeatureCollection",
+  const [dbscanFeatureCollection, setAdminPoints] = useState<FeatureCollection>({
+    type: "FeatureCollection",
     features: [],
   });
 
+  // coropleth data
+  const [administrativeBoundaries, setAdministrativeBoundaries] = useState<Feature<Geometry>[]>([]);
+
+
+  useEffect(() => {
+    const fetchChoroplethData = async () => {
+      displayChoroplethMessage();
+      try {
+        // Query API Choropleth
+        const geometry_response = await fetch("/api/data/feature_list", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            filters: filters,
+            geojsons: adminJsonData.features as Feature<Geometry>[]
+          }),
+        });
+  
+        if (geometry_response.ok) {
+          const geometry_data = await geometry_response.json() as Feature<Geometry>[];
+  
+          console.log("Administrative Data: ", geometry_data);
+          // setAdminstrativePoints(geometry_data);
+          setAdministrativeBoundaries(geometry_data);
+        }
+        
+      } catch (error) {
+        console.error("Error fetching api choropleth data:", error);
+        setHasError("Failed fetching api choropleth data:");
+        
+      } finally {
+        messageApi.destroy('choropleth');
+  
+      }
+    };
+    
+    fetchChoroplethData();
+  }, [filters]);
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -60,7 +112,7 @@ const MapWrapper = () => {
         const payLoad: { filters: QueryState } = {
           filters: filters
         }
-        console.log("filters:", filters);
+        // console.log("filters:", filters);
 
         const response = await fetch("/api/data", {
           method: "POST",
@@ -70,10 +122,10 @@ const MapWrapper = () => {
           body: JSON.stringify(payLoad),
         });
 
-        
+
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
-          console.log("Fetched data:", data);
+          // console.log("Fetched data:", data);
           setRawData(data);
 
         } else {
@@ -81,9 +133,7 @@ const MapWrapper = () => {
           setHasError("Failed fetching api data:");
         }
 
-
         // Fetch cluster points
-
         const dbscan_response = await fetch("/api/cluster", {
           method: "POST",
           headers: {
@@ -91,11 +141,13 @@ const MapWrapper = () => {
           },
           body: JSON.stringify(payLoad),
         });
-        if(dbscan_response.ok){
-          const dbscan_data = await dbscan_response.json() as FeatureCollection; 
-          console.log("DBSCAN Data: ", dbscan_data);
-          setDBSCANData(dbscan_data);
+        if (dbscan_response.ok) {
+          const dbscan_data = await dbscan_response.json() as FeatureCollection;
+          // console.log("DBSCAN Data: ", dbscan_data);
+          setAdminPoints(dbscan_data);
         }
+
+
 
       } catch (error) {
         console.error("Error fetching api data:", error);
@@ -154,7 +206,13 @@ const MapWrapper = () => {
   return (
     <>
       {contextHolder}
-      <Map points={points} generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} messageApi={messageApi} dbscanData={dbscanFeatureCollection} ></Map>
+      <Map
+        points={points}
+        generalReportPoints={generalReportPoints}
+        matchingPolygons={matchingPolygons}
+        dbscanData={dbscanFeatureCollection}
+        administrativeBoundaries={administrativeBoundaries}
+      ></Map>
     </>
   )
 }
