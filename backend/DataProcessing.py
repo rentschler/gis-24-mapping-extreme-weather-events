@@ -128,3 +128,17 @@ def process_geometry(body, res):
 def geometries_to_geojson(geometries_grouped):
     pass
     
+def merge_with_geojson(body, geometries_grouped):
+    geojsons = []
+
+    for i, feature in enumerate(body.geojsons):
+        polygon_id = str(i + 1)
+        matched_geometry = next((item for item in geometries_grouped if item['polygon_id'] == polygon_id), None)
+
+        geojsons.append({
+            "type": "Feature",
+            "properties": {**feature.properties, "geometry_points": matched_geometry['geometry_points'] if matched_geometry else []},
+            "geometry": feature.geometry.dict()
+        })
+    
+    return geojsons

@@ -102,3 +102,46 @@ def geometry_post(body: GeometryPost, db):
     )
     
     return query
+
+
+# Testing this
+def geometry_post_geojson(body: GeometryPostGeoJSON, db):
+    polygon_conditions = []
+    polygon_labels = []
+    
+    for i, feature in enumerate(body.geojsons):
+        polygon_geom = ST_GeomFromGeoJSON(feature.geometry.json())
+        condition = ST_Within(HeavyRain.geom, polygon_geom)
+        label = f'{i + 1}'
+        polygon_conditions.append(condition)
+        polygon_labels.append((condition, label))
+    
+    polygon_case = case(
+        *[(cond, label) for cond, label in zip(polygon_conditions, [f'{i + 1}' for i in range(len(body.geojsons))])]
+    )
+    
+    query = db.query(
+        HeavyRain,
+        polygon_case.label('polygon_id')
+    ).filter(
+        or_(*polygon_conditions)
+    )
+    
+    # Apply filters
+    if body.filters:
+        if body.filters.timeRange:
+            query = query.filter(HeavyRain.time_event.between(body.filters.timeRange[0], body.filters.timeRange[1]))
+
+        if body.filters.impactCodes:
+            string_lookup = [HeavyRain.impacts.contains(code) for code in body.filters.impactCodes]
+            query = query.filter(or_(*string_lookup))
+
+        if body.filters.qcLevels:
+            string_lookup = [HeavyRain.qc_level == code for code in body.filters.qcLevels]
+            query = query.filter(or_(*string_lookup))
+
+        if body.filters.infoSources:
+            string_lookup = [HeavyRain.info_source.contains(code) for code in body.filters.infoSources]
+            query = query.filter(or_(*string_lookup))
+    
+    return query

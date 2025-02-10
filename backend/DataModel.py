@@ -362,9 +362,12 @@ class GeometryPost(BaseModel):
     filters: Optional[HeavyRainFilter] = None
     geometry: list[geojson_pydantic.Polygon]
     
+class GeometryPostGeoJSON(BaseModel):
+    filters:  HeavyRainFilter # Optional[HeavyRainFilter] = None
+    geojsons: list[geojson_pydantic.Feature]
     
 class GeometryDB(HeavyRainResponse):
-    polygon_id: Optional[int] = None
+    polygon_id: Optional[str] = None
     
     @classmethod
     def from_db(cls, geometry):

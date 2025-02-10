@@ -161,4 +161,28 @@ async def get_data_with_geometry(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}, {traceback.format_exc()}")
 
+
+
+@app.post("/api/data/feature_list", response_model=list[geojson_pydantic.Feature])
+async def get_data_with_geojson(
+    body: GeometryPostGeoJSON,
+    db: Session = Depends(get_db),
+):
+    """
+    Fetch HeavyRain records that fall within the specified GeoJSON features,
+    attach geometry points to the original GeoJSON, and return an array of GeoJSONs.
+    """
+    try:
+        query = geometry_post_geojson(body, db)
+        results = query.all()
+        geometry_raw = [GeometryDB.from_db(item) for item in results]
+        geometry_processed = process_geometry(body, geometry_raw)
+        geojson_result = merge_with_geojson(body, geometry_processed)
+        return geojson_result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}, {traceback.format_exc()}")
+
+
+
+
 app.include_router(router)
