@@ -86,7 +86,7 @@ const MapWrapper = () => {
         if (geometry_response.ok) {
           const geometry_data = await geometry_response.json() as Feature<Geometry>[];
   
-          console.log("Administrative Data: ", geometry_data);
+          // console.log("Administrative Data: ", geometry_data);
           // setAdminstrativePoints(geometry_data);
           setAdministrativeBoundaries(geometry_data);
         }

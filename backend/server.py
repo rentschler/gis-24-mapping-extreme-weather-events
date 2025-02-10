@@ -89,8 +89,8 @@ async def get_clusters(
         return cluster_to_geojson(group_list)
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")
-
+        # raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}         {traceback.format_exc()}")
+        return {"type": "FeatureCollection", "features": []} 
 
 
 @app.get("/api/data", response_model=list[HeavyRainResponse])
@@ -180,7 +180,7 @@ async def get_data_with_geojson(
         geojson_result = merge_with_geojson(body, geometry_processed)
         return geojson_result
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}, {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}, {traceback.format_exc()}")     
 
 
 
