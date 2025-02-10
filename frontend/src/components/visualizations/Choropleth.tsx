@@ -139,7 +139,7 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
 
 
     return (<>
-        {!isLoading && adminBoundaries && adminBoundaries.length > 0 && (adminBoundaries).map((feature, index) => {
+        {!isLoading && adminBoundaries && adminBoundaries.length > 0 && (adminBoundaries).map((feature) => {
             return <GeoJSON
                 key={feature.properties?.NUTS_ID}
                 data={feature}
@@ -149,11 +149,6 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
                     <div className="" style={{
                         overflow: "auto",
                     }}>
-                        index {index}
-
-                        {/*
-                        Eff this: {feature as any}
-                        */}
                         <AggregationData points={(feature.properties as any).geometry_points as MeteorologicalEventRecord[]} country={feature.properties?.CNTR_CODE} name={feature.properties?.NAME_LATN} /> 
                     </div>
                 </Popup>

@@ -70,17 +70,15 @@ const MapWrapper = () => {
     const fetchChoroplethData = async () => {
       displayChoroplethMessage();
       try {
-        const payLoad: { filters: QueryState } = {
-          filters: filters
-        }
         // Query API Choropleth
         const geometry_response = await fetch("/api/data/feature_list", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({
-            filters: payLoad,
+            filters: filters,
             geojsons: adminJsonData.features as Feature<Geometry>[]
           }),
         });
