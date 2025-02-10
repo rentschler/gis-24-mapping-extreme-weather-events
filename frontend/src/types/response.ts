@@ -276,8 +276,3 @@ export const impactCodeData: ImpactCodeData[] = [
     { code: ImpactCode.E2, description: "Fire as a consequence of the event" },
     { code: ImpactCode.E3, description: "Evacuation order by authorities" }
 ];
-
-export type AdminPoint = { 
-    polygon_id: number,
-    geometry_points: MeteorologicalEventRecord[]
-}

@@ -1,6 +1,6 @@
 
 import "leaflet/dist/leaflet.css";
-import { Popup, Marker } from "react-leaflet";
+import { Popup } from "react-leaflet";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 import { GeoJSON } from 'react-leaflet/GeoJSON';
 import * as d3 from "d3";

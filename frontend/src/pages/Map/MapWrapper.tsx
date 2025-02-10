@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Geometry, Feature, FeatureCollection, Polygon, GeoJsonProperties } from 'geojson';
-
+import { Geometry, Feature, FeatureCollection } from 'geojson';
 import "leaflet/dist/leaflet.css";
-import { AdminPoint, MeteorologicalEventRecord } from "../../types/response";
+import { MeteorologicalEventRecord } from "../../types/response";
 
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 import geojsonData from '../../combined_reports.geo.json'; // geojsons for general report points
@@ -31,6 +30,16 @@ const MapWrapper = () => {
     // Dismiss manually and asynchronously
     // setTimeout(messageApi.destroy, 2500);
   };
+  const displayChoroplethMessage = () => {
+    messageApi.open({
+      type: 'loading',
+      content: 'Loading choropleth data...',
+      duration: 0,
+      key: 'choropleth',
+    });
+    // Dismiss manually and asynchronously
+    // setTimeout(messageApi.destroy, 2500);
+  };
 
 
   // query filter state (e.g. time range, impact codes, etc)
@@ -48,15 +57,54 @@ const MapWrapper = () => {
   const [points, setPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [generalReportPoints, setGeneralReportPoints] = useState<MeteorologicalEventRecord[]>([]);
   const [matchingPolygons, setMatchingPolygons] = useState<Feature[]>([]);
-  const [dbscanFeatureCollection, setAdminPoints] = useState<FeatureCollection>({  type: "FeatureCollection",
+  const [dbscanFeatureCollection, setAdminPoints] = useState<FeatureCollection>({
+    type: "FeatureCollection",
     features: [],
   });
 
-  // response of administrative choropleth
-  const [administrativePoints, setAdminstrativePoints] = useState<AdminPoint[]>([]);
-  // coropleth boundaries
+  // coropleth data
   const [administrativeBoundaries, setAdministrativeBoundaries] = useState<Feature<Geometry>[]>([]);
 
+
+  useEffect(() => {
+    const fetchChoroplethData = async () => {
+      displayChoroplethMessage();
+      try {
+        const payLoad: { filters: QueryState } = {
+          filters: filters
+        }
+        // Query API Choropleth
+        const geometry_response = await fetch("/api/data/feature_list", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filters: payLoad,
+            geojsons: adminJsonData.features as Feature<Geometry>[]
+          }),
+        });
+  
+        if (geometry_response.ok) {
+          const geometry_data = await geometry_response.json() as Feature<Geometry>[];
+  
+          console.log("Administrative Data: ", geometry_data);
+          // setAdminstrativePoints(geometry_data);
+          setAdministrativeBoundaries(geometry_data);
+        }
+        
+      } catch (error) {
+        console.error("Error fetching api choropleth data:", error);
+        setHasError("Failed fetching api choropleth data:");
+        
+      } finally {
+        messageApi.destroy('choropleth');
+  
+      }
+    };
+    
+    fetchChoroplethData();
+  }, [filters]);
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -76,7 +124,7 @@ const MapWrapper = () => {
           body: JSON.stringify(payLoad),
         });
 
-        
+
         if (response.ok) {
           const data = await response.json() as MeteorologicalEventRecord[];
           // console.log("Fetched data:", data);
@@ -87,7 +135,6 @@ const MapWrapper = () => {
           setHasError("Failed fetching api data:");
         }
 
-
         // Fetch cluster points
         const dbscan_response = await fetch("/api/cluster", {
           method: "POST",
@@ -96,43 +143,13 @@ const MapWrapper = () => {
           },
           body: JSON.stringify(payLoad),
         });
-        if(dbscan_response.ok){
-          const dbscan_data = await dbscan_response.json() as FeatureCollection; 
+        if (dbscan_response.ok) {
+          const dbscan_data = await dbscan_response.json() as FeatureCollection;
           // console.log("DBSCAN Data: ", dbscan_data);
           setAdminPoints(dbscan_data);
         }
-        
-        
-        // Fetch administrative boundaries 
-        var geometries: Geometry[] = [];
-        var id = 1;
-        // Necessary to map the result with polygon_id with the loaded administrative geojson polygons
-        (adminJsonData.features as Feature<Geometry>[]).forEach((feature) => {
-          if (feature.geometry.type === "Polygon") {
-            geometries.push(feature.geometry);
-            (feature as any)["polygon_id"] = id; // Explicitly cast to `any` to avoid TypeScript errors
-            id += 1;
-          }
-        });
 
-        // Query API
-        const geometry_response = await fetch("/api/data/geometry", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-              filters: payLoad,
-              geometry: geometries
-          }),
-      });
-      if(geometry_response.ok){
-        const geometry_data = await geometry_response.json() as AdminPoint[]; 
-        // console.log("Administrative Data: ", geometry_data);
-        setAdminstrativePoints(geometry_data);
-        setAdministrativeBoundaries(adminJsonData.features as Feature<Geometry>[]);
-      }
-      
+
 
       } catch (error) {
         console.error("Error fetching api data:", error);
@@ -191,14 +208,13 @@ const MapWrapper = () => {
   return (
     <>
       {contextHolder}
-      <Map 
-      points={points} 
-      generalReportPoints={generalReportPoints} 
-      matchingPolygons={matchingPolygons} 
-      messageApi={messageApi} 
-      dbscanData={dbscanFeatureCollection} 
-      administrativeBoundaries={administrativeBoundaries} 
-      administrativePoints={administrativePoints} ></Map>
+      <Map
+        points={points}
+        generalReportPoints={generalReportPoints}
+        matchingPolygons={matchingPolygons}
+        dbscanData={dbscanFeatureCollection}
+        administrativeBoundaries={administrativeBoundaries}
+      ></Map>
     </>
   )
 }

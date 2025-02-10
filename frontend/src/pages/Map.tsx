@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { GeoJsonProperties, Geometry, Feature, FeatureCollection } from 'geojson';
 
 import "leaflet/dist/leaflet.css";
-import { MeteorologicalEventRecord, AdminPoint } from "../types/response";
+import { MeteorologicalEventRecord } from "../types/response";
 import React from "react";
 
 
@@ -13,7 +13,6 @@ import ReportPointsPolygons from "../components/visualizations/ReportPointsPolyg
 import Choropleth from "../components/visualizations/Choropleth";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { MessageInstance } from "antd/es/message/interface";
 import DBSCAN from "../components/visualizations/DBSCAN";
 // Sample GeoJSON (you would typically fetch this from an API or import it)
 /* import { useSelector } from "react-redux";
@@ -32,13 +31,11 @@ interface MapProps {
   generalReportPoints: MeteorologicalEventRecord[],
   matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
   dbscanData: FeatureCollection,
-  messageApi: MessageInstance,
-  administrativePoints: AdminPoint[],
   administrativeBoundaries: Feature<Geometry>[]
 
 }
 
-const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscanData, administrativePoints, administrativeBoundaries }: MapProps) => {
+const Map = ({ points, generalReportPoints, matchingPolygons, dbscanData, administrativeBoundaries }: MapProps) => {
   /* Do we need this? yes to render the visualizations on demand*/
   const {
     options
@@ -92,7 +89,7 @@ const Map = ({ points, generalReportPoints, matchingPolygons, messageApi, dbscan
         {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
         {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
-        {options.showHeatmap && <Choropleth messageApi={messageApi} adminPoints={administrativePoints} adminBoundaries={administrativeBoundaries} />}
+        {options.showHeatmap && <Choropleth adminBoundaries={administrativeBoundaries} />}
         {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
       </MapContainer>
     </div>
