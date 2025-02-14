@@ -86,11 +86,20 @@ const Map = ({ points, generalReportPoints, matchingPolygons, dbscanData, admini
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ZoomListener />
-        {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
-        {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
-        {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
+        {/* Drawing order: Heat map, then dbscan on top, then summary poligons, and on top point/cluster markers*/}
+        {/*Choropleth layer*/}
         {options.showHeatmap && <Choropleth adminBoundaries={administrativeBoundaries} />}
+
+        {/*DBSCAN layer*/}
         {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
+
+        {/* event summaries*/}
+        {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
+
+        {/* Point markers*/}
+        {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
+        {/* Cluster markers*/}
+        {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
       </MapContainer>
     </div>
   );
