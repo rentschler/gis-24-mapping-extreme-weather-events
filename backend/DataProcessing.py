@@ -10,7 +10,7 @@ def post_filter_rain(body, res):
         
         filtered_list = [
             item for item in res
-            if min_bound <= len(item.event.impacts or []) <= max_bound
+            if min_bound <= len(item.event.impacts or []) and len(item.event.impacts or []) <= max_bound
         ]
         
         return filtered_list
@@ -18,10 +18,11 @@ def post_filter_rain(body, res):
     return res 
 
 def post_filter_cluster(body, res):
-    list = post_filter_rain(body, res)
+    
+    post_filter_list = post_filter_rain(body, res)
     
     filtered_list = [
-        item for item in list
+        item for item in post_filter_list
         if item.cluster_id != None
     ]
     return filtered_list
@@ -37,9 +38,16 @@ def group_clusters(clusters):
     for cluster in clusters:
         grouped[cluster.cluster_id].append(cluster)
     
+    # filter out clusters with less then 5 item
+    filtered = {}
+    for group in grouped.keys():
+        # print(f'{group} : number of items {len(grouped[group])}')
+        if len(grouped[group]) > 4:
+            filtered[group] = grouped[group]
+    
     polygons = []
     
-    for cluster_id in grouped.keys():
+    for cluster_id in filtered.keys():
         
         geom_points = [point.location.geom for point in grouped[cluster_id]]
         
@@ -55,11 +63,13 @@ def group_clusters(clusters):
         }
         
         polygons.append(cluster)
+
     
     
     return polygons
 
 def process_cluster(body, res):
+    
     clusters = post_filter_cluster(body, res)
     
     clusters_grouped = group_clusters(clusters)

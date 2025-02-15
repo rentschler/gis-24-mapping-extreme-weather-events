@@ -80,12 +80,11 @@ async def get_clusters(
         res = query.all()
                 
         clusters_raw = [ClusterDB.from_db(item) for item in res]
-        
+                
         clusters_processed = process_cluster(body, clusters_raw)
         
-        
         group_list = [ClusterGrouped(**item) for item in clusters_processed]
-        
+                
         return cluster_to_geojson(group_list)
         
     except Exception as e:
@@ -149,7 +148,7 @@ async def get_data_with_geometry(
         results = query.all()
         
         geometry_raw = [GeometryDB.from_db(item) for item in results]
-        
+
         geometry_processed = process_geometry(body, geometry_raw)
         
         # print(geometry_processed)
