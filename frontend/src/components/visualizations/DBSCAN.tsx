@@ -6,6 +6,7 @@ import {FeatureCollection, Geometry, GeoJsonProperties, Feature} from "geojson";
 import * as d3 from "d3";
 import AggregationData from "./Aggregation/AggregationVis.tsx";
 import {MeteorologicalEventRecord} from "../../types/response.ts";
+import BivariateLegend from "../legend/BivariateLegend.tsx";
 
 const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }> = ({data}) => {
   const [reloadKey, setReloadKey] = useState(0);
@@ -38,15 +39,14 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
   // Number of quantile bins per dimension (3x3 grid)
   const n = 3;
 
-  // Create quantile scales for each variable.
-  // These scales will return an index in the range [0, 1, 2]
-  const x = d3.scaleQuantile()
+  // Create threshold scales for each variable.
+  const x = d3.scaleThreshold<number, number>()
       .domain([minImpacts, maxImpacts/2])
-      .range(d3.range(n));
+      .range([0.1, 1, 2]);
 
-  const y = d3.scaleQuantile()
-      .domain([minPrecip, maxPrecip/2])
-      .range(d3.range(n));
+  const y = d3.scaleThreshold<number, number>()
+  .domain([0.1, maxPrecip/2])
+  .range([0, 1, 2]);
 
   // Define the 3x3 RdBu color scheme
   const rdBu = {
@@ -55,15 +55,6 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
       "#e8e8e8", "#e4acac", "#c85a5a",
       "#b0d5df", "#ad9ea5", "#985356",
       "#64acbe", "#627f8c", "#574249"
-    ]
-  };
-
-//   2x2c RdBu color scheme
-  const rdBu2c = {
-    name: "RdBu",
-    colors: [
-      "#e8e8e8", "#c85a5a",
-      "#64acbe", "#574249"
     ]
   };
 
@@ -76,7 +67,7 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
     const precip_avg = precip_sum / (feature.properties?.cluster_points?.length || 1);
     const ix = x(impacts_avg);
     const iy = y(precip_avg);
-    const index = ix  + iy* n;
+    const index = ix  + iy * n;
     console.log(feature.properties?.cluster_points?.length + "\nprecip", precip_avg, ix + "\nimpacts", impacts_avg, iy + "\nindex", index, "\n", rdBu.colors[index]);
     return rdBu.colors[index];
   };
@@ -92,7 +83,7 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
                   weight: 1,
                   opacity: 1,
                   color: "white", // Border color
-                  fillOpacity: 1,
+                  fillOpacity: 0.8,
                 })}
             >
               <Popup
@@ -102,16 +93,22 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
                   pane="popupPane" // Force popup to render on top
               >
                 <div style={{overflow: "auto"}}>
-                    <h1 style={{color: twoDimColor(feature)}}>cluster</h1>
                   <AggregationData
                       points={feature.properties?.cluster_points as MeteorologicalEventRecord[]}
-                      country={feature.properties?.cluster_points[0]?.location.country}
+                      country={"Cluster"}
                       name={feature.properties?.cluster_points[0]?.location.place}
                   />
                 </div>
               </Popup>
             </GeoJSON>
         ))}
+        <BivariateLegend colors={rdBu.colors}  
+
+    title = "Cluster Legend"
+    impactLabel = "Impacts"
+    precipLabel = "Precipitation"
+
+    ></BivariateLegend>
       </>
   );
 };
