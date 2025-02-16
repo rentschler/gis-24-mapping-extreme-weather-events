@@ -1,5 +1,6 @@
 
 import "leaflet/dist/leaflet.css";
+import React, { useState, useEffect } from "react";
 import { Popup } from "react-leaflet";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 import { GeoJSON } from 'react-leaflet/GeoJSON';
@@ -16,6 +17,12 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
     // console.log("dbscan data", data.features[0]);
     // return (<Marker position={[49,9]}></Marker>);
     // return (<>{data.features[0]}</>)
+    const [reloadKey, setReloadKey] = useState(0);
+
+    useEffect(() => {
+        // This effect will run whenever `data` changes
+        setReloadKey(prevKey => prevKey + 1);
+    }, [data]);
 
     const colorScale = d3.scaleOrdinal<string>()
         .domain(data.features.map(feature => feature.properties!.cluster_id)) // Use a property like `category`
@@ -26,7 +33,8 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
         {/* Map over features */}
         {data.features.map((feature, index) => (
             <GeoJSON 
-                key={index} 
+            
+                key={`${index}-${reloadKey}`}
                 data={feature} 
                 style={{fillColor: colorScale(feature.properties!.cluster_id),
                     weight: 1,
