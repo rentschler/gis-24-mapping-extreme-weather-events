@@ -1,7 +1,8 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import * as d3 from "d3";
 import {MeteorologicalEventRecord} from "../../../types/response";
-import AggregationLegend from "./AggregationLegend.tsx";
+import SvgLegend from "../../legend/SvgLegend.tsx";
+import {PieArcDatum} from "d3";
 
 interface PieChartProps {
     points: MeteorologicalEventRecord[],
@@ -18,37 +19,43 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
     const donutRef = useRef<SVGSVGElement | null>(null);
     const [hasData, setHasData] = useState(false);
 
-    const colors = !impactType ? d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#98abc5", "#8a89a6", "#7b6888"]) :
-        // d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#d0743c", "#ff8c00", "#a05d56"]);
-        d3.scaleOrdinal().domain(["Small", "Medium", "Large"]).range(["#d0743c", "#ff8c00", "#a05d56"]);
+    // Helper to extract the numeric value from a point
+    const getValue = (p: MeteorologicalEventRecord) =>
+        impactType ? p.event.impacts?.length || 0 : p.event.precipitation_amount || 0;
+
+    const [minVal, maxVal] = useMemo(() => {
+        return [0, Math.max(...points.map(getValue))];
+    }, [getValue, points]);
+
+    const colorScale = useMemo(() => {
+        // d3.interpolateBlues for precipitation and d3.interpolateRdYlBu for impact
+        return !impactType ? d3.scaleSequential(d3.interpolateBlues)
+                .domain([minVal!, maxVal!]) :
+            d3.scaleSequential(d3.interpolateReds)
+                .domain([minVal!, maxVal!])
+    }, [impactType, minVal, maxVal]);
 
     const donutData = useMemo(() => {
-        return [
-            {
-                label: "Small",
-                value: impactType ?
-                    points.filter((p) => p.event.impacts && p.event.impacts.length <= 2).length
-                    : points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount <= 50).length,
-                color: colors("Small") as string
-            },
-            {
-                label: "Medium",
-                value: impactType ?
-                    points.filter(
-                        (p) => p.event.impacts && p.event.impacts.length > 2 && p.event.impacts.length <= 4
-                    ).length :
-                    points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount > 50 && p.event.precipitation_amount <= 100).length,
-                color: colors("Medium") as string
-            },
-            {
-                label: "Large",
-                value: impactType ?
-                    points.filter((p) => p.event.impacts && p.event.impacts.length > 4).length :
-                    points.filter((p) => p.event.precipitation_amount && p.event.precipitation_amount > 100).length,
-                color: colors("Large") as string
-            },
-        ]
-    }, [impactType, points, colors]);
+        const steps = maxVal - minVal > 5 ? 5 : maxVal - minVal;
+        const stepValues = d3.range(minVal, maxVal, (maxVal - minVal) / (steps - 1)).map(value => Math.round(value))
+        // Include the maxVal value as the last item in the legend.
+        const allValues = stepValues.concat(maxVal);
+
+        return allValues.map((value, index) => {
+            const [min, max] = index === 0 ? [0, allValues[index]] : [allValues[index - 1], allValues[index]];
+            const count = points.filter((p) => getValue(p) >= min && getValue(p) < max).length;
+            const percent = count / points.length;
+            return {
+                label: percent > 0.05 ? `${count}` : "",
+                value: count,
+                color: colorScale(value)
+            } as DonutData;
+        });
+    }, [maxVal, minVal, points, colorScale, getValue]);
+
+    useEffect(() => {
+        console.log("donutData", donutData)
+    }, [donutData])
 
 
 // add donut chart
@@ -93,7 +100,7 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
             .attr("class", "arc")
             .append("path")
             .attr("d", arc)
-            .attr("fill", (d) => d.data.color);
+            .attr("fill", (d: PieArcDatum<DonutData>) => d.data.color);
 
         // Add labels inside the donut chart
         svgDonut
@@ -101,32 +108,40 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
             .data(pie(filtered))
             .enter()
             .append("text")
-            .attr("transform", (d: any) => `translate(${arc.centroid(d)})`)
+            .attr("transform", ((d: PieArcDatum<DonutData>) => `translate(${arc.centroid(d)})`))
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("font-size", "18px")
             .attr("fill", "black")
-            .text((d) => `${d.data.value}`);
+            .text((d: PieArcDatum<DonutData>) => `${d.data.label}`);
 
         return () => {
             svgDonut.selectAll("*").remove();
         };
 
-    }, [colors, impactType, points]);
+    }, [colorScale, donutData, impactType, points]);
+
+    if(!hasData) return <div className={"d-flex flex-column gap-3"} style={{height: "200px"}}>
+        {impactType ?
+            <p className={"m-0 text-center fw-bold"} style={{fontSize: "16px"}}>No Impact Data</p> :
+            <p className={"m-0 text-center fw-bold"} style={{fontSize: "16px"}}>No Precipitation Data</p>}
+    </div>
 
 
     return (
-        <div className={"d-flex flex-column gap-1"}>
-            {impactType ?
-                hasData ? <p className={"m-0 text-center fw-bold"}>Impact Distribution</p> : <p>No Impact Data</p>
-                : hasData ? <p className={"m-0 text-center fw-bold"}>Precipitation Distribution</p> :
-                    <p>No Precipitation Data</p>}
+        <div className={"d-flex flex-column gap-3"} style={{height: "200px"}}>
+            {impactType ?<p className={"m-0 text-center fw-bold"} style={{fontSize: "16px"}}>Impact Distribution</p> :
+                <p className={"m-0 text-center fw-bold"} style={{fontSize: "16px"}}>Precipitation Distribution</p>
+            }
             <div className={"d-flex flex-row gap-1 align-items-center"}>
                 <svg
                     ref={donutRef}
                     style={{width: "120px", height: "auto"}}
                 ></svg>
-                <AggregationLegend donutData={donutData}/>
+                {/*<Legend colorScale={colorScale} domain={[minPrecipitation, maxPrecipitation]} />*/}
+                <SvgLegend title={null} colorScale={colorScale} domain={[minVal, maxVal]}
+                           type={impactType ? "impact" : "precipitation"}/>
+                {/* <AggregationLegend donutData={donutData}/>*/}
             </div>
         </div>
     )

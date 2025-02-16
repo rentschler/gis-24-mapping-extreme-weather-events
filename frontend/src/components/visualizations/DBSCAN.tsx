@@ -1,17 +1,14 @@
-
 import "leaflet/dist/leaflet.css";
-import React, { useState, useEffect } from "react";
-import { Popup } from "react-leaflet";
-import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
-import { GeoJSON } from 'react-leaflet/GeoJSON';
+import React, {useState, useEffect} from "react";
+import {Popup} from "react-leaflet";
+import {FeatureCollection, Geometry, GeoJsonProperties} from "geojson";
+import {GeoJSON} from 'react-leaflet/GeoJSON';
 import * as d3 from "d3";
 import AggregationData from "./Aggregation/AggregationVis.tsx";
-import { MeteorologicalEventRecord } from "../../types/response.ts";
+import {MeteorologicalEventRecord} from "../../types/response.ts";
 
 
-
-const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }> = ({ data }) => {
-
+const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }> = ({data}) => {
 
 
     // console.log("dbscan data", data.features[0]);
@@ -29,25 +26,32 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
         .range(d3.schemeCategory10); // Use D3's predefined color scheme
 
 
-    return (<> 
+    return (<>
         {/* Map over features */}
         {data.features.map((feature, index) => (
-            <GeoJSON 
-            
+            <GeoJSON
+
                 key={`${index}-${reloadKey}`}
-                data={feature} 
-                style={{fillColor: colorScale(feature.properties!.cluster_id),
+                data={feature}
+                style={{
+                    fillColor: colorScale(feature.properties!.cluster_id),
                     weight: 1,
                     opacity: 1,
                     color: "white", // Border color
                     fillOpacity: 0.7,
                 }}
             >
-                <Popup >
-                    <AggregationData 
-                    points={feature.properties?.cluster_points as MeteorologicalEventRecord[]} 
-                    country={feature.properties?.cluster_points[0]?.location.country} 
-                    name={feature.properties?.cluster_points[0]?.location.place} />
+                <Popup minWidth={1000} maxWidth={1000} maxHeight={500}
+                       pane="popupPane" // Force popup to render in the popup pane
+                >
+                    <div className="" style={{
+                        overflow: "auto",
+                    }}>
+                        <AggregationData
+                            points={feature.properties?.cluster_points as MeteorologicalEventRecord[]}
+                            country={feature.properties?.cluster_points[0]?.location.country}
+                            name={feature.properties?.cluster_points[0]?.location.place}/>
+                    </div>
                 </Popup>
             </GeoJSON>
         ))}</>);

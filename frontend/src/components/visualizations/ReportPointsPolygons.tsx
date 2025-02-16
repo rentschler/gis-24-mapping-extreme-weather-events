@@ -43,7 +43,9 @@ const ReportPointsPolygons: React.FC<{generalReportPoints: MeteorologicalEventRe
               fillOpacity: 0.4, // Fill opacity
             }}
           >
-            <Popup>
+            <Popup
+                pane="popupPane" // Force popup to render in the popup pane
+            >
               <MapPopup record={correspondingPoint} />
             </Popup>
           </Polygon>

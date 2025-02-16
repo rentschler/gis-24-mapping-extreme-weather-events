@@ -33,7 +33,7 @@ const AggregationData: React.FC<{
             </div>
 
             <div
-                className={"d-flex flex-row gap-1"}
+                className={"d-flex flex-row "}
             >
 
                 {showBarChart ? <BarChart points={points}></BarChart> : <Scatterplot points={points}></Scatterplot>}
@@ -43,7 +43,7 @@ const AggregationData: React.FC<{
                 <div
                     className={"d-flex flex-row gap-1"}
                 >
-                    <div className={"d-flex flex-column gap-3"}>
+                    <div className={"d-flex flex-column gap-4 my-auto"}>
                         {/* Donut Chart */}
                         <PieChart points={points} impactType={true}></PieChart>
                         <PieChart points={points} impactType={false}></PieChart>

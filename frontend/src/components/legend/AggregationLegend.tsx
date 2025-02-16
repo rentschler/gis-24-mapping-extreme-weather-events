@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import {DonutData} from "./PieChart.tsx";
+import {DonutData} from "../visualizations/Aggregation/PieChart.tsx";
 
 interface AggregationLegendProps {
     donutData: DonutData[]
