@@ -14,12 +14,13 @@ interface BaseLegendProps {
  * @param colorScale - d3 color scale
  * @param domain - min and max values for the color scale
  * @param title - title of the legend
+ * @param type - type of the legend, either "impact" or "precipitation"
  * @constructor
  */
 const SvgLegend: React.FC<BaseLegendProps> = ({ colorScale, domain, title, type= "precipitation" }) => {
   const [min, max] = domain;
-  const steps = 5;
-  const stepValues = d3.range(min, max, (max - min) / (steps-1));
+  const steps = max - min > 5 ? 5 : max - min;
+  const stepValues = d3.range(min, max, (max - min) / (steps-1)).map(value => Math.round(value))
   // Include the max value as the last item in the legend.
   const allValues = stepValues.concat(max);
 

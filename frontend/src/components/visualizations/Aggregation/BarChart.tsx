@@ -163,7 +163,7 @@ const BarChart = ({ points }: BarCharProps) => {
 
     }, [points])
     return <>
-        <svg ref={svgRef} style={{ flex: 1, marginRight: "20px" }}></svg>
+        <svg ref={svgRef} style={{ flex: 1, marginRight: "5px" }}></svg>
     </>
 }
 export default BarChart

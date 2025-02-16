@@ -33,7 +33,7 @@ const AggregationData: React.FC<{
             </div>
 
             <div
-                className={"d-flex flex-row gap-1"}
+                className={"d-flex flex-row "}
             >
 
                 {showBarChart ? <BarChart points={points}></BarChart> : <Scatterplot points={points}></Scatterplot>}
