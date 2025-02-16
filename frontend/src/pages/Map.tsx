@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, Pane  } from "react-leaflet";
 import { useState, useEffect } from "react";
 import { GeoJsonProperties, Geometry, Feature, FeatureCollection } from 'geojson';
 
@@ -74,33 +74,58 @@ const Map = ({ points, generalReportPoints, matchingPolygons, dbscanData, admini
   };
 
 
+
+// Leaflet defines the default pane z-indices as follows:
+//
+// tilePane: 200
+// overlayPane: 400
+// shadowPane: 500
+// markerPane: 600
+// tooltipPane: 650
+// popupPane: 700
+
   return (
     <div className="map-container px-2">
-      <MapContainer
-        center={[47.69162, 9.187]}
-        className="map-content"
-        zoom={8}
-        ref={mapRef}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <ZoomListener />
-        {/* Drawing order: Heat map, then dbscan on top, then summary poligons, and on top point/cluster markers*/}
-        {/*Choropleth layer*/}
-        {options.showHeatmap && <Choropleth adminBoundaries={administrativeBoundaries} />}
+        <MapContainer center={[47.69162, 9.187]} zoom={8} className="map-content">
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {/*DBSCAN layer*/}
-        {options.showDBSCANMap && <DBSCAN data={dbscanData}></DBSCAN>}
+      {/* Heat map: rendered at the bottom */}
+      <Pane name="heatmapPane" style={{ zIndex: 501 }}>
+        {options.showHeatmap && (
+          <Choropleth adminBoundaries={administrativeBoundaries} />
+        )}
+      </Pane>
 
-        {/* event summaries*/}
-        {options.showReportPolygons && <ReportPointsPolygons generalReportPoints={generalReportPoints} matchingPolygons={matchingPolygons} />}
+      {/* Report polygons: on top of heat map */}
+      <Pane name="reportPolygonsPane" style={{ zIndex: 502 }}>
+        {options.showReportPolygons && (
+          <ReportPointsPolygons
+            generalReportPoints={generalReportPoints}
+            matchingPolygons={matchingPolygons}
+          />
+        )}
+      </Pane>
 
-        {/* Point markers*/}
-        {options.showSimplePointMap && <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />}
-        {/* Cluster markers*/}
-        {options.showDynamicClustering && <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />}
-      </MapContainer>
+      {/* DBSCAN layer: on top of the DBSCan */}
+      <Pane name="dbscanPane" style={{ zIndex: 503 }}>
+        {options.showDBSCANMap && <DBSCAN data={dbscanData} />}
+      </Pane>
+
+
+      {/* Simple point markers: on top of report polygons */}
+      <Pane name="pointMarkersPane" style={{ zIndex: 601 }}>
+        {options.showSimplePointMap && (
+          <SimplePoints points={points} radius={calculateRadius(zoomLevel)} />
+        )}
+      </Pane>
+
+      {/* Cluster markers: rendered on top of everything else */}
+      <Pane name="clusterMarkersPane" style={{ zIndex: 602 }}>
+        {options.showDynamicClustering && (
+          <DynamicCluster points={points} radius={calculateRadius(zoomLevel)} />
+        )}
+      </Pane>
+    </MapContainer>
     </div>
   );
 };

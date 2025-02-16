@@ -3,7 +3,7 @@
 import { MeteorologicalEventRecord } from "../../types/response.ts";
 import { GeoJsonProperties, Geometry, Feature } from 'geojson';
 import { GeoJSON } from 'react-leaflet/GeoJSON'
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { Popup } from "react-leaflet";
 import { useEffect } from "react";
@@ -36,7 +36,7 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
             let min = Infinity;
             
             adminBoundaries.forEach(feature => {
-                var points : MeteorologicalEventRecord[] = (feature.properties as any).geometry_points;
+                const points : MeteorologicalEventRecord[] = (feature.properties as any).geometry_points;
                 if(points){
                     const precipitationAmount = points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
                     
@@ -71,7 +71,7 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
     const getStyle = (records: MeteorologicalEventRecord[]) => {
         // collect the precipitation Amount
         if(!records ) return {};
-        var precipitationAmount = 0;
+        let precipitationAmount = 0;
         records.forEach(point => {
            precipitationAmount += point.event.precipitation_amount || 0; 
         });  
@@ -82,7 +82,7 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
             weight: 1,
             opacity: 1,
             color: "white", // Border color
-            fillOpacity: 0.5,
+            fillOpacity: 0.4,
         };
     };
 
@@ -94,7 +94,9 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
                 data={feature}
                 style={() => getStyle((feature.properties as any).geometry_points ) || {}}
             >
-                <Popup minWidth={1000} maxWidth={1000} maxHeight={500}>
+                <Popup minWidth={1000} maxWidth={1000} maxHeight={500}
+                pane="popupPane" // Force popup to render in the popup pane
+                >
                     <div className="" style={{
                         overflow: "auto",
                     }}>

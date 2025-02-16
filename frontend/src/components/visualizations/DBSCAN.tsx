@@ -41,7 +41,9 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
                     fillOpacity: 0.7,
                 }}
             >
-                <Popup minWidth={1000} maxWidth={1000} maxHeight={500}>
+                <Popup minWidth={1000} maxWidth={1000} maxHeight={500}
+                       pane="popupPane" // Force popup to render in the popup pane
+                >
                     <div className="" style={{
                         overflow: "auto",
                     }}>
