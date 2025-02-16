@@ -34,6 +34,8 @@ const BivariateLegend: React.FC<BivariateLegendProps> = ({
       container.style.color = "black";
       container.style.borderRadius = "5px";
       container.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.2)";
+      container.style.width = "100%";
+
 
       let html = "";
       // Optional title

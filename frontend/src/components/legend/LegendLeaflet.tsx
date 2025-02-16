@@ -34,6 +34,7 @@ const LegendLeaflet: React.FC<BaseLegendProps> = ({ colorScale, domain, title="P
             div.style.color = "black";
             div.style.borderRadius = "5px";
             div.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.2)";
+            div.style.width = "100%";
             div.innerHTML = `
                 ${title ? `<div style="font-size:14px; margin-bottom:8px;"><strong>${title}</strong></div>` : ""}
                 ${stepValues

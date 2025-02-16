@@ -114,6 +114,7 @@ const Map = ({points, generalReportPoints, matchingPolygons, dbscanData, adminis
                 <ReportPointsPolygons
                     generalReportPoints={generalReportPoints}
                     matchingPolygons={matchingPolygons}
+                    colorScale={colorScale}
                 />
             )}
           </Pane>

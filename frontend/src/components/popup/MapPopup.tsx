@@ -24,7 +24,7 @@ const MapPopup = ({record}:MapPopupProps) => {
             </div>
         )}{record.event.impacts && (
             <div>
-                <p>impacts: </p>
+                <p>impacts ({record.event.impacts.length}):</p>
                 <ul style={{ listStyleType: 'circle', marginLeft: '20px' }}>
                     {record.event.impacts.map((code) => (
                         <li key={code}>{getImpactDescription(code)}</li>
