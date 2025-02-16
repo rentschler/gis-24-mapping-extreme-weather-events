@@ -116,7 +116,7 @@ interface DynamicClusterProps {
 const DynamicCluster: React.FC<DynamicClusterProps> = ({ points, radius, colorScale }) => {
   return (
   <>
-  <LegendLeaflet colorScale={getClusterColor} domain={[0, 300]} type={"impact"} title={"Cluster Centers"}/>
+    <LegendLeaflet colorScale={getClusterColor} domain={[0, 300]} type={"impact"} title={"Cluster Centers"}/>
     <MarkerClusterGroup
       iconCreateFunction={customClusterIcon}
       disableClusteringAtZoom={12}
@@ -127,7 +127,7 @@ const DynamicCluster: React.FC<DynamicClusterProps> = ({ points, radius, colorSc
         const longitude = point.location.coordinates.longitude
         if (!latitude || !longitude) return null;
 
-        let fillColor = "grey";
+        let fillColor = colorScale(0);
         if (point.event.impacts) {
           const impacts = point.event.impacts;
           fillColor = colorScale(impacts.length);
