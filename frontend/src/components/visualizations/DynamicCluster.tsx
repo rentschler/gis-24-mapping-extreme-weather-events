@@ -4,17 +4,17 @@ import { MeteorologicalEventRecord } from "../../types/response";
 import L, { MarkerCluster } from "leaflet";
 import { CircleMarker, Popup } from "react-leaflet";
 import MapPopup from "../../components/popup/MapPopup";
+import * as d3 from "d3";
+import LegendLeaflet from "../legend/LegendLeaflet";
 
+const getClusterColor =  d3.scaleLinear<string>()
+.domain([0, 50, 150, 300, 3000])
+.range(["rgba(181, 226, 140, 1)", "rgba(241, 211, 87, 1)",
+  "rgba(253, 156, 115, 1)", "rgb(244,107,88)","rgb(177,33,33)"]);
 const customClusterIcon = (cluster: MarkerCluster): L.DivIcon => {
 
-  const getClusterColor = (value: number) => {
-    if (value <= 10) return "rgba(181, 226, 140, 1)";
-    if (value <= 100) return "rgba(241, 211, 87, 1)";
-    else return "rgba(253, 156, 115, 1)";
-  };
-
-  var childCount = cluster.getChildCount();
-  var markers = cluster.getAllChildMarkers(); // Gets all Markers, but does not contain all impacts :c
+  const childCount = cluster.getChildCount();
+  const markers = cluster.getAllChildMarkers(); // Gets all Markers, but does not contain all impacts :c
 
   const impactFrequencies: Record<number, number> = {};
   let totalSum = 0;
@@ -107,52 +107,55 @@ const customClusterIcon = (cluster: MarkerCluster): L.DivIcon => {
 
 };
 
-interface DynamicClusterProps { 
+interface DynamicClusterProps {
   points: MeteorologicalEventRecord[];
   radius: number;
   colorScale: d3.ScaleSequential<string, never>;
 }
 
 const DynamicCluster: React.FC<DynamicClusterProps> = ({ points, radius, colorScale }) => {
-    return (
-        
+  return (
+  <>
+  <LegendLeaflet colorScale={getClusterColor} domain={[0, 300]} type={"impact"} title={"Cluster Centers"}/>
     <MarkerClusterGroup
-    iconCreateFunction={customClusterIcon}
-    disableClusteringAtZoom={12}
-  >
+      iconCreateFunction={customClusterIcon}
+      disableClusteringAtZoom={12}
+    >
 
-    {points.map((point) => {
-      const latitude = point.location.coordinates.latitude
-      const longitude = point.location.coordinates.longitude
-      if (!latitude || !longitude) return null;
+      {points.map((point) => {
+        const latitude = point.location.coordinates.latitude
+        const longitude = point.location.coordinates.longitude
+        if (!latitude || !longitude) return null;
 
-      let fillColor = "grey";
-      if (point.event.impacts) {
-        const impacts = point.event.impacts;
-        fillColor = colorScale(impacts.length);
-      }
+        let fillColor = "grey";
+        if (point.event.impacts) {
+          const impacts = point.event.impacts;
+          fillColor = colorScale(impacts.length);
+        }
 
 
-      // Dynamically calculate the radius based on the zoom level
-      return (
-        <CircleMarker
+        // Dynamically calculate the radius based on the zoom level
+        return (
+          <CircleMarker
 
-          key={point.id}
-          center={[latitude, longitude]}
-          radius={radius}
-          color={fillColor} // Border color of the dot
-          stroke={false} // Fill color for the dot
-          fillOpacity={1} // Opacity of the fill color
-        > <Popup
-          pane="popupPane"
-        >
-            <MapPopup record={point} />
-          </Popup>
-        </CircleMarker>
-      );
-    })}
-  </MarkerClusterGroup>
-    )
+            key={point.id}
+            center={[latitude, longitude]}
+            radius={radius}
+            color={fillColor} // Border color of the dot
+            stroke={false} // Fill color for the dot
+            fillOpacity={1} // Opacity of the fill color
+          > <Popup
+            pane="popupPane"
+          >
+              <MapPopup record={point} />
+            </Popup>
+          </CircleMarker>
+        );
+      })}
+    </MarkerClusterGroup>
+  </>
+
+  )
 };
 
 export default DynamicCluster;
