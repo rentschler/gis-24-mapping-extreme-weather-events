@@ -3,11 +3,24 @@ import { useMap } from 'react-leaflet';
 import * as d3 from "d3";
 import L from "leaflet";
 
-const LegendLeaflet: React.FC<{ colorScale: d3.ScaleSequential<string, never>; domain: [number, number] }> = ({ colorScale, domain }) => {
+interface BaseLegendProps {
+  colorScale: d3.ScaleSequential<string, never>;
+  domain: [number, number];
+  title?: string;
+  type?: "impact" | "precipitation";
+}
+
+const LegendLeaflet: React.FC<BaseLegendProps> = ({ colorScale, domain, title="Precipitation", type= "precipitation" }) => {
     const map = useMap();
 
     useEffect(() => {
         const [min, max] = domain;
+
+        // check for undefined values
+        if(!colorScale || !domain){
+            return;
+        }
+
         const steps = 5; // Number of legend steps
         const stepValues = d3.range(min, max, (max - min) / steps);
 
@@ -21,20 +34,21 @@ const LegendLeaflet: React.FC<{ colorScale: d3.ScaleSequential<string, never>; d
             div.style.color = "black";
             div.style.borderRadius = "5px";
             div.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.2)";
+            div.style.width = "100%";
             div.innerHTML = `
-                <div style="font-size:14px; margin-bottom:8px;"><strong>Precipitation</strong></div>
+                ${title ? `<div style="font-size:14px; margin-bottom:8px;"><strong>${title}</strong></div>` : ""}
                 ${stepValues
                     .map(
                         (value) =>
                             `<div style="display: flex; align-items: center; margin-bottom: 4px;">
                                 <div style="width: 20px; height: 20px; background: ${colorScale(value)}; margin-right: 8px;"></div>
-                                <span>${value.toFixed(1)} mm</span>
+                                <span>${value.toFixed(0)} ${type === "precipitation" ? "mm" : ""}</span>
                             </div>`
                     )
                     .join("")}
                 <div style="display: flex; align-items: center;">
                     <div style="width: 20px; height: 20px; background: ${colorScale(max)}; margin-right: 8px;"></div>
-                    <span>${max} mm</span>
+                    <span>${(+max).toFixed(0)} ${type === "precipitation" ? "mm" : ""}</span>
                 </div>
             `;
             return div;
@@ -47,7 +61,7 @@ const LegendLeaflet: React.FC<{ colorScale: d3.ScaleSequential<string, never>; d
         return () => {
             legend.remove();
         };
-    }, [colorScale, domain, map]);
+    }, [colorScale, domain, map, title, type]);
 
     return null;
 }

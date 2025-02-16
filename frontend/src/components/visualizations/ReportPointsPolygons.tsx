@@ -12,7 +12,14 @@ import MapPopup from "../../components/popup/MapPopup";
          * 3. Display only the points that are in the query.
          * - Surround with if case for UI selection 
          */
-const ReportPointsPolygons: React.FC<{generalReportPoints: MeteorologicalEventRecord[],matchingPolygons: Feature<Geometry, GeoJsonProperties>[]}> = ({generalReportPoints, matchingPolygons}) => {
+
+interface ReportPointsPolygonsProps {
+  generalReportPoints: MeteorologicalEventRecord[],
+  matchingPolygons: Feature<Geometry, GeoJsonProperties>[],
+  colorScale: d3.ScaleSequential<string, never>;
+}
+
+const ReportPointsPolygons: React.FC<ReportPointsPolygonsProps> = ({generalReportPoints, matchingPolygons, colorScale}) => {
     
     
     return matchingPolygons.map((feature, index) => {
@@ -28,7 +35,7 @@ const ReportPointsPolygons: React.FC<{generalReportPoints: MeteorologicalEventRe
         let fillColor = "grey";
         if (correspondingPoint.event.impacts) {
           const impacts = correspondingPoint.event.impacts;
-          fillColor = impacts.length > 2 ? impacts.length > 4 ? "red" : "orange" : "yellow";
+          fillColor =  colorScale(impacts.length);
         }
         return (
 
