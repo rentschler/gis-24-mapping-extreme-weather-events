@@ -3,7 +3,14 @@ import { MeteorologicalEventRecord } from "../../types/response";
 import { CircleMarker, Popup } from "react-leaflet";
 import MapPopup from "../../components/popup/MapPopup";
 
-const SimplePoints: React.FC<{ points: MeteorologicalEventRecord[], radius: number }> = ({ points, radius}) =>  {
+interface SimplePointsProps {
+  points: MeteorologicalEventRecord[];
+  radius: number;
+  colorScale: d3.ScaleSequential<string, never>;
+}
+
+
+const SimplePoints: React.FC<SimplePointsProps> = ({ points, radius, colorScale}) =>  {
  
     return points.map((point) => {
       const latitude = point.location.coordinates.latitude
@@ -12,7 +19,7 @@ const SimplePoints: React.FC<{ points: MeteorologicalEventRecord[], radius: numb
       let fillColor = "grey";
       if (point.event.impacts) {
         const impacts = point.event.impacts;
-        fillColor = impacts.length > 2 ? impacts.length > 4 ? "red" : "orange" : "yellow";
+        fillColor = colorScale(impacts.length);
       }
 
       return (
@@ -23,7 +30,9 @@ const SimplePoints: React.FC<{ points: MeteorologicalEventRecord[], radius: numb
           color={fillColor} // Border color of the dot
           stroke={false} // Fill color for the dot
           fillOpacity={1} // Opacity of the fill color
-        > <Popup>
+        > <Popup
+          pane="popupPane"
+        >
             <MapPopup record={point} />
           </Popup>
         </CircleMarker>

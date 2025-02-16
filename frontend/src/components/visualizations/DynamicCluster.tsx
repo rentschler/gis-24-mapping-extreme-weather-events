@@ -107,8 +107,13 @@ const customClusterIcon = (cluster: MarkerCluster): L.DivIcon => {
 
 };
 
+interface DynamicClusterProps { 
+  points: MeteorologicalEventRecord[];
+  radius: number;
+  colorScale: d3.ScaleSequential<string, never>;
+}
 
-const DynamicCluster: React.FC<{ points: MeteorologicalEventRecord[], radius: number }> = ({ points, radius}) => {
+const DynamicCluster: React.FC<DynamicClusterProps> = ({ points, radius, colorScale }) => {
     return (
         
     <MarkerClusterGroup
@@ -124,7 +129,7 @@ const DynamicCluster: React.FC<{ points: MeteorologicalEventRecord[], radius: nu
       let fillColor = "grey";
       if (point.event.impacts) {
         const impacts = point.event.impacts;
-        fillColor = impacts.length > 2 ? impacts.length > 4 ? "red" : "orange" : "yellow";
+        fillColor = colorScale(impacts.length);
       }
 
 
@@ -138,7 +143,9 @@ const DynamicCluster: React.FC<{ points: MeteorologicalEventRecord[], radius: nu
           color={fillColor} // Border color of the dot
           stroke={false} // Fill color for the dot
           fillOpacity={1} // Opacity of the fill color
-        > <Popup>
+        > <Popup
+          pane="popupPane"
+        >
             <MapPopup record={point} />
           </Popup>
         </CircleMarker>

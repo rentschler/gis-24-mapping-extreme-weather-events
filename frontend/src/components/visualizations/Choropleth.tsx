@@ -32,25 +32,30 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
             // open loading message
             setIsLoading(true);
 
-            let max = -Infinity;
-            let min = Infinity;
-            
-            adminBoundaries.forEach(feature => {
+            const [min, max] = d3.extent(adminBoundaries, feature => {
                 const points : MeteorologicalEventRecord[] = (feature.properties as any).geometry_points;
-                if(points){
-                    const precipitationAmount = points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
-                    
-                    if(precipitationAmount < min){
-                        min = precipitationAmount; 
-                    }
-                    if(precipitationAmount > max){
-                        max = precipitationAmount; 
-                    }
-                }
+                return points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
             });
+
+            // let max = -Infinity;
+            // let min = Infinity;
             
-            setMaxPrecipitation(max);
-            setMinPrecipitation(min);
+            // adminBoundaries.forEach(feature => {
+            //     const points : MeteorologicalEventRecord[] = (feature.properties as any).geometry_points;
+            //     if(points){
+            //         const precipitationAmount = points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
+                    
+            //         if(precipitationAmount < min){
+            //             min = precipitationAmount; 
+            //         }
+            //         if(precipitationAmount > max){
+            //             max = precipitationAmount; 
+            //         }
+            //     }
+            // });
+            
+            setMaxPrecipitation(max || 1);
+            setMinPrecipitation(min || 1);
             setGeojson(adminBoundaries as Feature<Geometry, GeoJsonProperties>[]);
             // console.log("loaded admin boundaries", adminBoundaries);
             // console.log("Min and max", min, max);
