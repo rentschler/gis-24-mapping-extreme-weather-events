@@ -44,13 +44,14 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
         return allValues.map((value, index) => {
             const [min, max] = index === 0 ? [0, allValues[index]] : [allValues[index - 1], allValues[index]];
             const count = points.filter((p) => getValue(p) >= min && getValue(p) < max).length;
+            const percent = count / points.length;
             return {
-                label: count.toString(),
+                label: percent > 0.05 ? `${count}` : "",
                 value: count,
                 color: colorScale(value)
             } as DonutData;
         });
-    }, [impactType, points, minVal, maxVal, colorScale]);
+    }, [maxVal, minVal, points, colorScale, getValue]);
 
     useEffect(() => {
         console.log("donutData", donutData)
