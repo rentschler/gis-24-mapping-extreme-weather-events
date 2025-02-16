@@ -65,45 +65,6 @@ const MapWrapper = () => {
   // coropleth data
   const [administrativeBoundaries, setAdministrativeBoundaries] = useState<Feature<Geometry>[]>([]);
 
-
-  useEffect(() => {
-    const fetchChoroplethData = async () => {
-      displayChoroplethMessage();
-      try {
-        // Query API Choropleth
-        const geometry_response = await fetch("/api/data/feature_list", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-            filters: filters,
-            geojsons: adminJsonData.features as Feature<Geometry>[]
-          }),
-        });
-  
-        if (geometry_response.ok) {
-          const geometry_data = await geometry_response.json() as Feature<Geometry>[];
-  
-          // console.log("Administrative Data: ", geometry_data);
-          // setAdminstrativePoints(geometry_data);
-          setAdministrativeBoundaries(geometry_data);
-        }
-        
-      } catch (error) {
-        console.error("Error fetching api choropleth data:", error);
-        setHasError("Failed fetching api choropleth data:");
-        
-      } finally {
-        messageApi.destroy('choropleth');
-  
-      }
-    };
-    
-    fetchChoroplethData();
-  }, [filters]);
-
   useEffect(() => {
     const fetchPoints = async () => {
       // open the loading message
@@ -148,6 +109,29 @@ const MapWrapper = () => {
         }
 
 
+        // Query API Choropleth
+        displayChoroplethMessage();
+        const geometry_response = await fetch("/api/data/feature_list", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            filters: filters,
+            geojsons: adminJsonData.features as Feature<Geometry>[]
+          }),
+        });
+  
+        if (geometry_response.ok) {
+          const geometry_data = await geometry_response.json() as Feature<Geometry>[];
+  
+          console.log("Administrative Data: ", geometry_data);
+          // setAdminstrativePoints(geometry_data);
+          setAdministrativeBoundaries(geometry_data);
+          messageApi.destroy('choropleth');
+        }
+        
 
       } catch (error) {
         console.error("Error fetching api data:", error);
