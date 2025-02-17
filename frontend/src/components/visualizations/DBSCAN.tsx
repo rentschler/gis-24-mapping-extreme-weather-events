@@ -34,7 +34,7 @@ const DBSCAN: React.FC<{ data: FeatureCollection<Geometry, GeoJsonProperties> }>
   const minPrecip = 0;
   const maxPrecip = d3.max(precipValuesSum) || 1;
 
-  console.log("minmax", minImpacts, maxImpacts, minPrecip, maxPrecip);
+  // console.log("minmax", minImpacts, maxImpacts, minPrecip, maxPrecip);
 
   // Number of quantile bins per dimension (3x3 grid)
   const n = 3;

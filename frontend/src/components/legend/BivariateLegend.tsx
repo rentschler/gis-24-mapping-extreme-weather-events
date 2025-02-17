@@ -80,7 +80,7 @@ const BivariateLegend: React.FC<BivariateLegendProps> = ({
           // i is the impact index (column)
           // j is the precip index (row)
           const colorIndex = (i * n) + j;
-          console.log(colorIndex);
+          // console.log(colorIndex);
           
           html += `<td style="width: 20px; height: 20px; background: ${colors[colorIndex]}; padding: 0; margin: 0; border: 1px solid #ccc;"></td>`;
         }
