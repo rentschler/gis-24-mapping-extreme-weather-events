@@ -13,6 +13,7 @@ export interface DonutData {
     label: string;
     value: number;
     color: string;
+    text_color: string;
 }
 
 const PieChart = ({points, impactType = true}: PieChartProps) => {
@@ -36,19 +37,30 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
     }, [impactType, minVal, maxVal]);
 
     const donutData = useMemo(() => {
-        const steps = maxVal - minVal > 5 ? 5 : maxVal - minVal;
-        const stepValues = d3.range(minVal, maxVal, (maxVal - minVal) / (steps - 1)).map(value => Math.round(value))
-        // Include the maxVal value as the last item in the legend.
-        const allValues = stepValues.concat(maxVal);
+        const steps = maxVal - minVal > 4 ? 4 : maxVal - minVal;
+        const stepValues = d3.range(minVal, maxVal, (maxVal - minVal) / (steps))
+        // remove the first value and Include the maxVal value as the last item in the legend.
+        const allValues = stepValues.slice(1).concat(maxVal);
+
+        // Helper function to determine text color based on background color
+        const getContrastTextColor = (backgroundColor: string) => {
+            const rgb = d3.rgb(backgroundColor);
+            // Calculate relative luminance using the formula
+            const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+            return luminance > 0.5 ? 'black' : 'white';
+        };
 
         return allValues.map((value, index) => {
             const [min, max] = index === 0 ? [0, allValues[index]] : [allValues[index - 1], allValues[index]];
-            const count = points.filter((p) => getValue(p) >= min && getValue(p) < max).length;
-            const percent = count / points.length;
+            const count = points.filter((p) => getValue(p) > min && getValue(p) <= max).length;
+            const length = points.filter((p) => getValue(p) > 0).length;
+            const percent = count / length;
+            const color = colorScale(value);
             return {
                 label: percent > 0.05 ? `${count}` : "",
                 value: count,
-                color: colorScale(value)
+                color: color,
+                text_color: getContrastTextColor(color)
             } as DonutData;
         });
     }, [maxVal, minVal, points, colorScale, getValue]);
@@ -100,7 +112,9 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
             .attr("class", "arc")
             .append("path")
             .attr("d", arc)
-            .attr("fill", (d: PieArcDatum<DonutData>) => d.data.color);
+            .attr("fill", (d: PieArcDatum<DonutData>) => d.data.color)
+            .append("title")
+            .text((d: PieArcDatum<DonutData>) => `${d.data.value}`);
 
         // Add labels inside the donut chart
         svgDonut
@@ -112,7 +126,7 @@ const PieChart = ({points, impactType = true}: PieChartProps) => {
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("font-size", "18px")
-            .attr("fill", "black")
+            .attr("fill", (d: PieArcDatum<DonutData>) => d.data.text_color)
             .text((d: PieArcDatum<DonutData>) => `${d.data.label}`);
 
         return () => {

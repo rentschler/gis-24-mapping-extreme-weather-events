@@ -20,9 +20,9 @@ interface BaseLegendProps {
 const SvgLegend: React.FC<BaseLegendProps> = ({ colorScale, domain, title, type= "precipitation" }) => {
   const [min, max] = domain;
   const steps = max - min > 5 ? 5 : max - min;
-  const stepValues = d3.range(min, max, (max - min) / (steps-1)).map(value => Math.round(value))
+  const stepValues = d3.range(min, max, (max - min) / (steps))
   // Include the max value as the last item in the legend.
-  const allValues = stepValues.concat(max);
+  const allValues = stepValues.slice(1).concat(max);
 
   // Layout constants for the SVG legend
   const margin = 5;
@@ -53,10 +53,13 @@ const SvgLegend: React.FC<BaseLegendProps> = ({ colorScale, domain, title, type=
         {title}
         </text>
       }
-      {allValues.map((value, index) => (
-        <g
-          key={index}
-          transform={`translate(${margin}, ${
+      {allValues.map((value, index) => {
+        const [min, max] = index === 0 ? [0, allValues[index]] : [allValues[index - 1], allValues[index]];
+        const label = type === "precipitation" ? `≤ ${max.toFixed(1)} mm` : `≤ ${max.toFixed(1)}`;
+        return (
+          <g
+            key={index}
+            transform={`translate(${margin}, ${
             margin + titleHeight + index * (rectSize + spacing)
           })`}
         >
@@ -66,10 +69,11 @@ const SvgLegend: React.FC<BaseLegendProps> = ({ colorScale, domain, title, type=
             y={rectSize - 5}
             style={{ fontSize: "12px", alignmentBaseline: "middle" }}
           >
-            {value.toFixed(0)} {type === "precipitation" ? "mm" : ""}
+            {label}
           </text>
         </g>
-      ))}
+        )
+      })}
     </svg>
   );
 };

@@ -22,7 +22,7 @@ const LegendLeaflet: React.FC<BaseLegendProps> = ({ colorScale, domain, title="P
         }
 
         const steps = 5; // Number of legend steps
-        const stepValues = d3.range(min, max, (max - min) / steps);
+        const stepValues = d3.range(min, max, (max - min) / steps)
 
         // Create a new control for the legend
         const legend = new L.Control({ position: "bottomleft" });
