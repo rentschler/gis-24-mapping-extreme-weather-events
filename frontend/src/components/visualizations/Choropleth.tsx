@@ -34,7 +34,12 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
 
             const [min, max] = d3.extent(adminBoundaries, feature => {
                 const points : MeteorologicalEventRecord[] = (feature.properties as any).geometry_points;
-                return points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
+                var result = points.reduce((sum, point) => {
+                    const pA = point.event.precipitation_amount || 0;
+                    const parsedA = typeof pA === 'string' ? parseFloat(pA) : pA;
+                    return sum + parsedA;
+                }, 0);
+                return result;// points.reduce((sum, point) => sum + (point.event.precipitation_amount || 0), 0);
             });
 
             // let max = -Infinity;
@@ -75,10 +80,13 @@ const Choropleth: React.FC<AdministrativeProps> = ({ adminBoundaries }: Administ
     // Function to style each GeoJSON feature
     const getStyle = (records: MeteorologicalEventRecord[]) => {
         // collect the precipitation Amount
-        if(!records ) return {};
+        
+        
         let precipitationAmount = 0;
         records.forEach(point => {
-           precipitationAmount += point.event.precipitation_amount || 0; 
+            const pA = point.event.precipitation_amount || 0;
+            const parsedA = typeof pA === 'string' ? parseFloat(pA) : pA;
+           precipitationAmount += parsedA || 0; 
         });  
         
         // const precipitationAmount = feature.properties?.precipitationAmount || 0;
