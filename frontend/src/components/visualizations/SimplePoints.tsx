@@ -16,7 +16,7 @@ const SimplePoints: React.FC<SimplePointsProps> = ({ points, radius, colorScale}
       const latitude = point.location.coordinates.latitude
       const longitude = point.location.coordinates.longitude
       if (!latitude || !longitude) return null;
-      let fillColor = "grey";
+      let fillColor = colorScale(0);
       if (point.event.impacts) {
         const impacts = point.event.impacts;
         fillColor = colorScale(impacts.length);
