@@ -1,4 +1,3 @@
-
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import { MeteorologicalEventRecord } from "../../types/response";
 import L, { MarkerCluster } from "leaflet";
@@ -49,15 +48,16 @@ const customClusterIcon = (cluster: MarkerCluster): L.DivIcon => {
     });
   }
 
-  // This has only few segments
-  const segments = Object.entries(impactFrequencies).map(([key, count]) => ({
-    value: (count / totalSum) * 360, // Proportion of the circle
-    label: key, // Label for the segment (0, 1, 2, etc.)
-  }));
+  // Sort segments by size (largest first) and adjust starting angle
+  const segments = Object.entries(impactFrequencies)
+    .map(([key, count]) => ({
+      value: (count / totalSum) * 360, // Proportion of the circle
+      label: key,
+    }))
+    .sort((a, b) => b.value - a.value); // Sort by size, largest first
 
-
-  const radius = 25;
-  const overlayRadius = 18;
+    const radius = 25;
+    const overlayRadius = 18;
 
   // Generate SVG paths for each segment of the pie chart
   let currentAngle = 0;
