@@ -60,7 +60,7 @@ const customClusterIcon = (cluster: MarkerCluster): L.DivIcon => {
     const overlayRadius = 18;
 
   // Generate SVG paths for each segment of the pie chart
-  let currentAngle = 0;
+  let currentAngle = -90;
   const svgSegments = segments.map(({ value, label }) => {
     const startAngle = currentAngle;
     const endAngle = currentAngle + value;
